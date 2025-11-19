@@ -1,10 +1,10 @@
 /*------------------------- 
    base
 --------------------------*/
-html {
+/* html {
   width: 100%;
   overflow-x: hidden;
-}
+} */
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
@@ -72,7 +72,6 @@ img {
   top: 0;
   z-index: 10;
   background-color: #fff;
-  ;
 }
 
 .inner-header {
@@ -234,7 +233,7 @@ img {
 
   .dog-icon {
     position: absolute;
-    height: 200px;
+    height: 180px;
     top: 5%;
     left: 90%;
     transform: translate(-50%, -50%);
@@ -250,6 +249,7 @@ img {
 
   .hero-right {
     text-align: center;
+    width: 100%;
   }
 
   .hero-right p {
