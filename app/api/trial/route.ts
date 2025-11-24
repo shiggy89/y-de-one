@@ -81,7 +81,7 @@ export async function POST(req: Request) {
         `・希望日：${dateWithYoubi}\n` +
         `・時間帯：${timeSlot}\n` +
         `・バレエ経験：${experience}\n` +
-        (question ? `・ご質問／不安なこと：${question}\n` : "") +
+        (question ? `・ご質問 / 不安なこと：${question}\n` : "") +
         `\n当日はスタジオでお会いできることを楽しみにしております😊\n\n` +
         `📍Y-de-ONEスタジオ\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n\n` +
         (question

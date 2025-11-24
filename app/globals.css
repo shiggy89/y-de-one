@@ -1333,7 +1333,7 @@ img {
 
 /* LINE の表示名 */
 .trial-line-name {
-  font-size: 13px;
+  font-size: 14px;
   margin-bottom: 16px;
   font-weight: 500;
   line-height: 1.5;
@@ -1353,6 +1353,11 @@ img {
   margin-bottom: 16px;
 }
 
+.form-field:nth-child(2) {
+  padding-right: 16px;
+  margin-bottom: 16px;
+}
+
 .form-label {
   display: block;
   font-size: 14px;
@@ -1365,7 +1370,7 @@ img {
   display: inline-block;
   margin-left: 4px;
   padding: 0 6px;
-  font-size: 11px;
+  font-size: 12px;
   border-radius: 8px;
   background-color: #ff6b6b;
   color: #fff;
@@ -1390,7 +1395,7 @@ img {
 
 /* 補足説明 */
 .form-note {
-  font-size: 12px;
+  font-size: 14px;
   margin-top: 4px;
 }
 
@@ -1412,7 +1417,7 @@ img {
 
 /* エラーメッセージ */
 .form-error {
-  font-size: 12px;
+  font-size: 14px;
   color: #e53935;
   margin-top: 4px;
   margin-bottom: 8px;
@@ -1421,11 +1426,11 @@ img {
 /* 送信ボタン */
 .form-submit {
   width: 100%;
-  padding: 12px 0;
+  padding: 16px 0;
   border: none;
   border-radius: 6px;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 18px;
   cursor: pointer;
   background-color: #0090e8;
   color: #fff;

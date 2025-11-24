@@ -35,6 +35,9 @@ export default function TrialPage() {
   const [question, setQuestion] = useState("");
   const [dateError, setDateError] = useState<string | null>(null);
   const [datePlaceholder, setDatePlaceholder] = useState("希望日を選択してください");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayStr = today.toISOString().split("T")[0];
 
   // ===== LIFF 初期化 =====
   useEffect(() => {
@@ -254,6 +257,7 @@ export default function TrialPage() {
                 required
                 value={date}
                 onChange={(e) => handleDateChange(e.target.value)}
+                min={todayStr}
               />
               {date && (
                 <p className="form-note">
