@@ -117,6 +117,66 @@ export async function POST(req: Request) {
       );
     }
 
+    // ▼ ここから管理者への通知（複数人対応）
+    const adminIdsEnv = process.env.LINE_ADMIN_USER_IDS;
+
+    if (adminIdsEnv) {
+      // カンマ区切りを配列に変換して、LINEのIDとして妥当なものだけ残す
+      const adminUserIds = adminIdsEnv
+        .split(",")
+        .map((id) => id.trim())
+        .filter((id) => isValidLineUserId(id));
+
+      if (adminUserIds.length > 0) {
+        const adminText =
+          `【体験レッスン申込み通知】\n\n` +
+          `▼ お申込み内容\n` +
+          `・お名前：${name}\n` +
+          `・LINE表示名：${lineDisplayName ?? "不明"}\n` +
+          `・希望日：${dateWithYoubi}\n` +
+          `・時間帯：${timeSlot}\n` +
+          `・バレエ経験：${experience}\n` +
+          (question ? `・ご質問／不安なこと：${question}\n` : "") +
+          `\nこのメッセージを受け取ったら、スケジュールを確認のうえ、お客様にご連絡ください。`;
+
+        // 管理者の人数分だけ push を回す（3〜4人ならこれで十分）
+        for (const adminId of adminUserIds) {
+          const adminResponse = await fetch(LINE_ENDPOINT, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${channelAccessToken}`,
+            },
+            body: JSON.stringify({
+              to: adminId,
+              messages: [
+                {
+                  type: "text",
+                  text: adminText,
+                },
+              ],
+            }),
+          });
+
+          if (!adminResponse.ok) {
+            const adminError = await adminResponse.text();
+            console.error("LINE admin push error:", adminError);
+          }
+        }
+      } else {
+        console.warn(
+          "LINE_ADMIN_USER_IDS は設定されていますが、有効なIDがありません。",
+          adminIdsEnv
+        );
+      }
+    } else {
+      console.warn(
+        "LINE_ADMIN_USER_IDS が設定されていないため、管理者への通知は送信しません。"
+      );
+    }
+    // ▲ 管理者通知ここまで
+
+
 
     // ⑤ フロント側には「OK」を返す
     return NextResponse.json({ ok: true });

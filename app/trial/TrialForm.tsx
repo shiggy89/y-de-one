@@ -239,10 +239,22 @@ export default function TrialPage() {
           />
 
           {profile && (
-            <p className="trial-line-name">
-              <strong>{profile.displayName}</strong>
-              さん、Y-de-ONEのバレエ体験レッスンに興味をもっていただきありがとうございます。
-            </p>
+            // <p className="trial-line-name">
+            //     <strong>{profile.displayName}</strong>
+            //     さん、Y-de-ONEのバレエ体験レッスンに興味をもっていただきありがとうございます。
+            // </p>
+            <>
+              <p className="trial-line-name">
+                <strong>{profile.displayName}</strong>
+                さん、Y-de-ONEのバレエ体験レッスンに興味をもっていただきありがとうございます。
+              </p>
+              <p className="form-note">
+                ※ この端末の LINE userId：<code>{profile.userId}</code>
+                <br />
+                （管理者ID取得のための一時表示です。控えたらこの表示は削除してください）
+              </p>
+            </>
+
           )}
 
           <form className="trial-form" onSubmit={handleSubmit}>
