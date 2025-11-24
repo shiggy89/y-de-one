@@ -106,7 +106,7 @@ export default function Faq() {
           />
         </div>
         <div className="center-btn">
-          <a href="#" className="last-btn">体験レッスンはこちら <i className="fa-solid fa-arrow-up-right-from-square"></i></a>
+          <a href="https://liff.line.me/2008551653-JRwQxXrB" className="last-btn">体験レッスンはこちら <i className="fa-solid fa-arrow-up-right-from-square"></i></a>
         </div>
       </div>
     </section>

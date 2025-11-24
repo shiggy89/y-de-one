@@ -49,7 +49,7 @@ export default function Access() {
           </div>
         </div>
         <div className="center-btn">
-          <Link href="#" className="cta-btn">体験レッスンはこちら <i className="fa-solid fa-arrow-up-right-from-square"></i></Link>
+          <Link href="https://liff.line.me/2008551653-JRwQxXrB" className="cta-btn">体験レッスンはこちら <i className="fa-solid fa-arrow-up-right-from-square"></i></Link>
         </div>
       </div>
     </section>

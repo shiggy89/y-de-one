@@ -16,7 +16,7 @@ export default function Hero() {
 
           <p>高田馬場・東中野・落合・新宿エリア</p>
 
-          <Link href="#" className="cta-btn">
+          <Link href="https://liff.line.me/2008551653-JRwQxXrB" className="cta-btn">
             体験レッスンはこちら{" "}
             <i className="fa-solid fa-arrow-up-right-from-square"></i>
           </Link>

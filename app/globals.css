@@ -1306,3 +1306,148 @@ img {
     padding-right: 8px;
   }
 }
+
+/* =========================
+   Trial page
+========================= */
+
+.trial {
+  padding: 32px 0 48px;
+}
+
+.inner-trial {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* ページタイトル＆リード文 */
+.page-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  line-height: 1.5;
+  text-align: center;
+  color: #0090e8;
+}
+
+/* LINE の表示名 */
+.trial-line-name {
+  font-size: 13px;
+  margin-bottom: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* フォーム全体 */
+.trial-form {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  margin-bottom: 24px;
+}
+
+/* 各フォームフィールド */
+.form-field {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+/* 「必須」バッジ */
+.form-required {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 0 6px;
+  font-size: 11px;
+  border-radius: 8px;
+  background-color: #ff6b6b;
+  color: #fff;
+}
+
+/* input/textarea 共通 */
+.form-input,
+.form-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #0090e8;
+}
+
+/* 補足説明 */
+.form-note {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* ラジオボタン */
+.radio-group {
+  margin-top: 4px;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.radio-item input {
+  margin-right: 6px;
+}
+
+/* エラーメッセージ */
+.form-error {
+  font-size: 12px;
+  color: #e53935;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+/* 送信ボタン */
+.form-submit {
+  width: 100%;
+  padding: 12px 0;
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #0090e8;
+  color: #fff;
+}
+
+/* Lesson Schedule */
+.trial-schedule {
+  font-size: 13px;
+}
+
+.schedule-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.schedule-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.schedule-list li {
+  margin-bottom: 4px;
+}
