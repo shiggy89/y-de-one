@@ -137,7 +137,7 @@ export async function POST(req: Request) {
           `・時間帯：${timeSlot}\n` +
           `・バレエ経験：${experience}\n` +
           (question ? `・ご質問／不安なこと：${question}\n` : "") +
-          `\n⚠️${name} 様から質問がきています。⚠️\n質問の返信をしてください。`;
+          `\n⚠️質問がきています⚠️\n${name} 様へ質問の返信をしてください。`;
 
         // 管理者の人数分だけ push を回す（3〜4人ならこれで十分）
         for (const adminId of adminUserIds) {
