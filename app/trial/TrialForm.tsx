@@ -95,7 +95,11 @@ export default function TrialPage() {
     setTimeSlot("");
     setDateError(null);
 
-    if (!value) return;
+    if (!value) {
+      // ▼ 日付を消したときはプレースホルダーもリセット
+      setDatePlaceholder("希望日を選択してください");
+      return;
+    }
 
     const d = new Date(value + "T00:00:00");
     const day = d.getDay();
@@ -251,6 +255,11 @@ export default function TrialPage() {
                 value={date}
                 onChange={(e) => handleDateChange(e.target.value)}
               />
+              {date && (
+                <p className="form-note">
+                  選択した日：{datePlaceholder}
+                </p>
+              )}
               {dateError && <p className="form-error">{dateError}</p>}
               <p className="form-note">
                 ※ 月曜日はレッスン休講日のため選択できません。

@@ -61,6 +61,11 @@ export async function POST(req: Request) {
       return /^U[a-fA-F0-9]{16,64}$/.test(id);
     }
 
+    const d = new Date(date + "T00:00:00");
+    const day = d.getDay();
+    const youbi = ["日", "月", "火", "水", "木", "金", "土"][day];
+    const dateWithYoubi = `${date}（${youbi}）`;
+
     if (lineUserId && isValidLineUserId(lineUserId)) {
       console.log("LINE に送ろうとしている lineUserId:", lineUserId);
 
@@ -73,12 +78,12 @@ export async function POST(req: Request) {
         `🎉【ご予約が確定しました】🎉\n\n` +
         `▼ ご予約内容\n` +
         `・お名前：${displayNameForMessage}\n` +
-        `・希望日：${date}\n` +
+        `・希望日：${dateWithYoubi}\n` +
         `・時間帯：${timeSlot}\n` +
         `・バレエ経験：${experience}\n` +
         (question ? `・ご質問／不安なこと：${question}\n` : "") +
         `\n当日はスタジオでお会いできることを楽しみにしております😊\n\n` +
-        `📍Y-de-ONE\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n\n` +
+        `📍Y-de-ONEスタジオ\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n\n` +
         (question
           ? `P.S.ご質問については、担当者より追ってご連絡いたします。\n`
           : ``) +
