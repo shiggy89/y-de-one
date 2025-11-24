@@ -3,6 +3,8 @@
 import { useEffect, useState, type FormEvent } from "react";
 import liff from "@line/liff";
 import Heading2 from "../_components/Heading2";
+import { useRouter } from "next/navigation";
+const router = useRouter();
 
 type Profile = {
   userId: string;
@@ -32,6 +34,7 @@ export default function TrialPage() {
   const [experience, setExperience] = useState("");
   const [question, setQuestion] = useState("");
   const [dateError, setDateError] = useState<string | null>(null);
+  const [datePlaceholder, setDatePlaceholder] = useState("希望日を選択してください");
 
   // ===== LIFF 初期化 =====
   useEffect(() => {
@@ -97,6 +100,9 @@ export default function TrialPage() {
     const d = new Date(value + "T00:00:00");
     const day = d.getDay();
 
+    const youbi = ["日", "月", "火", "水", "木", "金", "土"][day];
+    setDatePlaceholder(`${value}（${youbi}）`);
+
     if (day === 1) {
       setDateError("月曜日はレッスン休講日のため、別の日付をお選びください。");
     }
@@ -155,6 +161,7 @@ export default function TrialPage() {
       alert(
         "体験レッスンのお申込みありがとうございます。\n詳細はこの後LINEでご連絡いたします。"
       );
+      router.push("/");
       // 必要であればLIFFを閉じる
       try {
         if (liff.isInClient()) {

@@ -68,18 +68,19 @@ export async function POST(req: Request) {
 
       const text =
         `${displayNameForMessage} 様\n\n` +
-        `Y-de-ONE（ワイデワン）大人バレエ教室です。\n` +
+        `Y-de-ONEバレエ教室です🩰\n` +
         `体験レッスンのお申込みありがとうございます。\n\n` +
-        `🎉【ご予約が確定しました】\n\n` +
+        `🎉【ご予約が確定しました】🎉\n\n` +
         `▼ ご予約内容\n` +
         `・お名前：${displayNameForMessage}\n` +
         `・希望日：${date}\n` +
         `・時間帯：${timeSlot}\n` +
         `・バレエ経験：${experience}\n` +
         (question ? `・ご質問／不安なこと：${question}\n` : "") +
-        `\n当日はスタジオでお待ちしております。\n\n` +
+        `\n当日はスタジオでお会いできることを楽しみにしております😊\n\n` +
+        `📍Y-de-ONE\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n\n` +
         (question
-          ? `いただいたご質問については、担当者より追ってご連絡いたします。\n`
+          ? `P.S.ご質問については、担当者より追ってご連絡いたします。\n`
           : ``) +
         `\n何か変更やキャンセルがある場合は、このLINEからお知らせください。`;
 
