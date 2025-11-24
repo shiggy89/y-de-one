@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import liff from "@line/liff";
 import Heading2 from "../_components/Heading2";
 
@@ -37,26 +37,25 @@ export default function TrialPage() {
   useEffect(() => {
     const initLiff = async () => {
       try {
-        // LIFFの中以外（ローカル開発など）はダミーユーザーで表示
-        // ※本番は LIFF からしか開かれない想定
-        // if (!liff.isInClient()) { … } を外してもOKです
-        try {
-          if (!liff.isInClient()) {
-            setProfile({
-              userId: "debug",
-              displayName: "テストユーザー",
-            });
-            // setName("テストユーザー");
-            setLoading(false);
-            return;
-          }
-        } catch {
-          // isInClient が使えない環境用のフォールバック
+        const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
+
+        if (!liffId) {
+          console.warn("NEXT_PUBLIC_LIFF_ID が設定されていません。");
+          setLoading(false);
+          return;
         }
 
-        await liff.init({
-          liffId: process.env.NEXT_PUBLIC_LIFF_ID as string,
-        });
+        // 開発用：ブラウザから直接アクセスしたときのダミープロフィール
+        if (!liff.isInClient() && process.env.NODE_ENV !== "production") {
+          setProfile({
+            userId: "debug",
+            displayName: "テストユーザー",
+          });
+          setLoading(false);
+          return;
+        }
+
+        await liff.init({ liffId });
 
         if (!liff.isLoggedIn()) {
           liff.login();
@@ -68,16 +67,23 @@ export default function TrialPage() {
           userId: p.userId,
           displayName: p.displayName,
         });
-        // setName(p.displayName);
       } catch (e) {
         console.error(e);
-        setError("LINEログインに失敗しました。時間をおいて再度お試しください。");
+        setError(
+          "LINEログインに失敗しました。時間をおいて再度お試しください。"
+        );
       } finally {
         setLoading(false);
       }
     };
 
-    initLiff();
+    // isInClient() が投げる環境もあるので try で包む
+    try {
+      initLiff();
+    } catch (e) {
+      console.error(e);
+      setLoading(false);
+    }
   }, []);
 
   // ===== 日付変更 =====
@@ -104,7 +110,7 @@ export default function TrialPage() {
   };
 
   // ===== 送信 =====
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 
@@ -145,15 +151,23 @@ export default function TrialPage() {
           question, // 質問は任意
         }),
       });
-      
+
       alert(
         "体験レッスンのお申込みありがとうございます。\n詳細はこの後LINEでご連絡いたします。"
       );
       // 必要であればLIFFを閉じる
-      liff.closeWindow();
+      try {
+        if (liff.isInClient()) {
+          liff.closeWindow();
+        }
+      } catch {
+        // ブラウザ直アクセス時などは何もしない
+      }
     } catch (e) {
       console.error(e);
-      setError("送信中にエラーが発生しました。時間をおいて再度お試しください。");
+      setError(
+        "送信中にエラーが発生しました。時間をおいて再度お試しください。"
+      );
     }
   };
 
@@ -169,6 +183,7 @@ export default function TrialPage() {
 
   const slots = getTimeSlotsForSelectedDate();
 
+  // ここから下（return 内）は、あなたのHTMLをそのまま残しています
   return (
     <main className="trial">
       <div className="inner inner-trial">
@@ -184,7 +199,6 @@ export default function TrialPage() {
                 Y-de-ONE（ワイデワン）の体験レッスンお申込みページです。
               </>
             }
-            // アイコンを使う場合はクラス名・画像パスをここに指定
             leftClassName="ballet-woman-icon heading2-icon-left"
             leftSrc="ballet-woman2-icon.png"
             leftAlt="バレエアイコン"
@@ -318,21 +332,8 @@ export default function TrialPage() {
               この内容で体験レッスンを申込む
             </button>
           </form>
-
-          {/* <section className="trial-schedule">
-            <h2 className="schedule-title">Lesson Schedule</h2>
-            <ul className="schedule-list">
-              <li>火曜：13:00 - 14:30</li>
-              <li>水曜：13:00 - 14:30 / 15:00 - 16:30 / 19:15 - 20:45</li>
-              <li>木曜：13:00 - 14:30 / 15:30 - 17:00 / 19:30 - 21:00</li>
-              <li>金曜：15:00 - 16:30</li>
-              <li>土曜：12:30 - 14:00 / 14:30 - 16:00 / 16:30 - 18:00</li>
-              <li>日曜：12:30 - 14:00 / 14:30 - 16:00</li>
-            </ul>
-          </section> */}
         </section>
       </div>
     </main>
   );
-
 }
