@@ -4,7 +4,6 @@ import { useEffect, useState, type FormEvent } from "react";
 import liff from "@line/liff";
 import Heading2 from "../_components/Heading2";
 import { useRouter } from "next/navigation";
-const router = useRouter();
 
 type Profile = {
   userId: string;
@@ -23,6 +22,7 @@ const TIME_SLOTS: Record<number, string[]> = {
 };
 
 export default function TrialPage() {
+  const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
