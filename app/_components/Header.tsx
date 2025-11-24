@@ -45,7 +45,7 @@ export default function Header() {
             <li><Link href="#">講師</Link></li>
             <li><Link href="#">アクセス</Link></li>
             <li><Link href="#">動画</Link></li>
-            <li><Link href="https://liff.line.me/2008551653-JRwQxXrB">体験レッスン</Link></li>
+            <li><Link href="https://lin.ee/iz33eCM">体験レッスン</Link></li>
           </ul>
         </nav>
       </div>
