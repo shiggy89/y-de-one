@@ -45,7 +45,6 @@ export async function POST(req: Request) {
 
     if (!channelAccessToken) {
       console.error("LINE_CHANNEL_ACCESS_TOKEN が設定されていません。");
-      // ここでは 500 を返しますが、予約自体は受け付けた扱いでもOKなら 200 にしてもよいです
       return NextResponse.json(
         {
           ok: false,
@@ -56,8 +55,15 @@ export async function POST(req: Request) {
       );
     }
 
-    if (lineUserId) {
+    // ✅ 追加：LINEのユーザーIDとして妥当かをざっくりチェック
+    function isValidLineUserId(id: string) {
+      // "U" + 16 or 32桁のhex が一般的なのでざっくりこんな感じでOK
+      return /^U[a-fA-F0-9]{16,64}$/.test(id);
+    }
+
+    if (lineUserId && isValidLineUserId(lineUserId)) {
       console.log("LINE に送ろうとしている lineUserId:", lineUserId);
+
       const displayNameForMessage = name || lineDisplayName || "お客様";
 
       const text =
@@ -97,12 +103,14 @@ export async function POST(req: Request) {
       if (!lineResponse.ok) {
         const errorText = await lineResponse.text();
         console.error("LINE Messaging API error:", errorText);
-        // ここで 500 を返すかどうかは運用ポリシー次第です
-        // 予約受付は成功とみなすなら、あえて 200 を返すのもありです
       }
     } else {
-      console.warn("lineUserId が無いため、LINEメッセージは送信しませんでした。");
+      console.warn(
+        "有効な lineUserId が無いため、LINEメッセージは送信しませんでした。lineUserId:",
+        lineUserId
+      );
     }
+
 
     // ⑤ フロント側には「OK」を返す
     return NextResponse.json({ ok: true });
