@@ -269,7 +269,7 @@ export default function TrialPage() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="例）山田花子 / はなこ さん"
+                placeholder="例）山田花子"
               />
             </div>
 
@@ -292,9 +292,9 @@ export default function TrialPage() {
                 </p>
               )}
               {dateError && <p className="form-error">{dateError}</p>}
-              <p className="form-note">
+              {/* <p className="form-note">
                 ※ 月曜日はレッスン休講日のため選択できません。
-              </p>
+              </p> */}
             </div>
 
             {/* 時間帯（必須） */}

@@ -28,13 +28,13 @@ export default function Flow() {
           <div className="flow-item">
             <Image
               className="step1-icon"
-              src="/images/step1-icon.png"
+              src="/images/step1-1-icon.png"
               alt="STEP1:予約するを表したアイコン"
               width={340}
               height={272}
             />
-            <h3>STEP1<br />予約する</h3>
-            <p>お問い合わせフォームまたはお電話でご予約ください。ご希望の日時をお伺いします。</p>
+            <h3>STEP1<br />LINEで予約する</h3>
+            <p>LINEの友だち追加をしていただき、体験レッスン申込みフォームよりご希望の日時をお送りください。</p>
           </div>
           <div className="flow-item">
             <Image

@@ -20,6 +20,10 @@ export default function Hero() {
             体験レッスンはこちら{" "}
             <i className="fa-solid fa-arrow-up-right-from-square"></i>
           </Link>
+          <span className="line-add-text">
+            <i className="fa-brands fa-line"></i>
+            友だち追加をして体験レッスンにお申込み下さい
+          </span>
 
           <Image
             className="dog-icon"

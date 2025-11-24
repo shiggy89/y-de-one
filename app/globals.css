@@ -179,6 +179,16 @@ img {
   font-weight: 600;
 }
 
+.fa-line {
+  color: #08B949;
+}
+
+.line-add-text {
+  display: block;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
 .cta-btn {
   display: inline-block;
   padding: 12px 32px;
@@ -261,8 +271,15 @@ img {
     transform: translate(-50%, -50%);
   }
 
+  .line-add-text {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
   .cta-btn {
-    margin: 28px 28px 28px 28px;
+    margin: 28px 28px 8px 28px;
   }
 
   .hero-right {
@@ -684,6 +701,7 @@ img {
   align-items: center;
   text-align: center;
 }
+
 .step1-icon,
 .step2-icon,
 .step3-icon {
@@ -692,17 +710,17 @@ img {
 }
 
 .step1-icon {
-  width: 200px;
-  height: auto;
-}
-
-.step2-icon {
   width: 180px;
   height: auto;
 }
 
+.step2-icon {
+  width: 160px;
+  height: auto;
+}
+
 .step3-icon {
-  width: 150px;
+  width: 130px;
   height: auto;
 }
 
@@ -1150,7 +1168,7 @@ img {
   }
 
   .dog-qa-icon {
-    top: -40%;
+    top: -35%;
     left: 50%;
     width: 167px;
     height: auto;
@@ -1291,6 +1309,7 @@ img {
     align-items: center;
     gap: 8px;
   }
+
   .ydeone-logo-footer {
     width: 250px;
     height: auto;
