@@ -57,6 +57,7 @@ export async function POST(req: Request) {
     }
 
     if (lineUserId) {
+      console.log("LINE に送ろうとしている lineUserId:", lineUserId);
       const displayNameForMessage = name || lineDisplayName || "お客様";
 
       const text =
