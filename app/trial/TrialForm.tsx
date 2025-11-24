@@ -94,19 +94,34 @@ export default function TrialPage() {
 
   // ===== 日付変更 =====
   const handleDateChange = (value: string) => {
-    setDate(value);
     setTimeSlot("");
     setDateError(null);
 
+    // 入力クリアされた場合
     if (!value) {
-      // ▼ 日付を消したときはプレースホルダーもリセット
+      setDate("");
       setDatePlaceholder("希望日を選択してください");
       return;
     }
 
-    const d = new Date(value + "T00:00:00");
-    const day = d.getDay();
+    // ▼ ここで「過去日付かどうか」をチェック
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 今日の0:00に揃える
 
+    const selected = new Date(value + "T00:00:00");
+
+    if (selected < today) {
+      // 過去の日付が選ばれたら、値を戻してエラー表示
+      setDate("");
+      setDatePlaceholder("希望日を選択してください");
+      setDateError("過去の日付は選択できません。本日以降の日付をお選びください。");
+      return;
+    }
+
+    // ここまで来たら「今日以降」なので確定
+    setDate(value);
+
+    const day = selected.getDay();
     const youbi = ["日", "月", "火", "水", "木", "金", "土"][day];
     setDatePlaceholder(`${value}（${youbi}）`);
 
