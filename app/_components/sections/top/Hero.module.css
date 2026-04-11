@@ -1,0 +1,105 @@
+.innerHero {
+  display: flex;
+  justify-content: space-between;
+}
+
+.heroLeft {
+  margin-left: 16px;
+  position: relative;
+}
+
+.heroLeft h1 {
+  font-size: 48px;
+  line-height: 1.4;
+  color: #008fd8;
+}
+
+.heroLeft p {
+  padding-left: 8px;
+  padding-top: 8px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.heroCtaWrap {
+  margin-bottom: 0;
+}
+
+.dogIcon {
+  position: absolute;
+  top: 5%;
+  left: 220%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  opacity: 0.8;
+  width: 260px;
+  height: auto;
+}
+
+.balletWoman1Icon {
+  position: absolute;
+  top: 50%;
+  left: 130%;
+  transform: translate(-50%, -50%);
+  width: 170px;
+  height: auto;
+}
+
+.familyIcon {
+  width: 500px;
+  height: auto;
+}
+
+.heroRight p {
+  font-size: 27px;
+  line-height: 1.2;
+  font-weight: 600;
+  padding-top: 24px;
+  padding-left: 60px;
+  color: #008fd8;
+  position: relative;
+  z-index: 1;
+}
+
+.heroRight p span {
+  font-size: 48px;
+  font-weight: 700;
+}
+
+@media (max-width: 576px) {
+  .innerHero {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .heroLeft {
+    margin: 0 0 48px 0;
+    padding: 0;
+  }
+
+  .heroCtaWrap {
+    margin-bottom: 24px;
+  }
+
+  .dogIcon {
+    top: 2.5%;
+    left: 78%;
+    width: 185px;
+  }
+
+  .balletWoman1Icon {
+    top: 112%;
+    left: 50%;
+  }
+
+  .heroRight {
+    text-align: center;
+  }
+
+  .heroRight p {
+    padding: 0;
+    margin-top: 72px;
+    margin-bottom: 8px;
+    width: 100%;
+  }
+}

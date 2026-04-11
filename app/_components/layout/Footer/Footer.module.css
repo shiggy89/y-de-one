@@ -1,0 +1,117 @@
+.footer {
+  background-color: #2a3b6a;
+  color: #ffffff;
+  font-size: 14px;
+  padding: 32px 0 16px;
+}
+
+.innerFooter {
+  display: flex;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.footerCol {
+  flex: 1;
+}
+
+.footerBlock {
+}
+
+.ydeoneLogoFooter {
+  width: 300px;
+  height: auto;
+  margin-bottom: 12px;
+  background-color: #fff;
+}
+
+.footerCopyText {
+  margin: 0 0 4px;
+}
+
+.footerArea {
+  margin: 0 0 16px;
+}
+
+.footerAddressTitle {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.footerAddressRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+}
+
+.footerContact {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-left: 100px;
+}
+
+.footerHeading {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.footerContactRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0 0 4px;
+}
+
+.footerLinks {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.footerNav {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footerNav li + li {
+  margin-top: 8px;
+}
+
+.footerNav a {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.footerNav a:hover {
+  text-decoration: underline;
+}
+
+.footerBottomCopy {
+  text-align: center;
+  margin: 24px 0 0;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+@media (max-width: 576px) {
+  .innerFooter {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ydeoneLogoFooter {
+    width: 250px;
+  }
+
+  .footerBlock:nth-of-type(2),
+  .footerLinks {
+    display: none;
+  }
+
+  .footerContact {
+    padding: 0 8px 0 0;
+  }
+}

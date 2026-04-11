@@ -1,0 +1,381 @@
+/* ━━━ ページ内ナビ ━━━ */
+.navSection {
+  padding-top: 16px;
+}
+
+.navCards {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.navCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: #fff0f5;
+  border-radius: 16px;
+  padding: 16px 24px;
+  min-width: 140px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.navCard:hover { background: #ffe0ec; }
+
+.navIcon { width: 140px; height: 140px; }
+
+.navLabel {
+  font-size: 15px;
+  font-weight: 700;
+  color: #e05080;
+}
+
+/* ━━━ 共通 ━━━ */
+.sectionHeading {
+  margin-top: 0;
+}
+
+.sectionDividerRed {
+  border: none;
+  border-top: 3px solid #e05080;
+  margin: 40px auto 0;
+  width: 95%;
+}
+
+.sectionDividerBlue {
+  border: none;
+  border-top: 3px solid #0090e8;
+  margin: 40px auto 0;
+  width: 85%;
+}
+
+/* ━━━ 舞台出演情報 ━━━ */
+.stageSection {
+  padding-top: 16px;
+  scroll-margin-top: 80px;
+}
+
+.stageCards {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  margin-bottom: 48px;
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.stageCard {
+  border-top: 3px solid #e05080;
+  padding: 24px 32px 0;
+}
+
+.stageCardHeader {
+  margin-bottom: 16px;
+}
+
+.stageCardDate {
+  font-size: 14px;
+  color: #0090e8;
+  font-weight: 700;
+}
+
+.stageCardTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  margin: 6px 0 4px;
+}
+
+.stageCardVenue {
+  font-size: 14px;
+  color: #888;
+}
+
+.stageCardBody {
+  font-size: 15px;
+  color: #555;
+  line-height: 1.9;
+  margin-bottom: 20px;
+  white-space: pre-wrap;
+  flex: 1;
+}
+
+.stageCardContent {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+.stagePhotoCol {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex-shrink: 0;
+  width: 280px;
+}
+
+.stagePhotoItem {
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.stagePhoto {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.activityGroups {
+  width: 90%;
+  margin: 0 auto;
+}
+
+/* 旧テーブル用（活動報告で使用） */
+.stageGroup {
+  margin-bottom: 40px;
+}
+
+.stageYear {
+  font-size: 18px;
+  font-weight: 700;
+  color: #e05080;
+  border-left: 4px solid #e05080;
+  padding-left: 12px;
+  margin-bottom: 12px;
+}
+
+.stageTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  table-layout: fixed;
+}
+
+.stageTable tr {
+  border-bottom: 1px solid #eee;
+}
+
+.stageTable td {
+  padding: 12px 8px;
+  vertical-align: top;
+  color: #333;
+}
+
+.stageDate {
+  white-space: nowrap;
+  color: #0090e8;
+  font-weight: 700;
+  width: 110px;
+}
+
+.mobileDateBreak {
+  display: none;
+}
+
+.stageTitle {
+  font-weight: 700;
+}
+
+.stageVenue {
+  color: #666;
+}
+
+.stageRole {
+  white-space: nowrap;
+  color: #e05080;
+  font-weight: 700;
+  text-align: right;
+}
+
+/* ━━━ 作品紹介 ━━━ */
+.worksSection {
+  padding-top: 16px;
+  background: #fff;
+  padding-bottom: 48px;
+  scroll-margin-top: 80px;
+}
+
+.worksList {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  width: 95%;
+  margin: 0 auto;
+}
+
+.workCard {
+  padding-top: 0;
+}
+
+.workCard .stageCardHeader {
+  width: 85%;
+  margin: 0 auto 16px;
+  border-top: 3px solid #0090e8;
+  padding-top: 24px;
+}
+
+.worksVideoWrapper {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  width: 85%;
+  margin: 0 auto 20px;
+}
+
+.worksVideoWrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 10px;
+}
+
+.worksCardBody {
+  font-size: 15px;
+  color: #555;
+  line-height: 1.9;
+  white-space: pre-wrap;
+  width: 85%;
+  margin: 0 auto;
+}
+
+/* ━━━ 活動報告 ━━━ */
+.activitySection {
+  padding-top: 16px;
+  padding-bottom: 8px;
+  scroll-margin-top: 80px;
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 40px;
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.activityItem {
+  border-left: 4px solid #e8f4fd;
+  padding: 16px 20px;
+  background: #f9fafe;
+  border-radius: 0 12px 12px 0;
+}
+
+.activityDate {
+  font-size: 13px;
+  color: #0090e8;
+  font-weight: 700;
+}
+
+.activityTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 6px 0 10px;
+}
+
+.activityBody {
+  font-size: 15px;
+  color: #555;
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* ━━━ レスポンシブ ━━━ */
+@media (max-width: 768px) {
+  .worksVideoWrapper {
+    width: 100%;
+  }
+
+  .worksCardBody {
+    width: 100%;
+  }
+
+  .workCard .stageCardHeader {
+    width: 100%;
+    margin: 0 auto 16px;
+  }
+
+  .stageCardContent {
+    flex-direction: column;
+  }
+
+  .stageCard {
+    padding: 24px 0 0;
+  }
+
+  .stagePhotoCol {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    order: -1;
+  }
+
+  .stagePhotoItem {
+    width: calc(50% - 6px);
+  }
+
+  .stageTable {
+    font-size: 14px;
+  }
+
+  .stageVenue {
+    display: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .activityGroups {
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .navCards {
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .navCard {
+    min-width: 0;
+    flex: 1;
+    padding: 12px 8px;
+  }
+
+  .navIcon {
+    width: 80px;
+    height: 80px;
+  }
+
+  .navLabel {
+    font-size: 13px;
+  }
+
+  .worksGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .stageDate {
+    width: 105px;
+    min-width: 105px;
+    white-space: normal;
+  }
+
+  .mobileDateBreak {
+    display: block;
+  }
+
+  .activityTitle {
+    font-size: 16px;
+  }
+}

@@ -1,0 +1,194 @@
+.blogPage {
+  padding: 16px 0 80px;
+}
+
+.mobileBreak {
+  display: none;
+}
+
+.empty {
+  text-align: center;
+  color: #888;
+  padding: 48px 0;
+}
+
+/* ━━━ 一覧 ━━━ */
+.blogList {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  width: 90%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.blogCard {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  transition: transform 0.2s;
+}
+
+.blogCard:hover {
+  transform: translateY(-4px);
+}
+
+.blogLink {
+  display: block;
+  color: #333;
+}
+
+.blogThumb {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+.thumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.thumbPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ccc;
+  font-size: 32px;
+}
+
+.blogInfo {
+  padding: 16px;
+}
+
+.blogDate {
+  font-size: 13px;
+  color: #888;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.blogTitle {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ━━━ 詳細 ━━━ */
+.backLink {
+  display: block;
+  color: #0090e8;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 auto 24px;
+  width: 80%;
+}
+
+.article {
+  width: 80%;
+  margin: 0 auto;
+}
+
+.articleTitle {
+  font-size: 26px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.5;
+  margin: 12px 0 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #eee;
+}
+
+.articleEyecatch {
+  margin-bottom: 32px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.eyecatchImg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.articleBody {
+  font-size: 16px;
+  line-height: 1.9;
+  color: #333;
+}
+
+.articleBody h2 {
+  font-size: 20px;
+  color: #0090e8;
+  margin: 40px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e8f4fd;
+}
+
+.articleBody h3 {
+  font-size: 17px;
+  margin: 32px 0 12px;
+}
+
+.articleBody p {
+  margin-bottom: 16px;
+}
+
+.articleBody img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.articleBody ul,
+.articleBody ol {
+  padding-left: 24px;
+  margin-bottom: 16px;
+}
+
+.articleBody li {
+  margin-bottom: 8px;
+}
+
+.articleBody a {
+  color: #0090e8;
+  text-decoration: underline;
+}
+
+/* ━━━ レスポンシブ ━━━ */
+@media (max-width: 768px) {
+  .blogList {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .mobileBreak {
+    display: block;
+  }
+
+  .blogList {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .backLink {
+    width: 90%;
+  }
+
+  .article {
+    width: 90%;
+  }
+
+  .articleTitle {
+    font-size: 20px;
+  }
+}

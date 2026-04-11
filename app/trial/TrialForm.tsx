@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import liff from "@line/liff";
-import Heading2 from "../_components/Heading2";
+import Heading2 from "../_components/sections/common/Heading2";
 import { useRouter } from "next/navigation";
+import styles from "./TrialForm.module.css";
 
 type Profile = {
   userId: string;
@@ -38,6 +39,9 @@ export default function TrialPage() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todayStr = today.toISOString().split("T")[0];
+  const balletWomanStyle = {
+    "--heading-icon-width": "172px",
+  } as CSSProperties;
 
   // ===== LIFF 初期化 =====
   useEffect(() => {
@@ -202,8 +206,8 @@ export default function TrialPage() {
 
   if (loading) {
     return (
-      <main className="trial">
-        <div className="inner inner-trial">
+      <main className={styles.trial}>
+        <div className={`inner `}>
           <p>読み込み中です…</p>
         </div>
       </main>
@@ -214,9 +218,9 @@ export default function TrialPage() {
 
   // ここから下（return 内）は、あなたのHTMLをそのまま残しています
   return (
-    <main className="trial">
-      <div className="inner inner-trial">
-        <h1 className="page-title">
+    <main className={styles.trial}>
+      <div className={`inner `}>
+        <h1 className={styles.pageTitle}>
           Y-de-ONEバレエ体験レッスンのお申込み〜初心者歓迎〜
         </h1>
         <section aria-labelledby="trial-form-heading">
@@ -228,27 +232,27 @@ export default function TrialPage() {
                 Y-de-ONE（ワイデワン）の体験レッスンお申込みページです。
               </>
             }
-            leftClassName="ballet-woman-icon heading2-icon-left"
             leftSrc="ballet-woman2-icon.png"
             leftAlt="バレエアイコン"
-            rightClassName="ballet-woman-icon heading2-icon-right"
+            leftStyle={balletWomanStyle}
             rightSrc="ballet-woman3-icon.png"
             rightAlt="バレエアイコン"
-            width={469}
-            height={532}
+            rightStyle={balletWomanStyle}
+            width={532}
+            height={469}
           />
 
           {profile && (
-            // <p className="trial-line-name">
+            // <p className={styles.trialLineName}>
             //     <strong>{profile.displayName}</strong>
             //     さん、Y-de-ONEのバレエ体験レッスンに興味をもっていただきありがとうございます。
             // </p>
             <>
-              <p className="trial-line-name">
+              <p className={styles.trialLineName}>
                 <strong>{profile.displayName}</strong>
                 さん、Y-de-ONEのバレエ体験レッスンに興味をもっていただきありがとうございます。
               </p>
-              <p className="form-note">
+              <p className={styles.formNote}>
                 ※ この端末の LINE userId：<code>{profile.userId}</code>
                 <br />
                 （管理者ID取得のための一時表示です。控えたらこの表示は削除してください）
@@ -257,15 +261,15 @@ export default function TrialPage() {
 
           )}
 
-          <form className="trial-form" onSubmit={handleSubmit}>
+          <form className={styles.trialForm} onSubmit={handleSubmit}>
             {/* 氏名（必須） */}
-            <div className="form-field">
-              <label className="form-label">
-                氏名 <span className="form-required">必須</span>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>
+                氏名 <span className={styles.formRequired}>必須</span>
               </label>
               <input
                 type="text"
-                className="form-input"
+                className={styles.formInput}
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -274,51 +278,51 @@ export default function TrialPage() {
             </div>
 
             {/* 希望日（必須） */}
-            <div className="form-field">
-              <label className="form-label">
-                体験レッスン希望日 <span className="form-required">必須</span>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>
+                体験レッスン希望日 <span className={styles.formRequired}>必須</span>
               </label>
               <input
                 type="date"
-                className="form-input"
+                className={styles.formInput}
                 required
                 value={date}
                 onChange={(e) => handleDateChange(e.target.value)}
                 min={todayStr}
               />
               {date && (
-                <p className="form-note">
+                <p className={styles.formNote}>
                   選択した日：{datePlaceholder}
                 </p>
               )}
-              {dateError && <p className="form-error">{dateError}</p>}
-              {/* <p className="form-note">
+              {dateError && <p className={styles.formError}>{dateError}</p>}
+              {/* <p className={styles.formNote}>
                 ※ 月曜日はレッスン休講日のため選択できません。
               </p> */}
             </div>
 
             {/* 時間帯（必須） */}
-            <div className="form-field">
-              <label className="form-label">
-                体験レッスン時間帯 <span className="form-required">必須</span>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>
+                体験レッスン時間帯 <span className={styles.formRequired}>必須</span>
               </label>
 
               {!date && (
-                <p className="form-note">
+                <p className={styles.formNote}>
                   先に「体験レッスン希望日」を選択してください。
                 </p>
               )}
 
               {date && slots.length === 0 && (
-                <p className="form-note">
+                <p className={styles.formNote}>
                   この日はレッスンを行っていません。別の日付をお選びください。
                 </p>
               )}
 
               {slots.length > 0 && (
-                <div className="radio-group">
+                <div className={styles.radioGroup}>
                   {slots.map((slot) => (
-                    <label key={slot} className="radio-item">
+                    <label key={slot} className={styles.radioItem}>
                       <input
                         type="radio"
                         name="timeSlot"
@@ -335,14 +339,14 @@ export default function TrialPage() {
             </div>
 
             {/* バレエ経験（必須） */}
-            <div className="form-field">
-              <label className="form-label">
-                バレエ経験 <span className="form-required">必須</span>
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>
+                バレエ経験 <span className={styles.formRequired}>必須</span>
               </label>
-              <div className="radio-group">
+              <div className={styles.radioGroup}>
                 {["はじめて", "少しだけ経験あり", "昔しっかりやっていた", "今も現役"].map(
                   (label) => (
-                    <label key={label} className="radio-item">
+                    <label key={label} className={styles.radioItem}>
                       <input
                         type="radio"
                         name="experience"
@@ -359,12 +363,12 @@ export default function TrialPage() {
             </div>
 
             {/* ご質問（任意） */}
-            <div className="form-field">
-              <label className="form-label">
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>
                 ご質問・不安なことなど（任意）
               </label>
               <textarea
-                className="form-textarea"
+                className={styles.formTextarea}
                 rows={4}
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
@@ -373,9 +377,9 @@ export default function TrialPage() {
             </div>
 
             {/* エラー表示 */}
-            {error && <p className="form-error">{error}</p>}
+            {error && <p className={styles.formError}>{error}</p>}
 
-            <button type="submit" className="form-submit">
+            <button type="submit" className={styles.formSubmit}>
               この内容で体験レッスンを申込む
             </button>
           </form>

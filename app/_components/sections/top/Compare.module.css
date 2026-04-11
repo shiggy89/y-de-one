@@ -1,0 +1,249 @@
+.mobileOnlyBreak {
+  display: none;
+}
+
+.compareCol {
+  position: relative;
+  margin: 0 auto 32px;
+  display: flex;
+  justify-content: center;
+  line-height: 1.6;
+  padding: 0 32px;
+}
+
+.dogPorkLeftIcon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 150px;
+  height: auto;
+}
+
+.dogPorkUpIcon {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 150px;
+  height: auto;
+  display: none;
+}
+
+.leftCol {
+  background-color: #e8f6fd;
+  width: 100%;
+  border-radius: 20px 0 0 20px;
+}
+
+.rightCol {
+  background-color: #efefef;
+  width: 100%;
+  border-radius: 0 20px 20px 0;
+}
+
+.leftCol h3,
+.rightCol h3 {
+  margin-top: 0;
+  padding: 12px;
+  color: #fff;
+  font-size: 18px;
+  text-align: center;
+}
+
+.leftCol h3 {
+  background-color: #27a9e1;
+  border-radius: 20px 0 0 0;
+}
+
+.rightCol h3 {
+  background-color: #8e8e8e;
+  border-radius: 0 20px 0 0;
+}
+
+.compareCol ul {
+  margin-left: 90px;
+  padding: 16px 0;
+  font-size: 18px;
+}
+
+.leftCol li {
+  color: #008fd8;
+}
+
+.leftCol li,
+.rightCol li {
+  position: relative;
+  padding-left: 30px;
+  line-height: 2;
+  font-weight: 500;
+}
+
+.compareLabel {
+  display: inline;
+}
+
+.ok,
+.ng {
+  position: absolute;
+  top: 0.45em;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  line-height: 20px;
+  font-weight: bold;
+  color: #fff;
+  border-radius: 4px;
+}
+
+.ok {
+  background-color: #16a34a;
+}
+
+.ng {
+  background-color: #ef4444;
+}
+
+.tabY {
+  display: block;
+}
+
+.tabN {
+  display: block;
+}
+
+.compareText {
+  display: flex;
+  justify-content: center;
+  padding: 0 32px;
+}
+
+.compareTextLeft {
+  flex: 1;
+  position: relative;
+  z-index: 0;
+}
+
+.yoshikiIdeaIcon {
+  position: absolute;
+  top: 70%;
+  left: 95%;
+  transform: translate(-50%, -50%);
+  width: 150px;
+  height: auto;
+  z-index: 1;
+}
+
+.compareTextLeft h3 {
+  color: #de4e8c;
+  line-height: 1.3;
+  font-size: 24px;
+  background-color: #e8f6fd;
+  padding: 32px 0 32px 32px;
+  margin-right: 48px;
+  border-radius: 90px 90px 0 90px;
+}
+
+.compareTextLeft h3 span {
+  font-size: 60px;
+}
+
+.compareTextRight {
+  flex: 2;
+  align-items: center;
+}
+
+.innerCompareTextRight {
+  display: flex;
+  align-items: center;
+  border: 2px solid #de4e8c;
+  border-radius: 20px;
+  padding: 16px;
+  margin-left: 84px;
+  margin-bottom: 8px;
+}
+
+.discountDownIcon {
+  width: 87px;
+  height: auto;
+}
+
+.caryyOverIcon {
+  width: 100px;
+  height: auto;
+}
+
+.innerCompareTextRight p {
+  align-items: center;
+  padding-left: 16px;
+  font-weight: 500;
+}
+
+.innerCompareTextRight:nth-child(1) p {
+  padding-left: 32px;
+}
+
+@media (max-width: 576px) {
+  .mobileOnlyBreak {
+    display: block;
+  }
+
+  .compareCol {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .dogPorkLeftIcon {
+    display: none;
+  }
+
+  .dogPorkUpIcon {
+    top: 50%;
+    left: 50%;
+    height: 170px;
+    display: block;
+  }
+
+  .leftCol {
+    border-radius: 20px;
+  }
+
+  .rightCol {
+    border-radius: 20px;
+    margin-top: 160px;
+  }
+
+  .leftCol h3,
+  .rightCol h3 {
+    border-radius: 20px 20px 0 0;
+  }
+
+  .compareCol ul {
+    margin: 0;
+    padding: 16px;
+  }
+
+  .compareText {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .compareTextLeft {
+    margin-bottom: 32px;
+    margin-right: 10px;
+  }
+
+  .yoshikiIdeaIcon {
+    top: 100%;
+    left: 95%;
+  }
+
+  .compareTextRight {
+    margin-top: 48px;
+  }
+
+  .innerCompareTextRight {
+    margin: 16px 0;
+    padding: 8px;
+    width: 95%;
+  }
+}

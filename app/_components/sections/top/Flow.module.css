@@ -1,0 +1,200 @@
+.mobileOnlyBreak {
+  display: none;
+}
+
+.innerFlow {
+  margin-bottom: 48px;
+}
+
+.balletWomanIcon {
+  --heading-icon-width: 172px;
+}
+
+.flowList {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 48px;
+  padding: 0;
+  position: relative;
+}
+
+.flowItem {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.step1Icon,
+.step2Icon,
+.step3Icon {
+  margin: 0 auto;
+  padding: 0;
+  display: block;
+}
+
+.iconWrapper {
+  height: 180px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.step1Icon {
+  width: 180px;
+  height: auto;
+}
+
+.step2Icon {
+  width: 160px;
+  height: auto;
+}
+
+.step3Icon {
+  width: 130px;
+  height: auto;
+}
+
+.flowItem h3 {
+  line-height: 1.2;
+  margin: 16px 0 24px;
+}
+
+.flowItem p {
+  width: 70%;
+  line-height: 1.2;
+  margin: 0 auto;
+}
+
+.arrowPinkLeft {
+  position: absolute;
+  top: 50%;
+  left: 34%;
+  transform: translate(-50%, -50%);
+}
+
+.arrowPinkRight {
+  position: absolute;
+  top: 50%;
+  left: 66%;
+  transform: translate(-50%, -50%);
+}
+
+.arrowDownUp,
+.arrowDownDown {
+  display: none;
+}
+
+.trialCard {
+  display: flex;
+  background-color: #e8f6fd;
+  border-radius: 20px;
+  margin: 32px;
+}
+
+.studio1Photo {
+  flex: 3;
+  width: 400px;
+  height: auto;
+  padding: 32px;
+}
+
+.trialCardText {
+  flex: 2;
+  margin: auto 0;
+  padding-left: 48px;
+}
+
+.trialCardText h3 {
+  line-height: 1.5;
+}
+
+.trialCardText h3 span {
+  color: #de4e8c;
+  font-size: 32px;
+}
+
+.trialCardText ul {
+  margin-top: 24px;
+}
+
+.ok {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  line-height: 20px;
+  font-weight: bold;
+  color: #fff;
+  border-radius: 4px;
+  margin-right: 10px;
+  background-color: #16a34a;
+}
+
+@media (max-width: 576px) {
+  .mobileOnlyBreak {
+    display: block;
+  }
+
+  .flowHeading {
+    margin-bottom: 4px;
+  }
+
+  .innerFlow {
+    margin-bottom: 200px;
+  }
+
+  .flowList {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .flowItem:nth-child(1),
+  .flowItem:nth-child(2) {
+    margin-bottom: 120px;
+  }
+
+  .flowItem h3 {
+    margin: 0 0 8px 0;
+  }
+
+  .arrowPinkLeft,
+  .arrowPinkRight {
+    display: none;
+  }
+
+  .arrowDownUp {
+    display: block;
+    position: absolute;
+    top: 32%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .arrowDownDown {
+    display: block;
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .trialCard {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0;
+  }
+
+  .studio1Photo {
+    width: 260px;
+  }
+
+  .trialCardText {
+    padding: 0;
+  }
+
+  .trialCardText ul {
+    margin: 0 0 32px 0;
+  }
+}

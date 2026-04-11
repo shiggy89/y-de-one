@@ -1,0 +1,208 @@
+.newsPage {
+  padding: 16px 0 80px;
+}
+
+/* ━━━ 一覧 ━━━ */
+.newsList {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  width: 80%;
+}
+
+.newsItem {
+  border-top: 1px solid #eee;
+  padding: 12px 8px;
+}
+
+.newsItem:last-child {
+  border-bottom: 1px solid #eee;
+}
+
+.newsMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.newsDate {
+  font-size: 14px;
+  color: #888;
+}
+
+.newsCategory {
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 2px 8px;
+  color: #0090e8;
+  background: #e8f4fd;
+}
+
+/* カテゴリ別カラー */
+.newsCategory[data-category="休講・振替"] {
+  color: #e05080;
+  background: #fff0f5;
+}
+
+.newsCategory[data-category="祝日レッスン"] {
+  color: #1a7a3a;
+  background: #e6f4eb;
+}
+
+.newsCategory[data-category="舞台・イベント"] {
+  color: #b05e00;
+  background: #fff4e0;
+}
+
+.newsCategory[data-category="お知らせ"] {
+  color: #0090e8;
+  background: #e8f4fd;
+}
+
+.newsTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0;
+}
+
+.readMore {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #0090e8;
+  font-weight: 700;
+}
+
+.newsContent {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #555;
+}
+
+.newsContent h2 {
+  font-size: 18px;
+  color: #0090e8;
+  margin: 24px 0 12px;
+}
+
+.newsContent h3 {
+  font-size: 16px;
+  margin: 20px 0 8px;
+}
+
+.newsContent p {
+  margin-bottom: 12px;
+}
+
+.newsContent img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+
+.newsContent ul,
+.newsContent ol {
+  padding-left: 24px;
+  margin-bottom: 12px;
+}
+
+.newsContent a {
+  color: #0090e8;
+  text-decoration: underline;
+}
+
+/* ━━━ 詳細ページ ━━━ */
+.backLink {
+  display: block;
+  color: #0090e8;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 auto 24px;
+  width: 80%;
+}
+
+.article {
+  width: 80%;
+  margin: 0 auto;
+}
+
+.articleMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.articleTitle {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.5;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #eee;
+}
+
+.articleBody {
+  font-size: 16px;
+  line-height: 1.9;
+  color: #333;
+}
+
+.articleBody h2 {
+  font-size: 20px;
+  color: #0090e8;
+  margin: 40px 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e8f4fd;
+}
+
+.articleBody h3 {
+  font-size: 17px;
+  margin: 32px 0 12px;
+}
+
+.articleBody p {
+  margin-bottom: 16px;
+}
+
+.articleBody img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.articleBody ul,
+.articleBody ol {
+  padding-left: 24px;
+  margin-bottom: 16px;
+}
+
+.articleBody li {
+  margin-bottom: 8px;
+}
+
+.articleBody a {
+  color: #0090e8;
+  text-decoration: underline;
+}
+
+/* ━━━ レスポンシブ ━━━ */
+@media (max-width: 576px) {
+  .newsPage {
+    padding: 16px 0 60px;
+  }
+
+  .newsTitle {
+    font-size: 15px;
+  }
+
+  .newsContent {
+    font-size: 14px;
+  }
+}

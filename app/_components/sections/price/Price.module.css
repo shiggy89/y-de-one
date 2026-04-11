@@ -1,0 +1,403 @@
+.mobileOnlyBreak {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobileOnlyBreak {
+    display: block;
+  }
+}
+
+/* ━━━ 料金サマリー ━━━ */
+.summarySection {
+  padding-top: 16px;
+}
+
+.priceHeading {
+  margin-top: 0;
+}
+
+@media (max-width: 576px) {
+  .priceHeading {
+    margin-top: 8px !important;
+  }
+}
+
+.summaryCards {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 80px;
+  overflow: visible;
+}
+
+.summaryCard {
+  flex: 1;
+  min-width: 200px;
+  max-width: 280px;
+  background: #e8f4fd;
+  border-radius: 16px;
+  padding: 28px 20px 16px;
+  text-align: center;
+}
+
+.summaryIcon {
+  width: 160px;
+  height: auto;
+  margin: 0 auto 12px;
+}
+
+/* 入会金カード専用 */
+.summaryCardBlue {
+  background: #e8f4fd;
+  position: relative;
+  padding-top: 64px;
+}
+
+.summaryIconFloat {
+  width: 110px;
+  height: auto;
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.summaryIconFloatLarge {
+  width: 140px;
+  top: -65px;
+}
+
+.summaryLabelWhite { color: #fff; }
+.summaryNumWhite   { color: #fff; }
+.summaryUnitWhite  { font-size: 18px; font-weight: 700; color: #fff; }
+.summaryNoteWhite  { color: rgba(255, 255, 255, 0.8); }
+
+.summaryLabel {
+  font-size: 24px;
+  font-weight: 700;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.summaryPrice {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+
+.summaryNum {
+  font-size: 58px;
+  color: #e05080;
+}
+
+.summaryUnit {
+  font-size: 20px;
+  color: #555;
+}
+
+.summaryNote {
+  font-size: 14px;
+  color: #888;
+  line-height: 1.5;
+}
+
+/* ━━━ レッスン料金 ━━━ */
+.lessonSection {
+  background: #ffffff;
+  padding: 48px 0 0;
+}
+
+.priceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.priceCard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 12px 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-top: 4px solid #e05080;
+}
+
+.priceCardAccent {
+  background: #fff0f5;
+  border-radius: 14px;
+  padding: 20px 12px 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-top: 4px solid #e05080;
+}
+
+.priceCardYellow {
+  background: #fff9e3;
+  border-radius: 14px;
+  padding: 20px 12px 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-top: 4px solid #e05080;
+}
+
+.priceCardBlue {
+  background: #e8f4fd;
+  border-radius: 14px;
+  padding: 20px 12px 16px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-top: 4px solid #e05080;
+}
+
+.priceTimesLabel {
+  font-size: 19px;
+  font-weight: 700;
+  color: #0090e8;
+  margin-bottom: 8px;
+}
+
+.priceTotal {
+  font-size: 32px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 6px;
+  line-height: 1.1;
+}
+
+.priceYen {
+  font-size: 16px;
+  color: #666;
+  margin-right: 2px;
+}
+
+.perLesson {
+  font-size: 13px;
+  color: #999;
+  line-height: 1.4;
+}
+
+/* 9回以降・35分クラス */
+.specialRow {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.specialCard {
+  flex: 1;
+  max-width: 340px;
+  background: #e8f4fd;
+  border-radius: 16px;
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.specialIcon {
+  width: 140px;
+  height: auto;
+  margin: 0 auto 12px;
+}
+
+.specialLabel {
+  font-size: 15px;
+  font-weight: 700;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.specialPrice {
+  font-size: 17px;
+  font-weight: 700;
+  color: #333;
+}
+
+.specialPrice span {
+  font-size: 30px;
+  color: #0090e8;
+}
+
+/* ━━━ システム説明 ━━━ */
+.systemSection {
+  padding: 16px 0;
+}
+
+.systemCards {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+}
+
+.systemCard {
+  flex: 1;
+  text-align: center;
+  padding: 0 8px;
+}
+
+.systemIcon {
+  width: 150px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.systemCardTitle {
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0;
+}
+
+.systemCard p {
+  font-size: inherit;
+  color: #555;
+  line-height: 1.2;
+  width: 80%;
+  margin: 0 auto;
+}
+
+/* ━━━ 注意事項 ━━━ */
+.noteSection {
+  padding-bottom: 16px;
+}
+
+.noteList {
+  list-style: none;
+  margin: 0 auto 40px;
+  padding: 20px 24px;
+  background: #f8f8f8;
+  border-radius: 12px;
+  width: 70%;
+}
+
+.noteList li {
+  font-size: 15px;
+  color: #666;
+  line-height: 1.8;
+  padding-left: 1.5em;
+  text-indent: -1.5em;
+}
+
+.noteList li::before {
+  content: "※ ";
+}
+
+/* ━━━ レスポンシブ ━━━ */
+@media (max-width: 860px) {
+  .priceGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .summaryCards {
+    gap: 14px;
+  }
+
+  .summaryCard {
+    min-width: 160px;
+  }
+}
+
+@media (max-width: 768px) {
+  .systemCards {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .systemCard {
+    max-width: 480px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  /* サマリーカード */
+  .summaryCards {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 80px;
+    gap: 70px;
+  }
+
+  .summaryCard {
+    width: 80%;
+    max-width: 320px;
+    min-width: unset;
+  }
+
+  .summaryNum {
+    font-size: 48px;
+  }
+
+  .summaryLabel {
+    font-size: 20px;
+  }
+
+  /* 料金グリッド */
+  .priceGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .priceCard,
+  .priceCardAccent,
+  .priceCardYellow,
+  .priceCardBlue {
+    padding: 14px 8px 12px;
+  }
+
+  .priceTimesLabel {
+    font-size: 17px;
+  }
+
+  .priceTotal {
+    font-size: 26px;
+  }
+
+  .priceYen {
+    font-size: 13px;
+  }
+
+  .perLesson {
+    font-size: 11px;
+  }
+
+  /* システム説明 */
+  .systemCards {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .systemCard {
+    margin-bottom: 40px;
+  }
+
+  .systemCard p {
+    text-align: center;
+  }
+
+  .systemIcon {
+    width: 200px;
+    margin: -16px auto;
+  }
+
+  /* 注意事項 */
+  .noteList {
+    padding: 14px 16px;
+    width: 90%;
+  }
+
+  .noteList li {
+    font-size: 14px;
+    display: flex;
+    gap: 4px;
+    padding-left: 0;
+    text-indent: 0;
+  }
+
+  .noteList li::before {
+    flex-shrink: 0;
+  }
+}

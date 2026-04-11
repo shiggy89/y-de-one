@@ -1,0 +1,188 @@
+/* ━━━ 地図 ━━━ */
+.mapSection {
+  padding-top: 16px;
+}
+
+.mapCard {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  margin-bottom: 48px;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.mapEmbed {
+  flex: 1;
+  aspect-ratio: 4 / 3;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.mapEmbed iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.mapInfo {
+  width: 260px;
+  flex-shrink: 0;
+}
+
+.mapAddress {
+  display: flex;
+  gap: 12px;
+  font-size: 15px;
+  line-height: 1.9;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+.mapAddress i {
+  color: #e05080;
+  margin-top: 4px;
+  flex-shrink: 0;
+  font-size: 24px;
+}
+
+.stationLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stationLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff0f5;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #e05080;
+  transition: background 0.2s;
+}
+
+.stationLink:hover {
+  background: #ffe0ec;
+}
+
+.stationLink i {
+  font-size: 14px;
+}
+
+/* ━━━ 各駅セクション ━━━ */
+.stationSection {
+  padding: 32px 0 0;
+  border-top: 1px solid #eee;
+  scroll-margin-top: 80px;
+  margin-bottom: 36px;
+}
+
+.ctaWrapper {
+  padding-top: 8px;
+}
+
+.stationHeader {
+  margin-bottom: 24px;
+}
+
+.stationName {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.stationName i {
+  color: #0090e8;
+  font-size: 18px;
+}
+
+.stationMeta {
+  font-size: 14px;
+  color: #888;
+}
+
+/* ━━━ ステップグリッド ━━━ */
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.stepCard {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.stepPhoto {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #e8f4fd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stepPhotoPlaceholder {
+  font-size: 13px;
+  color: #aac;
+}
+
+.stepBody {
+  padding: 12px;
+}
+
+.stepNum {
+  font-size: 11px;
+  font-weight: 700;
+  color: #0090e8;
+  letter-spacing: 0.05em;
+}
+
+.stepLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  margin: 4px 0 0;
+}
+
+/* ━━━ レスポンシブ ━━━ */
+@media (max-width: 768px) {
+  .mapCard {
+    flex-direction: column;
+  }
+
+  .mapInfo {
+    width: 100%;
+  }
+
+  .stepsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .mapEmbed {
+    width: 90%;
+    margin: 0 auto;
+  }
+
+  .stationName {
+    font-size: 18px;
+  }
+
+  .stepsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}

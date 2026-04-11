@@ -1,0 +1,112 @@
+.mobileOnlyBreak {
+  display: none;
+}
+
+.universeDanceIcon {
+  --heading-icon-width: 220px;
+  --heading-icon-radius: 999px;
+}
+
+.contemporaryDanceIcon {
+  --heading-icon-width: 214px;
+  --heading-right-top: 168px;
+}
+
+.mainText {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.5;
+  position: relative;
+}
+
+.mainText span {
+  background: linear-gradient(transparent 60%, #ffff66 0%);
+}
+
+.mainText h3 {
+  font-size: 22px;
+  color: #0090e8;
+  margin-top: 48px;
+  margin-bottom: 24px;
+}
+
+.yoshikiProfile {
+  position: absolute;
+  top: 45%;
+  left: 20%;
+  transform: translate(-50%, -50%);
+  width: 123px;
+  height: auto;
+  border-radius: 20px;
+  pointer-events: auto;
+  user-select: auto;
+  -webkit-user-drag: auto;
+  -webkit-touch-callout: default;
+  cursor: pointer;
+}
+
+.hornIcon {
+  position: absolute;
+  top: 50%;
+  left: 80%;
+  transform: translateY(-50%);
+  width: 162px;
+  height: auto;
+}
+
+.yoshikiKazukiProfile {
+  position: absolute;
+  top: 70%;
+  left: 80%;
+  transform: translate(-50%, -50%);
+  width: 225px;
+  height: auto;
+  border-radius: 20px;
+}
+
+@media (max-width: 576px) {
+  .mobileOnlyBreak {
+    display: block;
+  }
+
+  .universeDanceIcon {
+    width: 180px !important;
+    top: -100px !important;
+    left: 48% !important;
+    border-radius: 999px;
+  }
+
+  .contemporaryDanceIcon {
+    --heading-icon-width: 180px;
+    --heading-right-top-mobile: 150px;
+    --heading-icon-opacity: 0.8;
+  }
+
+  .mainText {
+    font-size: 17px;
+  }
+
+  .mainText h3:nth-of-type(2),
+  .mainText h3:nth-of-type(3) {
+    margin-top: 200px;
+  }
+
+  .yoshikiProfile {
+    top: 37%;
+    left: 50%;
+    margin-top: 0;
+  }
+
+  .hornIcon {
+    top: 48.5%;
+    left: 50%;
+    z-index: -1;
+    opacity: 0.6;
+  }
+
+  .yoshikiKazukiProfile {
+    top: 63%;
+    left: 50%;
+  }
+}

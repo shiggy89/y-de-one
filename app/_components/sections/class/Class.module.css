@@ -1,0 +1,107 @@
+.classSection {
+  padding-top: 16px;
+}
+
+.contentInner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.classGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 280px));
+  justify-content: center;
+  gap: 28px;
+  margin-bottom: 32px;
+}
+
+.classCard {
+  border-radius: 14px;
+  padding: 20px 16px 18px;
+  text-align: center;
+}
+
+.pinkCard {
+  background: #f4e8ec;
+}
+
+.blueCard {
+  background: #dcecf7;
+}
+
+.creamCard {
+  background: #f8f2df;
+}
+
+.classIcon {
+  width: 124px;
+  height: auto;
+  margin: 0 auto 10px;
+}
+
+.classCard h3 {
+  color: #0090e8;
+  font-size: 32px;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+.level {
+  color: #0090e8;
+  font-weight: 700;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.description {
+  width: 80%;
+  margin: 0 auto;
+  font-size: 16px;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.classHeading {
+  margin-top: 0;
+}
+
+.mobileOnlyBreak {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .classGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .mobileOnlyBreak {
+    display: block;
+  }
+
+  .classHeading {
+    margin-top: 8px !important;
+  }
+
+  .classGrid {
+    grid-template-columns: 1fr;
+    padding: 0 12px;
+  }
+
+  .classCard {
+    width: 80%;
+    margin: 0 auto;
+    padding: 18px 14px 16px;
+  }
+
+  .classIcon {
+    width: 110px;
+  }
+
+  .classCard h3 {
+    font-size: 28px;
+  }
+}

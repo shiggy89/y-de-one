@@ -1,0 +1,47 @@
+.mobileOnlyBreak {
+  display: none;
+}
+
+.featureList {
+  display: flex;
+  justify-content: space-between;
+}
+
+.featureItem {
+  flex: 1;
+}
+
+.featureIcons {
+  width: 150px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.featureItem h3 {
+  text-align: center;
+}
+
+.featureItem p {
+  width: 80%;
+  line-height: 1.2;
+  margin: 0 auto;
+}
+
+@media (max-width: 576px) {
+  .mobileOnlyBreak {
+    display: block;
+  }
+
+  .featureList {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .featureItem {
+    margin-bottom: 40px;
+  }
+
+  .featureItem p {
+    text-align: center;
+  }
+}

@@ -1,0 +1,227 @@
+.scheduleBlock {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 16px;
+  margin-top: 12px;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.scheduleHeading {
+  margin-top: 0;
+}
+
+.mobileOnlyBreak {
+  display: none;
+}
+
+.pawIcon {
+  width: 26px;
+  height: auto;
+}
+
+.scheduleScroll {
+  overflow: visible;
+  padding-bottom: 0;
+}
+
+.scheduleLegend {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto 4px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.scheduleBoard {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  border: 1px solid #a8a8a8;
+  background: #fff;
+}
+
+.scheduleCtaWrap {
+  margin-top: 16px;
+}
+
+.scheduleCta {
+  margin: 0 !important;
+  padding: 24px 0;
+}
+
+.scheduleCta > a {
+  margin-top: 0 !important;
+}
+
+.scheduleCta > span {
+  margin-bottom: 0 !important;
+}
+
+.dayHeaderRow {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-bottom: 1px solid #a8a8a8;
+  background: #d8d8d8;
+}
+
+.dayHeaderCell {
+  border-right: 1px solid #a8a8a8;
+  text-align: center;
+  color: #666;
+  line-height: 1;
+  padding: 6px 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.dayHeaderCell:last-child {
+  border-right: none;
+}
+
+.dayColumns {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  min-height: 760px;
+}
+
+.dayColumn {
+  position: relative;
+  border-right: 1px solid #a8a8a8;
+}
+
+.closedDay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ff2a00;
+  font-size: 64px;
+  font-weight: 500;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.dayColumn:last-child {
+  border-right: none;
+}
+
+.lessonBlock {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  box-sizing: border-box;
+  border: 1px solid #bcbcbc;
+  border-radius: 2px;
+  padding: 4px 4px 3px;
+  text-align: center;
+}
+
+.pink {
+  background: #f5edf1;
+}
+
+.blue {
+  background: #e4f1fb;
+}
+
+.yellow {
+  background: #f8f5df;
+}
+
+.time {
+  font-size: 15px;
+  line-height: 1.1;
+  margin-bottom: 2px;
+}
+
+.lessonTitle {
+  white-space: pre-line;
+  font-size: 18px;
+  line-height: 1.1;
+  margin-bottom: 2px;
+}
+
+.teacher {
+  font-size: 14px;
+  line-height: 1.1;
+}
+
+.stretchDummy {
+  position: absolute;
+  right: 3px;
+  bottom: 2px;
+  width: 50px;
+  height: auto;
+  opacity: 0.55;
+}
+
+@media (max-width: 576px) {
+  .mobileOnlyBreak {
+    display: block;
+  }
+
+  .scheduleHeading {
+    margin-top: 16px !important;
+  }
+
+  .pawIcon {
+    width: 26px;
+  }
+
+  .scheduleLegend {
+    width: 95%;
+    max-width: none;
+    font-size: 18px;
+    gap: 2px;
+  }
+
+  .scheduleScroll {
+    width: 95%;
+    margin: 0 auto;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .scheduleBoard {
+    width: 860px;
+    max-width: none;
+    margin: 0;
+  }
+
+  .dayColumns {
+    min-height: 620px;
+  }
+
+  .dayHeaderCell {
+    font-size: 17px;
+    padding: 5px 0;
+  }
+
+  .closedDay {
+    font-size: 48px;
+    top: 50%;
+  }
+
+  .time {
+    font-size: 15px;
+  }
+
+  .lessonTitle {
+    font-size: 17px;
+  }
+
+  .teacher {
+    font-size: 14px;
+  }
+
+  .stretchDummy {
+    width: 35px;
+  }
+}

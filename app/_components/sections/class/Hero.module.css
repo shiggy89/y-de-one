@@ -1,0 +1,100 @@
+.pageHero {
+  margin-bottom: 0;
+}
+
+.heroInner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 16px;
+  background: #fff9e3;
+}
+
+.innerPageHero {
+  position: relative;
+  overflow: hidden;
+  margin: 0;
+  padding: 104px 0 88px;
+}
+
+.title {
+  position: relative;
+  z-index: 2;
+  color: #008fd8;
+  font-size: 42px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.mobileBreak {
+  display: none;
+}
+
+.titleBottom {
+  margin-left: 0.3em;
+}
+
+.dogIcon {
+  position: absolute;
+  z-index: 1;
+  top: -40px;
+  left: 65%;
+  transform: translateX(-50%);
+  opacity: 0.8;
+  width: 260px;
+  height: auto;
+}
+
+.leftTeacherIcon {
+  position: absolute;
+  z-index: 1;
+  left: 160px;
+  bottom: 8px;
+  width: 120px;
+  height: auto;
+}
+
+.rightTeacherIcon {
+  position: absolute;
+  z-index: 1;
+  right: 160px;
+  bottom: 8px;
+  width: 120px;
+  height: auto;
+}
+
+@media (max-width: 576px) {
+  .innerPageHero {
+    padding: 56px 0 76px;
+  }
+
+  .title {
+    font-size: 28px;
+    line-height: 1.35;
+  }
+
+  .mobileBreak {
+    display: block;
+  }
+
+  .titleBottom {
+    margin-left: 0;
+  }
+
+  .dogIcon {
+    top: 2px;
+    left: 85%;
+    width: 155px;
+  }
+
+  .leftTeacherIcon {
+    left: 2px;
+    bottom: 6px;
+    width: 86px;
+  }
+
+  .rightTeacherIcon {
+    right: 2px;
+    bottom: 6px;
+    width: 86px;
+  }
+}

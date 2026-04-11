@@ -1,0 +1,170 @@
+.mobileOnlyBreak {
+  display: none;
+}
+
+.dogQaIcon,
+.qaIcon {
+  margin-left: 16px;
+  --heading-icon-width: 159px;
+}
+
+.dogQaIcon {
+  --heading-left-left: 8%;
+}
+
+.qaIcon {
+  --heading-right-left: 88%;
+}
+
+.faqList {
+  width: 70%;
+  margin: 0 auto;
+}
+
+.faqItem {
+  border-bottom: 1px solid #eee;
+  padding: 12px 0;
+}
+
+.faqQ {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+.faqQ p {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.faqQ i {
+  color: #de4e8c;
+  margin-right: 8px;
+  font-size: 24px;
+}
+
+.angleDown {
+  transition: transform 0.3s ease;
+}
+
+.angleDown.isOpen {
+  transform: rotate(180deg);
+}
+
+.faqA {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.4s ease;
+  opacity: 0;
+  color: #333;
+  line-height: 1.8;
+  font-size: 15px;
+  margin: 0 16px 0 0;
+}
+
+.faqA.isOpen {
+  max-height: 300px;
+  opacity: 1;
+}
+
+.salesText {
+  margin: 48px auto;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  position: relative;
+  padding: 32px 0;
+}
+
+.ballerinaFamily1Icon {
+  position: absolute;
+  top: 50%;
+  left: 1.5%;
+  transform: translate(-50%, -50%);
+  width: 442px;
+  height: auto;
+}
+
+.ballerinaFamily2Icon {
+  position: absolute;
+  top: 50%;
+  left: 96%;
+  transform: translate(-50%, -50%);
+  width: 364px;
+  height: auto;
+}
+
+.lastBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  margin-top: 24px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff7da0 0%, #ffb86c 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lastBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+@media (max-width: 576px) {
+  .mobileOnlyBreak {
+    display: block;
+  }
+
+  .innerFaq {
+    margin-bottom: 680px;
+  }
+
+  .dogQaIcon {
+    --heading-left-top-mobile: -76px;
+    --heading-left-left-mobile: calc(44% + 20px);
+    --heading-icon-width: 167px;
+  }
+
+  .qaIcon {
+    display: none;
+  }
+
+  .faqList {
+    width: 80%;
+  }
+
+  .salesText {
+    width: 80%;
+  }
+
+  .ballerinaFamily1Icon {
+    top: 240%;
+    left: 50%;
+    width: auto;
+    height: 210px;
+  }
+
+  .ballerinaFamily2Icon {
+    top: 350%;
+    left: 50%;
+  }
+
+  .lastBtn {
+    margin: 28px 16px 8px 16px;
+  }
+}
