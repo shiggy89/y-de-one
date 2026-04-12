@@ -1,5 +1,6 @@
 // app/api/trial/route.ts
 import { NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase";
 
 type TrialRequestBody = {
   lineUserId?: string;
@@ -36,8 +37,23 @@ export async function POST(req: Request) {
       );
     }
 
-    // ③ ここでスプレッドシート／DB などに保存したければ処理を追加
-    // 例）await saveToSheet(body);
+    // ③ Supabaseに trial ユーザーとして登録（未登録の場合のみ）
+    if (lineUserId && /^U[a-fA-F0-9]{16,64}$/.test(lineUserId)) {
+      const { data: existing } = await supabaseAdmin
+        .from("users")
+        .select("id")
+        .eq("line_user_id", lineUserId)
+        .single();
+
+      if (!existing) {
+        await supabaseAdmin.from("users").insert({
+          line_user_id: lineUserId,
+          name,
+          status: "trial",
+          is_admin: false,
+        });
+      }
+    }
 
     // ④ LINE へのプッシュメッセージ送信
     //    lineUserId が取得できている場合のみ送信します

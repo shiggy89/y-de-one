@@ -86,7 +86,7 @@ export default function Faq() {
           />
           <FaqItem
             question="レッスンのレベルはどのくらいですか？"
-            answer={<>「バレエ入門」「バレエ入門基礎」「バレエ基礎」「ポワント」「モダンバレエ」の5クラスをご用意しています。全くの初心者から、ブランクがある方、上のクラスに挑戦したい方まで、それぞれのペースで取り組めます。詳しくは<a href="/class" style={{ color: "#0090e8", fontWeight: 700, textDecoration: "underline" }}>クラスページ</a>をご覧ください。</>}
+            answer={<>「バレエ入門」「バレエ入門基礎」「バレエ基礎」「ポワント」「プレモダン」「モダンバレエ」の6クラスをご用意しています。全くの初心者から、ブランクがある方、上のクラスに挑戦したい方まで、それぞれのペースで取り組めます。詳しくは<a href="/class" style={{ color: "#0090e8", fontWeight: 700, textDecoration: "underline" }}>クラスページ</a>をご覧ください。</>}
           />
           <FaqItem
             question="月謝はどのくらいですか？"

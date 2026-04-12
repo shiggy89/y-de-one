@@ -581,7 +581,7 @@ export default function Works() {
           <Heading2
             className={styles.sectionHeading}
             title={<>Y-de-ONE | ワイデワン<br />活動報告</>}
-            lead="2016年のスタジオ開設から現在まで、舞台公演・企業イベント・テレビ・ミュージカル出演など、ワイデワンの歩みをまとめています。"
+            lead="2010年のスタジオ開設から現在まで、舞台公演・企業イベント・テレビ・ミュージカル出演など、ワイデワンの歩みをまとめています。"
           />
           <div className={styles.activityGroups}>
           {Object.entries(
