@@ -29,21 +29,14 @@ export async function POST(req: Request) {
         // ref パラメータを取得（既存生徒用リンクは ?ref=member）
         const ref = event.follow?.referral?.ref ?? "";
 
-        if (ref === "member") {
-          // 既存生徒向け：会員登録フォームURLを送る
-          const registerUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/register`;
-          await sendMessage(
-            lineUserId,
-            `Y-de-ONE（ワイデワン）へようこそ！\n\n以下のリンクから会員登録をお願いします。\n${registerUrl}`
-          );
-        } else {
-          // 一般向け：体験レッスン申込みURLを送る
-          const trialUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/trial`;
-          await sendMessage(
-            lineUserId,
-            `Y-de-ONE（ワイデワン）へようこそ！\n\n体験レッスンのお申込みはこちらから👇\n${trialUrl}`
-          );
-        }
+        const trialUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/trial`;
+        const registerUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/register`;
+        await sendMessage(
+          lineUserId,
+          `Y-de-ONE（ワイデワン）へようこそ！🩰\n\n` +
+          `▼ 体験レッスンをご希望の方はこちら\n${trialUrl}\n\n` +
+          `▼ すでに会員の方はこちらから登録をお願いします\n${registerUrl}`
+        );
 
         // Supabaseにtrialで登録（未登録の場合のみ）
         const { data: existing } = await supabaseAdmin
