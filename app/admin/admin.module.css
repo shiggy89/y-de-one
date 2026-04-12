@@ -1,0 +1,219 @@
+.admin {
+  padding: 24px 16px 48px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+.unauthorized {
+  text-align: center;
+  padding: 48px 16px;
+  font-size: 16px;
+  color: #e05080;
+}
+
+/* ━━━ タブ ━━━ */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #eee;
+}
+
+.tab {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #888;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+.tab.active {
+  color: #e05080;
+  border-bottom-color: #e05080;
+}
+
+/* ━━━ セクション ━━━ */
+.section {
+  margin-bottom: 32px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+/* ━━━ ユーザーリスト ━━━ */
+.searchInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.userList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.userCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.userName {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+  flex: 1;
+  min-width: 100px;
+}
+
+.badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 999px;
+  color: #fff;
+}
+
+.badge.trial { background: #aaa; }
+.badge.member { background: #0090e8; }
+.badge.teacher { background: #e05080; }
+
+.statusSelect {
+  font-size: 13px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.adminToggle {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
+
+.adminToggle.isAdmin {
+  background: #333;
+  color: #fff;
+  border-color: #333;
+}
+
+/* ━━━ 出席記録 ━━━ */
+.attendanceForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.formLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+}
+
+.formInput,
+.formSelect {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.submitBtn {
+  padding: 12px;
+  background: #0090e8;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.submitBtn:hover {
+  background: #0078c8;
+}
+
+.successMsg {
+  color: #16a34a;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.errorMsg {
+  color: #e53935;
+  font-size: 14px;
+}
+
+/* ━━━ メッセージ送信 ━━━ */
+.messageForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.textarea {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.trialCount {
+  font-size: 13px;
+  color: #888;
+}
+
+.sendBtn {
+  padding: 12px;
+  background: #e05080;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sendBtn:hover {
+  background: #c03060;
+}
