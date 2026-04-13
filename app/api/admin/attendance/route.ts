@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
-const LESSON_PRICES = [3300, 5400, 7800, 9600, 11000, 14000, 16200, 17600];
+// 維持費500円を除いたレッスン料金累計
+const LESSON_FEES_ONLY = [2800, 4900, 7300, 9100, 10500, 13500, 15700, 17100];
 
-function calcPrice(countThisMonth: number, lessonType: string): number {
-  if (lessonType === "35分") return 1100;
+function calcPrice(countThisMonth: number, lessonType: string, privateMinutes = 15): number {
   if (lessonType === "特別") return 3000;
-  if (lessonType === "個人") return 2500;
+  if (lessonType === "個人") return 2500 * (privateMinutes / 15);
   if (countThisMonth >= 9) return 2000;
-  const total = LESSON_PRICES[countThisMonth - 1] ?? 3300;
-  const prevTotal = countThisMonth > 1 ? (LESSON_PRICES[countThisMonth - 2] ?? 0) : 0;
-  return total - prevTotal;
+  const total = LESSON_FEES_ONLY[countThisMonth - 1] ?? 2800;
+  const prev = countThisMonth > 1 ? (LESSON_FEES_ONLY[countThisMonth - 2] ?? 0) : 0;
+  return total - prev;
 }
 
 function calcBadge(count: number): string | null {
@@ -24,7 +24,7 @@ function calcBadge(count: number): string | null {
 
 export async function POST(req: Request) {
   try {
-    const { userId, lessonDate, lessonType } = await req.json();
+    const { userId, lessonDate, lessonType, privateMinutes } = await req.json();
 
     if (!userId || !lessonDate || !lessonType) {
       return NextResponse.json({ error: "必須項目が不足しています" }, { status: 400 });
@@ -49,7 +49,10 @@ export async function POST(req: Request) {
       .lte("lesson_date", `${yearMonth}-31`);
 
     const countThisMonth = (thisMonthAttendances?.length ?? 0) + 1;
-    const price = isTeacher ? 0 : calcPrice(countThisMonth, lessonType);
+    const isFirstOfMonth = (thisMonthAttendances?.length ?? 0) === 0;
+    const maintenanceFee = isFirstOfMonth ? 500 : 0;
+    const lessonFee = isTeacher ? 0 : calcPrice(countThisMonth, lessonType, privateMinutes);
+    const price = lessonFee + (isTeacher ? 0 : maintenanceFee);
 
     // 出席記録を保存
     const { error } = await supabaseAdmin.from("attendances").insert({
@@ -103,7 +106,7 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ ok: true, price, countThisMonth, badge });
+    return NextResponse.json({ ok: true, price, lessonFee, maintenanceFee, countThisMonth, badge });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "サーバーエラーが発生しました" }, { status: 500 });

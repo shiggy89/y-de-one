@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import liff from "@line/liff";
 import styles from "./admin.module.css";
+import { getLessonsForDate, type Lesson } from "@/lib/lessons";
 
 type User = {
   id: number;
@@ -39,9 +40,15 @@ export default function AdminPanel() {
   const [search, setSearch] = useState("");
 
   // 出席記録
-  const [selectedUserId, setSelectedUserId] = useState("");
+  const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
   const [lessonDate, setLessonDate] = useState(new Date().toISOString().split("T")[0]);
   const [lessonType, setLessonType] = useState("通常");
+  const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [privateMinutes, setPrivateMinutes] = useState(15);
+  const [feePreviews, setFeePreviews] = useState<{
+    userId: number; name: string; line_picture_url: string | null;
+    isTeacher: boolean; lessonFee: number; maintenanceFee: number; total: number;
+  }[]>([]);
   const [attendanceMsg, setAttendanceMsg] = useState<string | null>(null);
   const [attendanceError, setAttendanceError] = useState<string | null>(null);
 
@@ -94,16 +101,26 @@ export default function AdminPanel() {
     setTrialCount((data.users ?? []).filter((u: User) => u.status === "trial").length);
   };
 
-  const handleStatusChange = async (userId: number, status: string) => {
+  const handleStatusChange = async (userId: number, newStatus: string, currentStatus: string) => {
+    if (!confirm(`${currentStatus} → ${newStatus} に変更しますか？`)) return;
     await fetch("/api/admin/users", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, status }),
+      body: JSON.stringify({ userId, status: newStatus }),
     });
     fetchUsers();
   };
 
   const handleAdminToggle = async (userId: number, currentIsAdmin: boolean) => {
+    if (currentIsAdmin) {
+      if (!confirm("管理者 → 一般 に変更しますか？")) return;
+    } else {
+      const input = prompt("管理者に変更するには「admin」と入力してください");
+      if (input !== "admin") {
+        if (input !== null) alert("入力が正しくありません");
+        return;
+      }
+    }
     await fetch("/api/admin/users", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -112,21 +129,38 @@ export default function AdminPanel() {
     fetchUsers();
   };
 
+  const fetchFeePreviews = async (ids: number[], date: string, type: string, minutes: number) => {
+    if (ids.length === 0) { setFeePreviews([]); return; }
+    const res = await fetch("/api/admin/preview-fees", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userIds: ids, lessonDate: date, lessonType: type, privateMinutes: minutes }),
+    });
+    const data = await res.json();
+    setFeePreviews(data.fees ?? []);
+  };
+
   const handleAttendance = async () => {
     setAttendanceMsg(null);
     setAttendanceError(null);
-    if (!selectedUserId) { setAttendanceError("生徒を選択してください"); return; }
+    if (selectedUserIds.length === 0) { setAttendanceError("生徒を選択してください"); return; }
 
-    const res = await fetch("/api/admin/attendance", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId: Number(selectedUserId), lessonDate, lessonType }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setAttendanceMsg(`記録しました（料金：¥${data.price?.toLocaleString()}）`);
+    const results = await Promise.all(
+      selectedUserIds.map((userId) =>
+        fetch("/api/admin/attendance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, lessonDate, lessonType, privateMinutes: lessonType === "個人" ? privateMinutes : undefined }),
+        }).then((r) => r.json())
+      )
+    );
+
+    const failed = results.filter((r) => !r.ok);
+    if (failed.length > 0) {
+      setAttendanceError("一部の記録に失敗しました");
     } else {
-      setAttendanceError(data.error ?? "エラーが発生しました");
+      setAttendanceMsg(`${selectedUserIds.length}人分を記録しました`);
+      setSelectedUserIds([]);
     }
   };
 
@@ -173,27 +207,126 @@ export default function AdminPanel() {
           <p className={styles.sectionTitle}>出席を記録する</p>
           <div className={styles.attendanceForm}>
             <div className={styles.formRow}>
-              <label className={styles.formLabel}>生徒</label>
-              <select className={styles.formSelect} value={selectedUserId} onChange={(e) => setSelectedUserId(e.target.value)}>
-                <option value="">選択してください</option>
-                {users.filter(u => u.status !== "trial").map((u) => (
-                  <option key={u.id} value={u.id}>{u.name ?? "（名前なし）"}</option>
-                ))}
-              </select>
-            </div>
-            <div className={styles.formRow}>
               <label className={styles.formLabel}>レッスン日</label>
-              <input type="date" className={styles.formInput} value={lessonDate} onChange={(e) => setLessonDate(e.target.value)} />
+              <input
+                type="date"
+                className={styles.formInput}
+                value={lessonDate}
+                onChange={(e) => {
+                  setLessonDate(e.target.value);
+                  setSelectedLesson(null);
+                  fetchFeePreviews(selectedUserIds, e.target.value, lessonType, privateMinutes);
+                }}
+              />
             </div>
             <div className={styles.formRow}>
               <label className={styles.formLabel}>レッスン種別</label>
-              <select className={styles.formSelect} value={lessonType} onChange={(e) => setLessonType(e.target.value)}>
-                <option value="通常">通常</option>
-                <option value="35分">35分</option>
-                <option value="特別">特別</option>
-                <option value="個人">個人</option>
+              <select className={styles.formSelect} value={lessonType} onChange={(e) => {
+                setLessonType(e.target.value);
+                fetchFeePreviews(selectedUserIds, lessonDate, e.target.value, privateMinutes);
+              }}>
+                <option value="通常">通常レッスン</option>
+                <option value="特別">特別レッスン</option>
+                <option value="個人">個人レッスン</option>
               </select>
             </div>
+            {lessonType === "個人" && (
+              <div className={styles.formRow}>
+                <label className={styles.formLabel}>個人レッスン時間</label>
+                <select
+                  className={styles.formSelect}
+                  value={privateMinutes}
+                  onChange={(e) => setPrivateMinutes(Number(e.target.value))}
+                >
+                  {[15, 30, 45, 60, 75, 90].map((m) => (
+                    <option key={m} value={m}>{m}分（¥{(2500 * m / 15).toLocaleString()}）</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {lessonType === "通常" && (() => {
+              const lessons = getLessonsForDate(lessonDate);
+              return lessons.length > 0 ? (
+                <div className={styles.formRow}>
+                  <label className={styles.formLabel}>レッスンを選択</label>
+                  <div className={styles.lessonGrid}>
+                    {lessons.map((l) => (
+                      <button
+                        key={`${l.start}-${l.title}`}
+                        type="button"
+                        className={`${styles.lessonBtn} ${selectedLesson?.start === l.start && selectedLesson?.title === l.title ? styles.lessonBtnActive : ""}`}
+                        onClick={() => {
+                          setSelectedLesson(l);
+                          if (selectedUserIds.length > 0) {
+                            fetchFeePreviews(selectedUserIds, lessonDate, lessonType, privateMinutes);
+                          }
+                        }}
+                      >
+                        <span className={styles.lessonBtnTime}>{l.start}〜{l.end}</span>
+                        <span className={styles.lessonBtnTitle}>{l.title}</span>
+                        <span className={styles.lessonBtnTeacher}>{l.teacher}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className={styles.noLesson}>この日はレッスンがありません（月曜休講）</p>
+              );
+            })()}
+            <div className={styles.formRow}>
+              <div className={styles.studentLabelRow}>
+                <label className={styles.formLabel}>生徒を選択</label>
+                <span className={styles.selectedCount}>{selectedUserIds.length}人</span>
+              </div>
+              <div className={styles.studentGrid}>
+                {users.filter(u => u.status !== "trial").map((u) => (
+                  <div
+                    key={u.id}
+                    className={`${styles.studentItem} ${selectedUserIds.includes(u.id) ? styles.selected : ""}`}
+                    onClick={() => {
+                      const next = selectedUserIds.includes(u.id)
+                        ? selectedUserIds.filter((id) => id !== u.id)
+                        : [...selectedUserIds, u.id];
+                      setSelectedUserIds(next);
+                      if (lessonType !== "通常" || selectedLesson) {
+                        fetchFeePreviews(next, lessonDate, lessonType, privateMinutes);
+                      } else {
+                        setFeePreviews([]);
+                      }
+                    }}
+                  >
+                    {u.line_picture_url ? (
+                      <img src={u.line_picture_url} alt="" className={styles.studentIcon} />
+                    ) : (
+                      <div className={styles.studentIconPlaceholder}><i className="fa-solid fa-user" /></div>
+                    )}
+                    <span className={styles.studentName}>{u.name ?? "名前なし"}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {feePreviews.length > 0 && (
+              <div className={styles.feePreview}>
+                {feePreviews.map((f) => (
+                  <div key={f.userId} className={styles.feePreviewRow}>
+                    {f.line_picture_url ? (
+                      <img src={f.line_picture_url} alt="" className={styles.feePreviewIcon} />
+                    ) : (
+                      <div className={styles.feePreviewIconPlaceholder}><i className="fa-solid fa-user" /></div>
+                    )}
+                    <span className={styles.feePreviewName}>{f.name}</span>
+                    <span className={styles.feePreviewAmount}>
+                      <span className={styles.feePreviewAmountNum}>
+                        ¥{f.isTeacher ? "0" : f.total.toLocaleString()}
+                      </span>
+                      <span className={styles.feePreviewNote}>
+                        {f.isTeacher ? "（講師）" : f.maintenanceFee > 0 ? "（維持費含む）" : ""}
+                      </span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
             {attendanceMsg && <p className={styles.successMsg}>{attendanceMsg}</p>}
             {attendanceError && <p className={styles.errorMsg}>{attendanceError}</p>}
             <button className={styles.submitBtn} onClick={handleAttendance}>記録する</button>
@@ -229,7 +362,7 @@ export default function AdminPanel() {
                 <select
                   className={styles.statusSelect}
                   value={u.status}
-                  onChange={(e) => handleStatusChange(u.id, e.target.value)}
+                  onChange={(e) => handleStatusChange(u.id, e.target.value, u.status)}
                 >
                   <option value="trial">trial</option>
                   <option value="member">member</option>

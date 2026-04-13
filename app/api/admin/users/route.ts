@@ -4,14 +4,23 @@ import { supabaseAdmin } from "@/lib/supabase";
 export async function GET() {
   const { data, error } = await supabaseAdmin
     .from("users")
-    .select("id, name, line_user_id, line_display_name, line_picture_url, status, is_admin")
-    .order("created_at", { ascending: false });
+    .select("id, name, line_user_id, line_display_name, line_picture_url, status, is_admin");
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json({ users: data });
+  const statusOrder: Record<string, number> = { teacher: 0, member: 1, trial: 2 };
+
+  const sorted = (data ?? []).sort((a, b) => {
+    const statusDiff = (statusOrder[a.status] ?? 9) - (statusOrder[b.status] ?? 9);
+    if (statusDiff !== 0) return statusDiff;
+    const adminDiff = (b.is_admin ? 1 : 0) - (a.is_admin ? 1 : 0);
+    if (adminDiff !== 0) return adminDiff;
+    return (a.name ?? "").localeCompare(b.name ?? "", "ja");
+  });
+
+  return NextResponse.json({ users: sorted });
 }
 
 export async function PATCH(req: Request) {
