@@ -8,6 +8,8 @@ type User = {
   id: number;
   name: string | null;
   line_user_id: string;
+  line_display_name: string | null;
+  line_picture_url: string | null;
   status: string;
   is_admin: boolean;
 };
@@ -52,15 +54,15 @@ export default function AdminPanel() {
   useEffect(() => {
     const init = async () => {
       try {
-        const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
-        if (!liffId) { setLoading(false); return; }
-
-        if (!liff.isInClient() && process.env.NODE_ENV !== "production") {
+        if (process.env.NODE_ENV !== "production") {
           setLineUserId("debug");
           setIsAdmin(true);
           setLoading(false);
           return;
         }
+
+        const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
+        if (!liffId) { setLoading(false); return; }
 
         await liff.init({ liffId });
         if (!liff.isLoggedIn()) { liff.login(); return; }
@@ -212,7 +214,17 @@ export default function AdminPanel() {
           <div className={styles.userList}>
             {filteredUsers.map((u) => (
               <div key={u.id} className={styles.userCard}>
-                <span className={styles.userName}>{u.name ?? "（名前なし）"}</span>
+                {u.line_picture_url ? (
+                  <img src={u.line_picture_url} alt="" className={styles.lineIcon} />
+                ) : (
+                  <div className={styles.lineIconPlaceholder}><i className="fa-solid fa-user"></i></div>
+                )}
+                <div className={styles.userInfo}>
+                  <span className={styles.userName}>{u.name ?? "（名前なし）"}</span>
+                  {u.line_display_name && (
+                    <span className={styles.lineDisplayName}>{u.line_display_name}</span>
+                  )}
+                </div>
                 <span className={`${styles.badge} ${styles[u.status]}`}>{u.status}</span>
                 <select
                   className={styles.statusSelect}

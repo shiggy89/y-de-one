@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
 const LINE_ENDPOINT = "https://api.line.me/v2/bot/message/push";
+const LINE_PROFILE_ENDPOINT = "https://api.line.me/v2/bot/profile";
+
+async function getLineProfile(userId: string) {
+  const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  const res = await fetch(`${LINE_PROFILE_ENDPOINT}/${userId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return null;
+  return res.json() as Promise<{ displayName: string; pictureUrl?: string }>;
+}
 
 async function sendMessage(to: string, text: string) {
   const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
@@ -38,6 +48,9 @@ export async function POST(req: Request) {
           `▼ すでに会員の方はこちらから登録をお願いします\n${registerUrl}`
         );
 
+        // LINEプロフィール取得
+        const profile = await getLineProfile(lineUserId);
+
         // Supabaseにtrialで登録（未登録の場合のみ）
         const { data: existing } = await supabaseAdmin
           .from("users")
@@ -49,9 +62,17 @@ export async function POST(req: Request) {
           await supabaseAdmin.from("users").insert({
             line_user_id: lineUserId,
             name: null,
+            line_display_name: profile?.displayName ?? null,
+            line_picture_url: profile?.pictureUrl ?? null,
             status: "trial",
             is_admin: false,
           });
+        } else {
+          // 既存ユーザーはプロフィールだけ更新
+          await supabaseAdmin.from("users").update({
+            line_display_name: profile?.displayName ?? null,
+            line_picture_url: profile?.pictureUrl ?? null,
+          }).eq("line_user_id", lineUserId);
         }
       }
     }
