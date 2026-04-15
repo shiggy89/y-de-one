@@ -262,7 +262,7 @@ export default function AdminPanel() {
 
   // レッスン履歴モーダル
   const [historyUser, setHistoryUser] = useState<User | null>(null);
-  const [historyData, setHistoryData] = useState<{ id: number; lesson_date: string; lesson_type: string; lesson_title: string | null; lesson_teacher: string | null; price_paid: number; maintenance_fee: number; lesson_fee: number }[]>([]);
+  const [historyData, setHistoryData] = useState<{ id: number; lesson_date: string; lesson_type: string; lesson_title: string | null; lesson_time: string | null; lesson_teacher: string | null; price_paid: number; maintenance_fee: number; lesson_fee: number }[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyMonth, setHistoryMonth] = useState(new Date().toISOString().slice(0, 7));
 

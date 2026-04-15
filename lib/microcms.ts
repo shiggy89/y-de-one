@@ -24,6 +24,7 @@ export type Blog = {
   updatedAt: string;
   publishedAt: string;
   title: string;
+  description?: string;
   content: string | { html?: string; [key: string]: unknown };
   eyecatch?: {
     url: string;
