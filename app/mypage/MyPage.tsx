@@ -355,7 +355,7 @@ export default function MyPage() {
           <p className={styles.nextBadgeText}>
             あと<span className={styles.nextBadgeNum}>{nextBadge.remaining}</span>回で
             {nextBadge.isContinuation
-              ? <span className={styles.nextBadgeName}>先月のバッジ継続！</span>
+              ? <><span className={styles.nextBadgeName}>{nextBadge.label}バッジ</span>継続！</>
               : <><span className={styles.nextBadgeName}>{nextBadge.label}バッジ</span>獲得！</>
             }
           </p>
