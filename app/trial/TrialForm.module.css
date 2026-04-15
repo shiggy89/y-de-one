@@ -63,17 +63,19 @@
 }
 
 .formInput,
-.formTextarea {
+.formTextarea,
+.formSelect {
   width: 100%;
   box-sizing: border-box;
   padding: 8px 10px;
   border-radius: 4px;
   border: 1px solid #ccc;
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .formInput:focus,
-.formTextarea:focus {
+.formTextarea:focus,
+.formSelect:focus {
   outline: none;
   border-color: #0090e8;
 }
