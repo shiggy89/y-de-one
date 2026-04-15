@@ -298,40 +298,43 @@ export default function AdminPanel() {
           return;
         }
 
-        // キャッシュで管理者確認済みならそこで完了、LIFFは裏で認証のみ
-        let adminConfirmedByCache = false;
-        let cachedUserId: string | null = null;
+        // キャッシュで管理者確認済みならliff.init()をスキップ
         try {
           const raw = localStorage.getItem(CACHE_KEY);
           if (raw) {
             const cached = JSON.parse(raw);
             if (Date.now() - cached.cachedAt < CACHE_TTL) {
-              cachedUserId = cached.lineUserId;
               setLineUserId(cached.lineUserId);
               const res = await fetch(`/api/admin/me?lineUserId=${cached.lineUserId}`);
               const data = await res.json();
               setIsAdmin(data.isAdmin ?? false);
               setLoading(false);
-              adminConfirmedByCache = true;
+              return; // liff.init()をスキップ
             }
           }
         } catch { /* ignore */ }
 
+        // キャッシュなし → 通常のLIFF認証フロー
         const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
         if (!liffId) { setLoading(false); return; }
 
         await liff.init({ liffId });
         if (!liff.isLoggedIn()) { liff.login(); return; }
         const p = await liff.getProfile();
+        setLineUserId(p.userId);
 
-        // キャッシュ未使用 or 別ユーザーの場合のみ状態更新
-        if (!adminConfirmedByCache || p.userId !== cachedUserId) {
-          setLineUserId(p.userId);
-          const res = await fetch(`/api/admin/me?lineUserId=${p.userId}`);
-          const data = await res.json();
-          setIsAdmin(data.isAdmin ?? false);
-          setLoading(false);
-        }
+        const res = await fetch(`/api/admin/me?lineUserId=${p.userId}`);
+        const data = await res.json();
+        setIsAdmin(data.isAdmin ?? false);
+
+        // キャッシュ更新
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify({
+            lineUserId: p.userId,
+            displayName: p.displayName,
+            cachedAt: Date.now(),
+          }));
+        } catch { /* ignore */ }
 
         // キャッシュ更新
         try {
