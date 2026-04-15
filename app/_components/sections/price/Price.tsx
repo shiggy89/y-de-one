@@ -7,13 +7,13 @@ import styles from "./Price.module.css";
 
 const LESSON_PRICES = [
   { times: "月1回",  total: "3,300",  perLesson: "2,800", note: null },
-  { times: "月2回",  total: "5,400",  perLesson: "2,600", note: null },
-  { times: "月3回",  total: "7,800",  perLesson: "2,400", note: null },
-  { times: "月4回",  total: "9,600",  perLesson: "2,400", note: null },
-  { times: "月5回",  total: "11,000", perLesson: "2,200", note: null },
-  { times: "月6回",  total: "14,000", perLesson: "2,200", note: null },
-  { times: "月7回",  total: "16,200", perLesson: "2,200", note: null },
-  { times: "月8回",  total: "17,600", perLesson: "1,400", note: null },
+  { times: "月2回",  total: "5,900",  perLesson: "2,600", note: null },
+  { times: "月3回",  total: "8,300",  perLesson: "2,400", note: null },
+  { times: "月4回",  total: "10,100", perLesson: "1,800", note: null },
+  { times: "月5回",  total: "12,300", perLesson: "2,200", note: null },
+  { times: "月6回",  total: "14,500", perLesson: "2,200", note: null },
+  { times: "月7回",  total: "16,700", perLesson: "2,200", note: null },
+  { times: "月8回",  total: "18,100", perLesson: "1,400", note: null },
 ];
 
 export default function Price() {

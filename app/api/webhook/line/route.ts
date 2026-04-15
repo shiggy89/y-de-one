@@ -39,13 +39,12 @@ export async function POST(req: Request) {
         // ref パラメータを取得（既存生徒用リンクは ?ref=member）
         const ref = event.follow?.referral?.ref ?? "";
 
-        const trialUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/trial`;
-        const registerUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/register`;
+        const LIFF_URL = "https://liff.line.me/2008551653-JRwQxXrB";
         await sendMessage(
           lineUserId,
           `Y-de-ONE（ワイデワン）へようこそ！🩰\n\n` +
-          `▼ 体験レッスンをご希望の方はこちら\n${trialUrl}\n\n` +
-          `▼ すでに会員の方はこちらから登録をお願いします\n${registerUrl}`
+          `▼ 体験レッスンをご希望の方はこちら\n${LIFF_URL}/trial\n\n` +
+          `▼ すでに会員の方はこちらから登録をお願いします\n${LIFF_URL}/register`
         );
 
         // LINEプロフィール取得

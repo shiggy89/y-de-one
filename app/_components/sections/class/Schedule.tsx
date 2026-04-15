@@ -24,9 +24,10 @@ type Lesson = {
 const LESSONS: Lesson[] = [
   { day: "Tue", start: "13:00", end: "14:30", title: "バレエ\n入門", teacher: "門馬和樹", type: "pink", stretch: true },
   { day: "Tue", start: "14:30", end: "15:05", title: "プレモダン", teacher: "門馬和樹", type: "blue" },
+  { day: "Tue", start: "19:30", end: "21:00", title: "モダンバレエ", teacher: "青山佳樹", type: "blue", stretch: true },
   { day: "Wed", start: "13:00", end: "14:30", title: "バレエ\n基礎", teacher: "門馬和樹", type: "pink" },
   { day: "Wed", start: "15:00", end: "16:30", title: "モダンバレエ", teacher: "門馬和樹", type: "blue" },
-  { day: "Wed", start: "19:15", end: "20:45", title: "バレエ\n基礎", teacher: "青山佳樹", type: "pink" },
+  { day: "Wed", start: "19:15", end: "20:45", title: "バレエ\n入門基礎", teacher: "青山佳樹", type: "pink" },
   { day: "Thu", start: "13:00", end: "14:30", title: "バレエ\n基礎", teacher: "青山佳樹", type: "pink" },
   { day: "Thu", start: "14:30", end: "15:05", title: "ポワント", teacher: "青山佳樹", type: "yellow" },
   { day: "Thu", start: "15:30", end: "17:00", title: "モダンバレエ", teacher: "青山佳樹", type: "blue", stretch: true },

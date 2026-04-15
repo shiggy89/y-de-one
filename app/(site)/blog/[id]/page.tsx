@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { client } from "../../../../lib/microcms";
@@ -6,6 +7,15 @@ import Heading2 from "../../../_components/sections/common/Heading2";
 import styles from "../blog.module.css";
 
 export const revalidate = 60;
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const item = await client.get<Blog>({ endpoint: "blog", contentId: id });
+  return {
+    title: `${item.title} | 大人バレエ教室 Y-de-ONE`,
+    description: item.description ?? "大人バレエ教室 Y-de-ONE（ワイデワン）のブログ記事です。",
+  };
+}
 
 export default async function BlogDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

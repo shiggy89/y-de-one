@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { client } from "../../../lib/microcms";
@@ -6,6 +7,11 @@ import Heading2 from "../../_components/sections/common/Heading2";
 import styles from "./blog.module.css";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "ブログ | 大人バレエ教室 Y-de-ONE",
+  description: "大人バレエ教室 Y-de-ONE（ワイデワン）のブログ。レッスンの様子や日々の出来事をお届けします。",
+};
 
 export default async function BlogPage() {
   const data = await client.getList<Blog>({

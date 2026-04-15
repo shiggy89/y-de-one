@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { client } from "../../../../lib/microcms";
 import type { Notice } from "../../../../lib/microcms";
 import Heading2 from "../../../_components/sections/common/Heading2";
@@ -5,6 +6,15 @@ import styles from "../news.module.css";
 import Link from "next/link";
 
 export const revalidate = 60;
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const item = await client.get<Notice>({ endpoint: "news", contentId: id });
+  return {
+    title: `${item.title} | 大人バレエ教室 Y-de-ONE`,
+    description: "大人バレエ教室 Y-de-ONE（ワイデワン）からのお知らせです。",
+  };
+}
 
 export default async function NewsDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

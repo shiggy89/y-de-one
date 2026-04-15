@@ -1,0 +1,649 @@
+.mypage {
+  height: 100dvh;
+  background: #f7f7f7;
+  font-family: "Noto Sans JP", sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.stickyTop {
+  flex-shrink: 0;
+}
+
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 12px;
+}
+
+.scrollAreaFit {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionFit {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.badgeInner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #888;
+}
+
+.errorMsg {
+  text-align: center;
+  padding: 40px;
+  color: #e05080;
+}
+
+/* ━━━ ヘッダー ━━━ */
+.header {
+  background: #fff;
+  padding: 3px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #eee;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatarBtn {
+  position: relative;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.avatarEditIcon {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  background: #e05080;
+  color: #fff;
+  font-size: 10px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.nameEditBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: inherit;
+  -webkit-tap-highlight-color: transparent;
+  color: inherit;
+}
+
+.nameEditInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 16px;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.avatarPlaceholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.headerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.headerName {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+}
+
+.headerNameText {
+  color: #e05080;
+}
+
+.headerMonth {
+  font-size: 11px;
+  color: #888;
+}
+
+.headerBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.headerBadgeImg {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+.headerBadgeLabel {
+  font-size: 11px;
+  color: #888;
+  font-weight: 600;
+  margin-top: -8px;
+}
+
+/* ━━━ 次のバッジまで ━━━ */
+.nextBadge {
+  background: #fff0f5;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #ffd6e5;
+}
+
+.nextBadgeImg {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.nextBadgeText {
+  font-size: 13px;
+  color: #555;
+}
+
+.nextBadgeNum {
+  font-size: 18px;
+  font-weight: 900;
+  color: #e05080;
+  margin: 0 2px;
+}
+
+.nextBadgeName {
+  font-weight: 700;
+  color: #e05080;
+  margin: 0 2px;
+}
+
+.badgeInfoBtn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 0 0 4px;
+  vertical-align: middle;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1;
+}
+
+/* ━━━ バッジ説明モーダル ━━━ */
+.badgeInfoOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.badgeInfoModal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px 20px;
+  width: 88%;
+  max-width: 360px;
+}
+
+.badgeInfoTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.badgeInfoList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.badgeInfoRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.badgeInfoImg {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.badgeInfoLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  flex: 1;
+}
+
+.badgeInfoCount {
+  font-size: 13px;
+  color: #888;
+}
+
+.badgeInfoClose {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  background: #e05080;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ━━━ タブ ━━━ */
+.tabs {
+  display: flex;
+  background: #fff;
+  border-bottom: 2px solid #eee;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex: 1;
+  padding: 12px 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #888;
+  background: none;
+  border: none;
+  border-bottom: 5px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab.active {
+  color: #e05080;
+  border-bottom-color: #e05080;
+}
+
+/* ━━━ セクション ━━━ */
+.section {
+  padding: 12px 12px 0px 12px;
+}
+
+.empty {
+  text-align: center;
+  color: #aaa;
+  padding: 32px 0;
+  font-size: 14px;
+}
+
+/* ━━━ お知らせ ━━━ */
+.noticeItem {
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+
+.noticeDateRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.noticeDate {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.noticeBadgeNew {
+  font-size: 10px;
+  font-weight: 700;
+  color: #fff;
+  background: #e05080;
+  border-radius: 4px;
+  padding: 1px 6px;
+  flex-shrink: 0;
+}
+
+.noticeAuthor {
+  color: #bbb;
+}
+
+.noticeTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.noticeBody {
+  font-size: 14px;
+  font-weight: 700;
+  color: #555;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.noticeBodyClamped {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal;
+}
+
+.noticeToggle {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  color: #e05080;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ━━━ 月ナビ ━━━ */
+.monthNav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.monthNavBtn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #e05080;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.monthNavBtn:disabled { color: #ccc; cursor: default; }
+
+.monthNavLabel {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+  min-width: 90px;
+  text-align: center;
+}
+
+/* ━━━ 月/年 モード切替 ━━━ */
+.historyModeToggle {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 12px;
+  border: 1.5px solid #e05080;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.historyModeBtn {
+  flex: 1;
+  padding: 5px 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #e05080;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.historyModeBtn.active {
+  background: #e05080;
+  color: #fff;
+}
+
+/* ━━━ 年モード ━━━ */
+.historyYearMonth {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.historyYearMonthBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.historyYearMonthBtn:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.historyYearMonthLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  min-width: 32px;
+}
+
+.historyYearMonthCount {
+  font-size: 12px;
+  color: #888;
+  flex: 1;
+}
+
+.historyYearMonthArrow {
+  font-size: 10px;
+  color: #e05080;
+}
+
+.historyYearMonthDetail {
+  padding: 0 12px 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* ━━━ レッスン履歴 ━━━ */
+.historyMeta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 0 2px;
+}
+
+.historyCount {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e05080;
+}
+
+.historyTotal {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+}
+
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.historyDateGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.historyDateLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+  padding-bottom: 4px;
+  border-bottom: 2px solid #eee;
+  margin-bottom: 2px;
+}
+
+.historyItem {
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.historyRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.historyType {
+  font-size: 13px;
+  color: #333;
+  font-weight: 600;
+  flex: 1;
+}
+
+.historyLessonTime {
+  font-size: 12px;
+  color: #0090e8;
+  font-weight: 700;
+}
+
+.historyTypeMaint {
+  font-size: 13px;
+  color: #888;
+  flex: 1;
+}
+
+.historyTeacher {
+  font-size: 12px;
+  color: #888;
+  font-weight: 400;
+  flex-shrink: 0;
+}
+
+.historyPrice {
+  font-size: 13px;
+  color: #333;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ━━━ バッジ履歴 ━━━ */
+.badgeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 8px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.badgeCell {
+  background: #fff;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.badgeImg {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.badgeMonth {
+  font-size: 11px;
+  color: #888;
+  font-weight: 600;
+}
+
+.badgeEmpty {
+  font-size: 12px;
+  color: #ccc;
+  font-weight: 600;
+}
