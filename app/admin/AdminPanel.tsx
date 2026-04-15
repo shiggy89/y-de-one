@@ -298,7 +298,7 @@ export default function AdminPanel() {
           return;
         }
 
-        // キャッシュがあれば即座に管理者チェックを開始
+        // キャッシュがあれば管理者チェックを先行実行（loadingは維持）
         let cachedUserId: string | null = null;
         try {
           const raw = localStorage.getItem(CACHE_KEY);
@@ -307,11 +307,10 @@ export default function AdminPanel() {
             if (Date.now() - cached.cachedAt < CACHE_TTL) {
               cachedUserId = cached.lineUserId;
               setLineUserId(cached.lineUserId);
-              setLoading(false);
-              // キャッシュのuserIdで管理者チェックを先行実行
               const res = await fetch(`/api/admin/me?lineUserId=${cached.lineUserId}`);
               const data = await res.json();
               setIsAdmin(data.isAdmin ?? false);
+              setLoading(false); // adminチェック完了後にloading解除
             }
           }
         } catch { /* ignore */ }
@@ -323,7 +322,6 @@ export default function AdminPanel() {
         if (!liff.isLoggedIn()) { liff.login(); return; }
         const p = await liff.getProfile();
         setLineUserId(p.userId);
-        setLoading(false);
 
         // キャッシュと異なるユーザーの場合は再チェック
         if (p.userId !== cachedUserId) {
@@ -331,6 +329,7 @@ export default function AdminPanel() {
           const data = await res.json();
           setIsAdmin(data.isAdmin ?? false);
         }
+        setLoading(false);
 
         // キャッシュ更新
         try {
