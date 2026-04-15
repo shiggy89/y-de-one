@@ -286,9 +286,6 @@ export default function AdminPanel() {
   };
 
   useEffect(() => {
-    const CACHE_KEY = "liff_profile_cache";
-    const CACHE_TTL = 60 * 1000; // 1分
-
     const init = async () => {
       try {
         if (process.env.NODE_ENV !== "production") {
@@ -298,23 +295,6 @@ export default function AdminPanel() {
           return;
         }
 
-        // キャッシュで管理者確認済みならliff.init()をスキップ
-        try {
-          const raw = localStorage.getItem(CACHE_KEY);
-          if (raw) {
-            const cached = JSON.parse(raw);
-            if (Date.now() - cached.cachedAt < CACHE_TTL) {
-              setLineUserId(cached.lineUserId);
-              const res = await fetch(`/api/admin/me?lineUserId=${cached.lineUserId}`);
-              const data = await res.json();
-              setIsAdmin(data.isAdmin ?? false);
-              setLoading(false);
-              return; // liff.init()をスキップ
-            }
-          }
-        } catch { /* ignore */ }
-
-        // キャッシュなし → 通常のLIFF認証フロー
         const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
         if (!liffId) { setLoading(false); return; }
 
@@ -326,24 +306,6 @@ export default function AdminPanel() {
         const res = await fetch(`/api/admin/me?lineUserId=${p.userId}`);
         const data = await res.json();
         setIsAdmin(data.isAdmin ?? false);
-
-        // キャッシュ更新
-        try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify({
-            lineUserId: p.userId,
-            displayName: p.displayName,
-            cachedAt: Date.now(),
-          }));
-        } catch { /* ignore */ }
-
-        // キャッシュ更新
-        try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify({
-            lineUserId: p.userId,
-            displayName: p.displayName,
-            cachedAt: Date.now(),
-          }));
-        } catch { /* ignore */ }
       } catch (e) {
         console.error(e);
       } finally {

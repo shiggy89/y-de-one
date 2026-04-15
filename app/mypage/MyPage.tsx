@@ -142,9 +142,6 @@ export default function MyPage() {
 
   // LIFF初期化
   useEffect(() => {
-    const CACHE_KEY = "liff_profile_cache";
-    const CACHE_TTL = 60 * 1000; // 1分
-
     const init = async () => {
       try {
         if (process.env.NODE_ENV !== "production") {
@@ -153,19 +150,6 @@ export default function MyPage() {
           setLoading(false);
           return;
         }
-
-        // キャッシュがあれば即表示
-        try {
-          const raw = localStorage.getItem(CACHE_KEY);
-          if (raw) {
-            const cached = JSON.parse(raw);
-            if (Date.now() - cached.cachedAt < CACHE_TTL) {
-              setLineUserId(cached.lineUserId);
-              setDisplayName(cached.displayName);
-              setLoading(false);
-            }
-          }
-        } catch { /* ignore */ }
 
         const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
         if (!liffId) { setError("LIFF設定エラー"); setLoading(false); return; }
@@ -176,19 +160,10 @@ export default function MyPage() {
         const p = await liff.getProfile();
         setLineUserId(p.userId);
         setDisplayName(p.displayName);
-        setLoading(false);
-
-        // キャッシュ更新
-        try {
-          localStorage.setItem(CACHE_KEY, JSON.stringify({
-            lineUserId: p.userId,
-            displayName: p.displayName,
-            cachedAt: Date.now(),
-          }));
-        } catch { /* ignore */ }
       } catch (e) {
         console.error(e);
         setError("LINEログインに失敗しました");
+      } finally {
         setLoading(false);
       }
     };
