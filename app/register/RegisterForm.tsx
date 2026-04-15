@@ -124,6 +124,7 @@ export default function RegisterForm() {
       <div className="inner">
         <Heading2
           title="会員登録フォーム"
+          lead="Y-de-ONE（ワイデワン）の会員登録ページです。"
         />
 
         {profile && (
