@@ -41,9 +41,16 @@ export async function POST(req: Request) {
     if (lineUserId && /^U[a-fA-F0-9]{16,64}$/.test(lineUserId)) {
       const { data: existing } = await supabaseAdmin
         .from("users")
-        .select("id")
+        .select("id, status")
         .eq("line_user_id", lineUserId)
         .single();
+
+      if (existing?.status === "member") {
+        return NextResponse.json(
+          { ok: false, error: "すでに会員登録済みのため、体験レッスンの申込みはできません。" },
+          { status: 409 }
+        );
+      }
 
       if (!existing) {
         await supabaseAdmin.from("users").insert({

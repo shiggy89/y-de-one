@@ -33,6 +33,7 @@ export default function TrialPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMember, setIsMember] = useState(false);
 
   // フォーム
   const [name, setName] = useState("");
@@ -84,6 +85,15 @@ export default function TrialPage() {
           userId: p.userId,
           displayName: p.displayName,
         });
+
+        // 会員チェック
+        const statusRes = await fetch(`/api/mypage/me?lineUserId=${p.userId}`);
+        if (statusRes.ok) {
+          const statusData = await statusRes.json();
+          if (statusData.user?.status === "member") {
+            setIsMember(true);
+          }
+        }
       } catch (e) {
         console.error(e);
         setError(
@@ -221,6 +231,21 @@ export default function TrialPage() {
       <main className={styles.trial}>
         <div className={`inner `}>
           <p>読み込み中です…</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (isMember) {
+    return (
+      <main className={styles.trial}>
+        <div className="inner" style={{ textAlign: "center", paddingTop: "48px" }}>
+          <p style={{ fontSize: "18px", fontWeight: 700, color: "#333", marginBottom: "12px" }}>
+            体験レッスンは申込み済みです
+          </p>
+          <p style={{ fontSize: "14px", color: "#888" }}>
+            すでに会員登録されています。<br />マイページをご利用ください。
+          </p>
         </div>
       </main>
     );
