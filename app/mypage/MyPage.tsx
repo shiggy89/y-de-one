@@ -76,6 +76,7 @@ export default function MyPage() {
 
   const [user, setUser] = useState<UserInfo | null>(null);
   const [currentBadge, setCurrentBadge] = useState<string | null>(null);
+  const [lastMonthBadge, setLastMonthBadge] = useState<string | null>(null);
   const [nextBadge, setNextBadge] = useState<NextBadge | null>(null);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [showBadgeInfo, setShowBadgeInfo] = useState(false);
@@ -177,6 +178,7 @@ export default function MyPage() {
       .then((data) => {
         if (data.user) setUser(data.user);
         setCurrentBadge(data.currentBadge ?? null);
+        setLastMonthBadge(data.lastMonthBadge ?? null);
         setNextBadge(data.nextBadge ?? null);
 
         // バッジ獲得ポップアップの表示判定
@@ -312,11 +314,11 @@ export default function MyPage() {
         {user && (
           <button className={styles.headerBadge} onClick={() => setShowBadgeInfo(true)}>
             <img
-              src={`/images/badges/badge-${currentBadge ?? "normal"}.png`}
-              alt={currentBadge ?? "normal"}
+              src={`/images/badges/badge-${lastMonthBadge ?? "normal"}.png`}
+              alt={lastMonthBadge ?? "normal"}
               className={styles.headerBadgeImg}
             />
-            <p className={styles.headerBadgeLabel}>{BADGE_LABEL[currentBadge ?? "normal"]}</p>
+            <p className={styles.headerBadgeLabel}>{BADGE_LABEL[lastMonthBadge ?? "normal"]}</p>
           </button>
         )}
       </div>
