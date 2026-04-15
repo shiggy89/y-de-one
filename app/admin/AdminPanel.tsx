@@ -286,6 +286,9 @@ export default function AdminPanel() {
   };
 
   useEffect(() => {
+    const CACHE_KEY = "liff_profile_cache";
+    const CACHE_TTL = 60 * 1000; // 1分
+
     const init = async () => {
       try {
         if (process.env.NODE_ENV !== "production") {
@@ -295,6 +298,24 @@ export default function AdminPanel() {
           return;
         }
 
+        // キャッシュがあれば即座に管理者チェックを開始
+        let cachedUserId: string | null = null;
+        try {
+          const raw = localStorage.getItem(CACHE_KEY);
+          if (raw) {
+            const cached = JSON.parse(raw);
+            if (Date.now() - cached.cachedAt < CACHE_TTL) {
+              cachedUserId = cached.lineUserId;
+              setLineUserId(cached.lineUserId);
+              setLoading(false);
+              // キャッシュのuserIdで管理者チェックを先行実行
+              const res = await fetch(`/api/admin/me?lineUserId=${cached.lineUserId}`);
+              const data = await res.json();
+              setIsAdmin(data.isAdmin ?? false);
+            }
+          }
+        } catch { /* ignore */ }
+
         const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
         if (!liffId) { setLoading(false); return; }
 
@@ -302,11 +323,23 @@ export default function AdminPanel() {
         if (!liff.isLoggedIn()) { liff.login(); return; }
         const p = await liff.getProfile();
         setLineUserId(p.userId);
+        setLoading(false);
 
-        // 管理者チェック
-        const res = await fetch(`/api/admin/me?lineUserId=${p.userId}`);
-        const data = await res.json();
-        setIsAdmin(data.isAdmin ?? false);
+        // キャッシュと異なるユーザーの場合は再チェック
+        if (p.userId !== cachedUserId) {
+          const res = await fetch(`/api/admin/me?lineUserId=${p.userId}`);
+          const data = await res.json();
+          setIsAdmin(data.isAdmin ?? false);
+        }
+
+        // キャッシュ更新
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify({
+            lineUserId: p.userId,
+            displayName: p.displayName,
+            cachedAt: Date.now(),
+          }));
+        } catch { /* ignore */ }
       } catch (e) {
         console.error(e);
       } finally {
