@@ -8,6 +8,7 @@ import styles from "../trial/TrialForm.module.css";
 type Profile = {
   userId: string;
   displayName: string;
+  pictureUrl?: string;
 };
 
 export default function RegisterForm() {
@@ -43,7 +44,7 @@ export default function RegisterForm() {
         }
 
         const p = await liff.getProfile();
-        setProfile({ userId: p.userId, displayName: p.displayName });
+        setProfile({ userId: p.userId, displayName: p.displayName, pictureUrl: p.pictureUrl });
       } catch (e) {
         console.error(e);
         setError("LINEログインに失敗しました。時間をおいて再度お試しください。");
@@ -77,6 +78,8 @@ export default function RegisterForm() {
           lineUserId: profile?.userId,
           lastName: lastName.trim(),
           firstName: firstName.trim(),
+          lineDisplayName: profile?.displayName,
+          linePictureUrl: profile?.pictureUrl,
         }),
       });
 

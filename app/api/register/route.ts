@@ -3,7 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 
 export async function POST(req: Request) {
   try {
-    const { lineUserId, lastName, firstName } = await req.json();
+    const { lineUserId, lastName, firstName, lineDisplayName, linePictureUrl } = await req.json();
 
     if (!lineUserId || !lastName || !firstName) {
       return NextResponse.json(
@@ -26,7 +26,12 @@ export async function POST(req: Request) {
       if (existing.status === "trial") {
         await supabaseAdmin
           .from("users")
-          .update({ name, status: "member" })
+          .update({
+            name,
+            status: "member",
+            line_display_name: lineDisplayName ?? null,
+            line_picture_url: linePictureUrl ?? null,
+          })
           .eq("line_user_id", lineUserId);
       }
       return NextResponse.json({ ok: true });
@@ -38,6 +43,8 @@ export async function POST(req: Request) {
       name,
       status: "member",
       is_admin: false,
+      line_display_name: lineDisplayName ?? null,
+      line_picture_url: linePictureUrl ?? null,
     });
 
     if (error) {
