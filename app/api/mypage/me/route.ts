@@ -16,12 +16,12 @@ function calcLessonCount(lessonType: string, lessonTitle: string | null, lessonT
 }
 
 const BADGE_THRESHOLDS = [
-  { badge: "normal", min: 1 },
-  { badge: "bronze", min: 2 },
-  { badge: "silver", min: 3 },
-  { badge: "gold", min: 4 },
-  { badge: "platinum", min: 5 },
-  { badge: "diamond", min: 6 },
+  { badge: "normal",   min: 0  },
+  { badge: "bronze",   min: 4  },
+  { badge: "silver",   min: 8  },
+  { badge: "gold",     min: 12 },
+  { badge: "platinum", min: 20 },
+  { badge: "diamond",  min: 40 },
 ];
 
 const BADGE_LABEL: Record<string, string> = {
@@ -73,10 +73,25 @@ export async function GET(req: Request) {
     const currentBadge = badge?.badge ?? null;
     const lastMonthBadge = lastBadge?.badge ?? null;
 
+    type NextBadge = { badge: string; label: string; remaining: number; isContinuation: boolean } | null;
+
+    // remaining > 0 になる最初の上位バッジを返すヘルパー
+    function findNextAchievable(fromBadge: string | null): NextBadge {
+      const startRank = BADGE_THRESHOLDS.findIndex((b) => b.badge === fromBadge);
+      for (let i = startRank + 1; i < BADGE_THRESHOLDS.length; i++) {
+        const info = BADGE_THRESHOLDS[i];
+        const rem = Math.ceil(info.min - monthlyCount);
+        if (rem > 0) {
+          return { badge: info.badge, label: BADGE_LABEL[info.badge], remaining: rem, isContinuation: false };
+        }
+      }
+      return null;
+    }
+
     const CONTINUATION_BADGES = ["silver", "gold", "platinum", "diamond"];
     const isContinuation = CONTINUATION_BADGES.includes(lastMonthBadge ?? "");
 
-    let nextBadgeResult = null;
+    let nextBadgeResult: NextBadge = null;
     if (isContinuation) {
       const targetInfo = BADGE_THRESHOLDS.find((b) => b.badge === lastMonthBadge)!;
       const remaining = Math.ceil(targetInfo.min - monthlyCount);
@@ -85,29 +100,10 @@ export async function GET(req: Request) {
         nextBadgeResult = { badge: lastMonthBadge!, label: BADGE_LABEL[lastMonthBadge!], remaining, isContinuation: true };
       } else {
         // 先月バッジ達成済み → 次のランクを目標にする
-        const currentRank = BADGE_THRESHOLDS.findIndex((b) => b.badge === currentBadge);
-        const nextBadgeInfo = currentRank < BADGE_THRESHOLDS.length - 1
-          ? BADGE_THRESHOLDS[currentRank + 1]
-          : null;
-        if (nextBadgeInfo) {
-          const remainingForNext = Math.ceil(nextBadgeInfo.min - monthlyCount);
-          if (remainingForNext > 0) {
-            nextBadgeResult = { badge: nextBadgeInfo.badge, label: BADGE_LABEL[nextBadgeInfo.badge], remaining: remainingForNext, isContinuation: false };
-          }
-        }
+        nextBadgeResult = findNextAchievable(currentBadge);
       }
     } else {
-      // 次のバッジ獲得を目標にする
-      const currentRank = BADGE_THRESHOLDS.findIndex((b) => b.badge === currentBadge);
-      const nextBadgeInfo = currentRank < BADGE_THRESHOLDS.length - 1
-        ? BADGE_THRESHOLDS[currentRank + 1]
-        : null;
-      if (nextBadgeInfo) {
-        const remaining = Math.ceil(nextBadgeInfo.min - monthlyCount);
-        if (remaining > 0) {
-          nextBadgeResult = { badge: nextBadgeInfo.badge, label: BADGE_LABEL[nextBadgeInfo.badge], remaining, isContinuation: false };
-        }
-      }
+      nextBadgeResult = findNextAchievable(currentBadge);
     }
 
     return NextResponse.json({
