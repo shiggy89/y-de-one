@@ -298,7 +298,8 @@ export default function AdminPanel() {
           return;
         }
 
-        // キャッシュがあれば管理者チェックを先行実行（loadingは維持）
+        // キャッシュで管理者確認済みならそこで完了、LIFFは裏で認証のみ
+        let adminConfirmedByCache = false;
         let cachedUserId: string | null = null;
         try {
           const raw = localStorage.getItem(CACHE_KEY);
@@ -310,7 +311,8 @@ export default function AdminPanel() {
               const res = await fetch(`/api/admin/me?lineUserId=${cached.lineUserId}`);
               const data = await res.json();
               setIsAdmin(data.isAdmin ?? false);
-              setLoading(false); // adminチェック完了後にloading解除
+              setLoading(false);
+              adminConfirmedByCache = true;
             }
           }
         } catch { /* ignore */ }
@@ -321,15 +323,15 @@ export default function AdminPanel() {
         await liff.init({ liffId });
         if (!liff.isLoggedIn()) { liff.login(); return; }
         const p = await liff.getProfile();
-        setLineUserId(p.userId);
 
-        // キャッシュと異なるユーザーの場合は再チェック
-        if (p.userId !== cachedUserId) {
+        // キャッシュ未使用 or 別ユーザーの場合のみ状態更新
+        if (!adminConfirmedByCache || p.userId !== cachedUserId) {
+          setLineUserId(p.userId);
           const res = await fetch(`/api/admin/me?lineUserId=${p.userId}`);
           const data = await res.json();
           setIsAdmin(data.isAdmin ?? false);
+          setLoading(false);
         }
-        setLoading(false);
 
         // キャッシュ更新
         try {
