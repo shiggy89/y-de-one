@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import liff from "@line/liff";
 import Heading2 from "../_components/sections/common/Heading2";
 import styles from "../trial/TrialForm.module.css";
+import popupStyles from "./register.module.css";
 
 type Profile = {
   userId: string;
@@ -15,7 +16,7 @@ export default function RegisterForm() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
   const [lastName, setLastName] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -90,18 +91,21 @@ export default function RegisterForm() {
         return;
       }
 
-      setSubmitted(true);
-
-      try {
-        if (liff.isInClient()) {
-          liff.closeWindow();
-        }
-      } catch {
-        // ブラウザ直アクセス時は何もしない
-      }
+      setShowPopup(true);
     } catch (e) {
       console.error(e);
       setError("送信中にエラーが発生しました。時間をおいて再度お試しください。");
+    }
+  };
+
+  const handlePopupClose = () => {
+    setShowPopup(false);
+    try {
+      if (liff.isInClient()) {
+        liff.closeWindow();
+      }
+    } catch {
+      // ブラウザ直アクセス時は何もしない
     }
   };
 
@@ -110,18 +114,6 @@ export default function RegisterForm() {
       <main className={styles.trial}>
         <div className="inner">
           <p>読み込み中です…</p>
-        </div>
-      </main>
-    );
-  }
-
-  if (submitted) {
-    return (
-      <main className={styles.trial}>
-        <div className="inner">
-          <p style={{ textAlign: "center", fontSize: "18px", marginTop: "48px" }}>
-            登録が完了しました。<br />ありがとうございます！
-          </p>
         </div>
       </main>
     );
@@ -179,6 +171,21 @@ export default function RegisterForm() {
           </button>
         </form>
       </div>
+
+      {showPopup && (
+        <div className={popupStyles.overlay}>
+          <div className={popupStyles.popup}>
+            <p className={popupStyles.popupIcon}>✅</p>
+            <p className={popupStyles.popupTitle}>登録が完了しました！</p>
+            <p className={popupStyles.popupText}>
+              {profile?.displayName} さん、<br />Y-de-ONEへようこそ！
+            </p>
+            <button className={popupStyles.popupBtn} onClick={handlePopupClose}>
+              閉じる
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

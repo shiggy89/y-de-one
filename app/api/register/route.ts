@@ -22,18 +22,22 @@ export async function POST(req: Request) {
       .single();
 
     if (existing) {
-      // trial → member に昇格
-      if (existing.status === "trial") {
-        await supabaseAdmin
-          .from("users")
-          .update({
-            name,
-            status: "member",
-            line_display_name: lineDisplayName ?? null,
-            line_picture_url: linePictureUrl ?? null,
-          })
-          .eq("line_user_id", lineUserId);
+      if (existing.status === "member") {
+        return NextResponse.json(
+          { ok: false, error: "すでに会員登録済みです。" },
+          { status: 409 }
+        );
       }
+      // trial → member に昇格
+      await supabaseAdmin
+        .from("users")
+        .update({
+          name,
+          status: "member",
+          line_display_name: lineDisplayName ?? null,
+          line_picture_url: linePictureUrl ?? null,
+        })
+        .eq("line_user_id", lineUserId);
       return NextResponse.json({ ok: true });
     }
 
