@@ -624,7 +624,7 @@
   position: relative;
   background: #fff;
   border-radius: 20px;
-  padding: 32px 24px 28px;
+  padding: 20px 24px 20px;
   width: 88%;
   max-width: 320px;
   text-align: center;
@@ -636,7 +636,7 @@
   font-size: 16px;
   font-weight: 700;
   color: #333;
-  margin: 0 0 16px;
+  margin: 0 0 8px;
 }
 
 .badgePopupImg {
@@ -652,7 +652,7 @@
   font-size: 22px;
   font-weight: 900;
   color: #e05080;
-  margin: 12px 0 24px;
+  margin: 6px 0 16px;
 }
 
 .badgePopupClose {
