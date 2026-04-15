@@ -402,7 +402,7 @@ export default function MyPage() {
                 transform: `rotate(${Math.random() * 360}deg)`,
               }} />
             ))}
-            <p className={styles.badgePopupTitle}>🎉 先月のバッジを獲得しました！</p>
+            <p className={styles.badgePopupTitle}>🎉 {new Date().getMonth() === 0 ? 12 : new Date().getMonth()}月のバッジを獲得しました！</p>
             <img
               src={`/images/badges/badge-${popupBadge}.png`}
               alt={popupBadge}

@@ -640,9 +640,11 @@
 }
 
 .badgePopupImg {
-  width: 140px;
-  height: 140px;
+  display: block;
+  width: 180px;
+  height: 180px;
   object-fit: contain;
+  margin: 0 auto;
   animation: badgeBounce 0.6s ease-out;
 }
 
