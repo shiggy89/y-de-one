@@ -609,6 +609,87 @@
   flex-shrink: 0;
 }
 
+/* ━━━ バッジ獲得ポップアップ ━━━ */
+.badgePopupOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.badgePopup {
+  position: relative;
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px 24px 28px;
+  width: 88%;
+  max-width: 320px;
+  text-align: center;
+  overflow: hidden;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.badgePopupTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 16px;
+}
+
+.badgePopupImg {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  animation: badgeBounce 0.6s ease-out;
+}
+
+.badgePopupName {
+  font-size: 22px;
+  font-weight: 900;
+  color: #e05080;
+  margin: 12px 0 24px;
+}
+
+.badgePopupClose {
+  width: 100%;
+  padding: 14px 0;
+  background: #e05080;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* コンフェティ */
+.confetti {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  top: -10px;
+  animation: confettiFall linear forwards;
+  pointer-events: none;
+}
+
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(320px) rotate(720deg); opacity: 0; }
+}
+
+@keyframes badgeBounce {
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  80%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
 /* ━━━ バッジ履歴 ━━━ */
 .badgeGrid {
   display: grid;

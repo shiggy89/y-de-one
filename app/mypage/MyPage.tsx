@@ -79,6 +79,8 @@ export default function MyPage() {
   const [nextBadge, setNextBadge] = useState<NextBadge | null>(null);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [showBadgeInfo, setShowBadgeInfo] = useState(false);
+  const [showBadgePopup, setShowBadgePopup] = useState(false);
+  const [popupBadge, setPopupBadge] = useState<string | null>(null);
   const [showNameEdit, setShowNameEdit] = useState(false);
   const [editName, setEditName] = useState("");
   const [nameSaving, setNameSaving] = useState(false);
@@ -176,6 +178,22 @@ export default function MyPage() {
         if (data.user) setUser(data.user);
         setCurrentBadge(data.currentBadge ?? null);
         setNextBadge(data.nextBadge ?? null);
+
+        // バッジ獲得ポップアップの表示判定
+        const lastBadge: string | null = data.lastMonthBadge ?? null;
+        if (lastBadge && data.user) {
+          const userId: number = data.user.id;
+          const now = new Date();
+          const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+          const storageKey = `badge_popup_${userId}_${yearMonth}`;
+          // id=14は毎回表示（テスト用）、それ以外は月1回
+          const shouldShow = userId === 14 || !localStorage.getItem(storageKey);
+          if (shouldShow) {
+            setPopupBadge(lastBadge);
+            setShowBadgePopup(true);
+            if (userId !== 14) localStorage.setItem(storageKey, "1");
+          }
+        }
       });
   }, [lineUserId]);
 
@@ -366,6 +384,34 @@ export default function MyPage() {
               ))}
             </div>
             <button className={styles.badgeInfoClose} onClick={() => setShowBadgeInfo(false)}>閉じる</button>
+          </div>
+        </div>
+      )}
+
+      {/* ━━━ バッジ獲得ポップアップ ━━━ */}
+      {showBadgePopup && popupBadge && (
+        <div className={styles.badgePopupOverlay} onClick={() => setShowBadgePopup(false)}>
+          <div className={styles.badgePopup} onClick={(e) => e.stopPropagation()}>
+            {/* コンフェティ */}
+            {Array.from({ length: 24 }).map((_, i) => (
+              <span key={i} className={styles.confetti} style={{
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 1.2}s`,
+                animationDuration: `${1.2 + Math.random() * 1}s`,
+                background: ["#e05080","#0090e8","#ffd700","#7ed957","#ff914d","#c77dff"][i % 6],
+                transform: `rotate(${Math.random() * 360}deg)`,
+              }} />
+            ))}
+            <p className={styles.badgePopupTitle}>🎉 先月のバッジを獲得しました！</p>
+            <img
+              src={`/images/badges/badge-${popupBadge}.png`}
+              alt={popupBadge}
+              className={styles.badgePopupImg}
+            />
+            <p className={styles.badgePopupName}>{BADGE_LABEL[popupBadge]}バッジ</p>
+            <button className={styles.badgePopupClose} onClick={() => setShowBadgePopup(false)}>
+              やったー！
+            </button>
           </div>
         </div>
       )}
