@@ -460,6 +460,10 @@ export default function AdminPanel() {
     setAttendanceError(null);
     if (selectedUserIds.length === 0) { setAttendanceError("生徒を選択してください"); return; }
 
+    // 選択した生徒のアイコンをAPIレスポンス待たずに即時非表示
+    const prevAttendedIds = attendedIds;
+    setAttendedIds((prev) => [...new Set([...prev, ...selectedUserIds])]);
+
     setSubmitting(true);
     const results = await Promise.all(
       selectedUserIds.map((userId) =>
@@ -480,6 +484,7 @@ export default function AdminPanel() {
     const failed = results.filter((r) => !r.ok);
     if (failed.length > 0) {
       setAttendanceError("一部の記録に失敗しました");
+      setAttendedIds(prevAttendedIds); // 楽観更新を元に戻す
     } else {
       const n = new Date();
       const today = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`;
@@ -908,6 +913,9 @@ export default function AdminPanel() {
                           className={styles.ledgerDeleteBtn}
                           onClick={async () => {
                             if (!confirm(`${r.name} の出席記録を削除しますか？`)) return;
+                            // attendedIds・attendanceMonthData を即時更新（出席タブのアイコン復活）
+                            setAttendedIds((prev) => prev.filter((id) => id !== r.student_id));
+                            setAttendanceMonthData((prev) => prev.filter((a) => a.id !== r.id));
                             await fetch(`/api/admin/attendance/${r.id}`, { method: "DELETE" });
                             fetchLedger(ledgerMonth);
                           }}
