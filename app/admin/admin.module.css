@@ -1400,6 +1400,45 @@
   font-weight: 700;
 }
 
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(22, 163, 74, 0.95);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 28px;
+  font-size: 15px;
+  font-weight: 700;
+  z-index: 9999;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  animation: toastFade 4s ease forwards;
+}
+
+.toastMain {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.toastSub {
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+@keyframes toastFade {
+  0% { opacity: 0; transform: translateX(-50%) translateY(16px); }
+  10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  75% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 .errorMsg {
   color: #e53935;
   font-size: 14px;

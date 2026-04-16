@@ -34,6 +34,7 @@ type ReportRecord = {
 
 type LedgerRecord = {
   id: number;
+  student_id: number;
   lesson_date: string;
   lesson_type: string;
   lesson_title: string | null;
@@ -64,16 +65,20 @@ function buildCalendar(yearMonth: string): (number | null)[][] {
   return weeks;
 }
 
-const LESSON_PRICES = [3300, 5400, 7800, 9600, 11000, 14000, 16200, 17600];
+const LESSON_FEES_ONLY = [2800, 5400, 7800, 9600, 11800, 14000, 16200, 17600];
 
-function calcPrice(countThisMonth: number, lessonType: string): number {
-  if (lessonType === "35分") return 1100;
-  if (lessonType === "特別") return 3000;
-  if (lessonType === "個人") return 2500;
+function calcLessonFee(countThisMonth: number, lessonType: string, privateMinutes = 15, lessonTitle?: string): number {
+  if (lessonType === "個人") return 2500 * (privateMinutes / 15);
+  if (lessonType === "祝日") {
+    if (lessonTitle === "特別レッスン") return 3000;
+    if (lessonTitle === "ポワント" || lessonTitle === "プレモダン") return 1100;
+  } else if (lessonType === "通常") {
+    if (lessonTitle === "ポワント" || lessonTitle === "プレモダン") return 1100;
+  }
   if (countThisMonth >= 9) return 2000;
-  const total = LESSON_PRICES[Math.min(countThisMonth, 8) - 1] ?? 3300;
-  const prevTotal = countThisMonth > 1 ? (LESSON_PRICES[countThisMonth - 2] ?? 0) : 0;
-  return total - prevTotal;
+  const total = LESSON_FEES_ONLY[countThisMonth - 1] ?? 2800;
+  const prev = countThisMonth > 1 ? (LESSON_FEES_ONLY[countThisMonth - 2] ?? 0) : 0;
+  return total - prev;
 }
 
 export default function AdminPanel() {
@@ -109,10 +114,10 @@ export default function AdminPanel() {
     userId: number; name: string; line_picture_url: string | null;
     isTeacher: boolean; lessonFee: number; maintenanceFee: number; total: number;
   }[]>([]);
-  const [allFeeMap, setAllFeeMap] = useState<Record<number, { isTeacher: boolean; lessonFee: number; maintenanceFee: number; total: number }>>({});
+  const [attendanceMonthData, setAttendanceMonthData] = useState<LedgerRecord[]>([]);
   const [attendanceError, setAttendanceError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   // お知らせ管理
   const [notices, setNotices] = useState<NoticeRecord[]>([]);
@@ -327,6 +332,12 @@ export default function AdminPanel() {
     if (tab === "ledger" && isAdmin) fetchLedger(ledgerMonth);
   }, [tab, ledgerMonth, isAdmin]);
 
+  const lessonMonth = lessonDate.slice(0, 7);
+  useEffect(() => {
+    if (tab === "attendance" && isAdmin) fetchAttendanceMonth(lessonMonth);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, isAdmin, lessonMonth]);
+
   useEffect(() => {
     if (tab === "notices" && isAdmin) fetchNotices();
   }, [tab, isAdmin]);
@@ -377,38 +388,32 @@ export default function AdminPanel() {
     setFeePreviews(data.fees ?? []);
   };
 
-  // レッスン選択時に全生徒分の料金を事前取得しておく
-  const prefetchAllFees = async (date: string, type: string, minutes: number, lessonTitle?: string, lessonTime?: string) => {
-    const allIds = users.map((u) => u.id);
-    if (allIds.length === 0) return;
-    const res = await fetch("/api/admin/preview-fees", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userIds: allIds, lessonDate: date, lessonType: type, privateMinutes: minutes, lessonTitle, lessonTime }),
-    });
+  // 出席タブ用：当月の出席データを取得（料金計算をクライアント側で行うため）
+  const fetchAttendanceMonth = async (month: string) => {
+    const res = await fetch(`/api/admin/ledger?month=${month}`);
     const data = await res.json();
-    const map: Record<number, { isTeacher: boolean; lessonFee: number; maintenanceFee: number; total: number }> = {};
-    for (const f of data.fees ?? []) {
-      map[f.userId] = { isTeacher: f.isTeacher, lessonFee: f.lessonFee, maintenanceFee: f.maintenanceFee, total: f.total };
-    }
-    setAllFeeMap(map);
+    setAttendanceMonthData(data.records ?? []);
+  };
+
+  // クライアント側で料金を即座に計算（APIコールなし）
+  const calcClientFee = (userId: number, date: string, type: string, title: string | undefined, timeStart: string | null, minutes: number) => {
+    const user = users.find((u) => u.id === userId);
+    const isTeacher = user?.status === "teacher";
+    const prevCount = attendanceMonthData.filter((r) =>
+      r.student_id === userId &&
+      (r.lesson_date < date || (r.lesson_date === date && timeStart && r.lesson_time && r.lesson_time.split("〜")[0] < timeStart))
+    ).length;
+    const countThisMonth = prevCount + 1;
+    const isFirst = prevCount === 0;
+    const maintenanceFee = isTeacher ? 0 : (isFirst ? 500 : 0);
+    const lessonFee = isTeacher ? 0 : calcLessonFee(countThisMonth, type, minutes, title);
+    const total = isTeacher ? 0 : lessonFee + maintenanceFee;
+    return { isTeacher: isTeacher ?? false, lessonFee, maintenanceFee, total };
   };
 
   const handleAttendance = async () => {
     setAttendanceError(null);
-    setSuccessMsg(null);
     if (selectedUserIds.length === 0) { setAttendanceError("生徒を選択してください"); return; }
-
-    let lessonInfo = "";
-    if (lessonType === "通常" && selectedLesson) {
-      lessonInfo = `${selectedLesson.start}〜${selectedLesson.end}　${selectedLesson.title}　${selectedLesson.teacher}`;
-    } else if (lessonType === "祝日") {
-      lessonInfo = `祝日レッスン　${holidayLessonType}`;
-    } else if (lessonType === "個人") {
-      lessonInfo = `個人レッスン　${privateMinutes}分`;
-    }
-
-    if (!confirm(`${selectedUserIds.length}名の生徒の出席を記録しますか？\n\n${lessonInfo}`)) return;
 
     setSubmitting(true);
     const results = await Promise.all(
@@ -435,15 +440,17 @@ export default function AdminPanel() {
       const today = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`;
       setSelectedUserIds([]);
       setFeePreviews([]);
-      setAllFeeMap({});
       setSelectedLesson(null);
       setLessonType("通常");
       setPrivateMinutes(15);
       setHolidayLessonType("特別レッスン");
       setLessonDate(today);
       setAttendedIds([]);
-      setSuccessMsg(`${results.length}名の出席を記録しました`);
-      setTimeout(() => setSuccessMsg(null), 4000);
+      // 月データを再取得して次のクリック時の料金計算を最新に
+      fetchAttendanceMonth(lessonDate.slice(0, 7));
+      const names = selectedUserIds.map((id) => users.find((u) => u.id === id)?.name ?? "").filter(Boolean).join("、");
+      setToast(`${results.length}名の出席を記録しました\n${names}`);
+      setTimeout(() => setToast(null), 4000);
     }
     setSubmitting(false);
   };
@@ -624,9 +631,7 @@ export default function AdminPanel() {
                         setHolidayLessonType(t);
                         setSelectedUserIds([]);
                         setFeePreviews([]);
-                        setAllFeeMap({});
                         fetchAttendedIds(lessonDate, null, t);
-                        prefetchAllFees(lessonDate, "祝日", privateMinutes, t);
                       }}
                     >
                       <span className={styles.lessonBtnTitle}>{t}</span>
@@ -650,10 +655,8 @@ export default function AdminPanel() {
                           setSelectedLesson(l);
                           setSelectedUserIds([]);
                           setFeePreviews([]);
-                          setAllFeeMap({});
                           fetchAttendedIds(lessonDate, `${l.start}〜${l.end}`, l.title);
                           fetchLessonCounts(`${l.start}〜${l.end}`, l.title);
-                          prefetchAllFees(lessonDate, "通常", privateMinutes, l.title, `${l.start}〜${l.end}`);
                         }}
                       >
                         <span className={styles.lessonBtnTime}>{l.start}〜{l.end}</span>
@@ -688,23 +691,15 @@ export default function AdminPanel() {
                           : [...selectedUserIds, u.id];
                       setSelectedUserIds(next);
                       const lessonTitle = lessonType === "祝日" ? holidayLessonType : selectedLesson?.title;
-                      const lessonTime = selectedLesson ? `${selectedLesson.start}〜${selectedLesson.end}` : undefined;
+                      const timeStart = selectedLesson?.start ?? null;
                       if (lessonType !== "通常" || selectedLesson) {
-                        if (Object.keys(allFeeMap).length > 0) {
-                          // 事前取得済みなら即座に表示（APIコールなし）
-                          const previews = next
-                            .map((id) => {
-                              const usr = users.find((u) => u.id === id);
-                              const fee = allFeeMap[id];
-                              if (!usr || !fee) return null;
-                              return { userId: id, name: usr.name ?? "名前なし", line_picture_url: usr.line_picture_url ?? null, ...fee };
-                            })
-                            .filter(Boolean) as { userId: number; name: string; line_picture_url: string | null; isTeacher: boolean; lessonFee: number; maintenanceFee: number; total: number }[];
-                          setFeePreviews(previews);
-                        } else {
-                          // 未取得の場合（個人レッスン等）はAPIを叩く
-                          fetchFeePreviews(next, lessonDate, lessonType, privateMinutes, lessonTitle, lessonTime);
-                        }
+                        // クライアント側で即座に計算（APIコールなし）
+                        const previews = next.map((id) => {
+                          const usr = users.find((u) => u.id === id);
+                          const fee = calcClientFee(id, lessonDate, lessonType, lessonTitle, timeStart, privateMinutes);
+                          return { userId: id, name: usr?.name ?? "名前なし", line_picture_url: usr?.line_picture_url ?? null, ...fee };
+                        });
+                        setFeePreviews(previews);
                       } else {
                         setFeePreviews([]);
                       }
@@ -743,7 +738,6 @@ export default function AdminPanel() {
               </div>
             )}
             {attendanceError && <p className={styles.errorMsg}>{attendanceError}</p>}
-            {successMsg && <p className={styles.successMsg}>{successMsg}</p>}
             <button className={styles.submitBtn} onClick={handleAttendance} disabled={isFutureDate || submitting}>
               {submitting ? "記録中..." : "記録する"}
             </button>
@@ -1373,6 +1367,15 @@ export default function AdminPanel() {
         </div>
       )}
       </div>
+
+      {/* ━━━ トースト通知 ━━━ */}
+      {toast && (
+        <div className={styles.toast}>
+          {toast.split("\n").map((line, i) => (
+            <span key={i} className={i === 0 ? styles.toastMain : styles.toastSub}>{line}</span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
