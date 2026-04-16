@@ -115,6 +115,31 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // 後から遡及追加した場合に備え、月間全記録をlesson_date順で再ソートして料金を再計算・UPDATE
+    const { data: monthAll } = await supabaseAdmin
+      .from("attendances")
+      .select("id, lesson_date, lesson_time, lesson_type, lesson_title")
+      .eq("student_id", userId)
+      .gte("lesson_date", `${yearMonth}-01`)
+      .lt("lesson_date", nextMonthStr)
+      .order("lesson_date", { ascending: true })
+      .order("lesson_time", { ascending: true, nullsFirst: false });
+
+    for (let i = 0; i < (monthAll ?? []).length; i++) {
+      const a = monthAll![i];
+      const newCount = i + 1;
+      const newIsFirst = i === 0;
+      const newMaintenanceFee = isTeacher ? 0 : (newIsFirst ? 500 : 0);
+      const mins = a.lesson_type === "個人" ? parseInt(a.lesson_time ?? "15") : undefined;
+      const newLessonFee = isTeacher ? 0 : calcPrice(newCount, a.lesson_type, mins, a.lesson_title ?? undefined);
+      const newPrice = newLessonFee + newMaintenanceFee;
+
+      await supabaseAdmin
+        .from("attendances")
+        .update({ price_paid: newPrice })
+        .eq("id", a.id);
+    }
+
     // バッジ判定：月間全レッスンを加重カウント
     const { data: monthlyAttendances } = await supabaseAdmin
       .from("attendances")
