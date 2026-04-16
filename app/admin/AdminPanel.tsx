@@ -109,7 +109,10 @@ export default function AdminPanel() {
     userId: number; name: string; line_picture_url: string | null;
     isTeacher: boolean; lessonFee: number; maintenanceFee: number; total: number;
   }[]>([]);
+  const [allFeeMap, setAllFeeMap] = useState<Record<number, { isTeacher: boolean; lessonFee: number; maintenanceFee: number; total: number }>>({});
   const [attendanceError, setAttendanceError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // お知らせ管理
   const [notices, setNotices] = useState<NoticeRecord[]>([]);
@@ -374,8 +377,26 @@ export default function AdminPanel() {
     setFeePreviews(data.fees ?? []);
   };
 
+  // レッスン選択時に全生徒分の料金を事前取得しておく
+  const prefetchAllFees = async (date: string, type: string, minutes: number, lessonTitle?: string, lessonTime?: string) => {
+    const allIds = users.map((u) => u.id);
+    if (allIds.length === 0) return;
+    const res = await fetch("/api/admin/preview-fees", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userIds: allIds, lessonDate: date, lessonType: type, privateMinutes: minutes, lessonTitle, lessonTime }),
+    });
+    const data = await res.json();
+    const map: Record<number, { isTeacher: boolean; lessonFee: number; maintenanceFee: number; total: number }> = {};
+    for (const f of data.fees ?? []) {
+      map[f.userId] = { isTeacher: f.isTeacher, lessonFee: f.lessonFee, maintenanceFee: f.maintenanceFee, total: f.total };
+    }
+    setAllFeeMap(map);
+  };
+
   const handleAttendance = async () => {
     setAttendanceError(null);
+    setSuccessMsg(null);
     if (selectedUserIds.length === 0) { setAttendanceError("生徒を選択してください"); return; }
 
     let lessonInfo = "";
@@ -389,6 +410,7 @@ export default function AdminPanel() {
 
     if (!confirm(`${selectedUserIds.length}名の生徒の出席を記録しますか？\n\n${lessonInfo}`)) return;
 
+    setSubmitting(true);
     const results = await Promise.all(
       selectedUserIds.map((userId) =>
         fetch("/api/admin/attendance", {
@@ -413,13 +435,17 @@ export default function AdminPanel() {
       const today = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`;
       setSelectedUserIds([]);
       setFeePreviews([]);
+      setAllFeeMap({});
       setSelectedLesson(null);
       setLessonType("通常");
       setPrivateMinutes(15);
       setHolidayLessonType("特別レッスン");
       setLessonDate(today);
       setAttendedIds([]);
+      setSuccessMsg(`${results.length}名の出席を記録しました`);
+      setTimeout(() => setSuccessMsg(null), 4000);
     }
+    setSubmitting(false);
   };
 
   // ━━━ レポート ━━━
@@ -598,7 +624,9 @@ export default function AdminPanel() {
                         setHolidayLessonType(t);
                         setSelectedUserIds([]);
                         setFeePreviews([]);
+                        setAllFeeMap({});
                         fetchAttendedIds(lessonDate, null, t);
+                        prefetchAllFees(lessonDate, "祝日", privateMinutes, t);
                       }}
                     >
                       <span className={styles.lessonBtnTitle}>{t}</span>
@@ -622,8 +650,10 @@ export default function AdminPanel() {
                           setSelectedLesson(l);
                           setSelectedUserIds([]);
                           setFeePreviews([]);
+                          setAllFeeMap({});
                           fetchAttendedIds(lessonDate, `${l.start}〜${l.end}`, l.title);
                           fetchLessonCounts(`${l.start}〜${l.end}`, l.title);
+                          prefetchAllFees(lessonDate, "通常", privateMinutes, l.title, `${l.start}〜${l.end}`);
                         }}
                       >
                         <span className={styles.lessonBtnTime}>{l.start}〜{l.end}</span>
@@ -660,7 +690,21 @@ export default function AdminPanel() {
                       const lessonTitle = lessonType === "祝日" ? holidayLessonType : selectedLesson?.title;
                       const lessonTime = selectedLesson ? `${selectedLesson.start}〜${selectedLesson.end}` : undefined;
                       if (lessonType !== "通常" || selectedLesson) {
-                        fetchFeePreviews(next, lessonDate, lessonType, privateMinutes, lessonTitle, lessonTime);
+                        if (Object.keys(allFeeMap).length > 0) {
+                          // 事前取得済みなら即座に表示（APIコールなし）
+                          const previews = next
+                            .map((id) => {
+                              const usr = users.find((u) => u.id === id);
+                              const fee = allFeeMap[id];
+                              if (!usr || !fee) return null;
+                              return { userId: id, name: usr.name ?? "名前なし", line_picture_url: usr.line_picture_url ?? null, ...fee };
+                            })
+                            .filter(Boolean) as { userId: number; name: string; line_picture_url: string | null; isTeacher: boolean; lessonFee: number; maintenanceFee: number; total: number }[];
+                          setFeePreviews(previews);
+                        } else {
+                          // 未取得の場合（個人レッスン等）はAPIを叩く
+                          fetchFeePreviews(next, lessonDate, lessonType, privateMinutes, lessonTitle, lessonTime);
+                        }
                       } else {
                         setFeePreviews([]);
                       }
@@ -699,7 +743,10 @@ export default function AdminPanel() {
               </div>
             )}
             {attendanceError && <p className={styles.errorMsg}>{attendanceError}</p>}
-            <button className={styles.submitBtn} onClick={handleAttendance} disabled={isFutureDate}>記録する</button>
+            {successMsg && <p className={styles.successMsg}>{successMsg}</p>}
+            <button className={styles.submitBtn} onClick={handleAttendance} disabled={isFutureDate || submitting}>
+              {submitting ? "記録中..." : "記録する"}
+            </button>
           </div>
         </div>
       )}

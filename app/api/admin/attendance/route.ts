@@ -125,20 +125,17 @@ export async function POST(req: Request) {
       .order("lesson_date", { ascending: true })
       .order("lesson_time", { ascending: true, nullsFirst: false });
 
-    for (let i = 0; i < (monthAll ?? []).length; i++) {
-      const a = monthAll![i];
-      const newCount = i + 1;
-      const newIsFirst = i === 0;
-      const newMaintenanceFee = isTeacher ? 0 : (newIsFirst ? 500 : 0);
-      const mins = a.lesson_type === "個人" ? parseInt(a.lesson_time ?? "15") : undefined;
-      const newLessonFee = isTeacher ? 0 : calcPrice(newCount, a.lesson_type, mins, a.lesson_title ?? undefined);
-      const newPrice = newLessonFee + newMaintenanceFee;
-
-      await supabaseAdmin
-        .from("attendances")
-        .update({ price_paid: newPrice })
-        .eq("id", a.id);
-    }
+    await Promise.all(
+      (monthAll ?? []).map((a, i) => {
+        const newCount = i + 1;
+        const newIsFirst = i === 0;
+        const newMaintenanceFee = isTeacher ? 0 : (newIsFirst ? 500 : 0);
+        const mins = a.lesson_type === "個人" ? parseInt(a.lesson_time ?? "15") : undefined;
+        const newLessonFee = isTeacher ? 0 : calcPrice(newCount, a.lesson_type, mins, a.lesson_title ?? undefined);
+        const newPrice = newLessonFee + newMaintenanceFee;
+        return supabaseAdmin.from("attendances").update({ price_paid: newPrice }).eq("id", a.id);
+      })
+    );
 
     // バッジ判定：月間全レッスンを加重カウント
     const { data: monthlyAttendances } = await supabaseAdmin
