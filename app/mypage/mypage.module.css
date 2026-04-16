@@ -251,12 +251,59 @@
   max-width: 360px;
 }
 
+.badgeInfoHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 16px;
+}
+
 .badgeInfoTitle {
   font-size: 16px;
   font-weight: 700;
   color: #333;
   text-align: center;
-  margin-bottom: 16px;
+  margin: 0;
+}
+
+.badgeInfoNext {
+  position: absolute;
+  right: 0;
+  font-size: 12px;
+  color: #0090e8;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.badgeInfoBack {
+  position: absolute;
+  left: 0;
+  font-size: 12px;
+  color: #0090e8;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.badgeCountLabel {
+  font-size: 13px;
+  color: #333;
+  flex: 1;
+}
+
+.badgeCountValue {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e05080;
+  white-space: nowrap;
 }
 
 .badgeInfoList {

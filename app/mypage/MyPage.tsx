@@ -80,6 +80,7 @@ export default function MyPage() {
   const [nextBadge, setNextBadge] = useState<NextBadge | null>(null);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [showBadgeInfo, setShowBadgeInfo] = useState(false);
+  const [badgeInfoPage, setBadgeInfoPage] = useState<"badges" | "counts">("badges");
   const [showBadgePopup, setShowBadgePopup] = useState(false);
   const [popupBadge, setPopupBadge] = useState<string | null>(null);
   const [showNameEdit, setShowNameEdit] = useState(false);
@@ -294,7 +295,7 @@ export default function MyPage() {
           </div>
         </div>
         {user && (
-          <button className={styles.headerBadge} onClick={() => setShowBadgeInfo(true)}>
+          <button className={styles.headerBadge} onClick={() => { setBadgeInfoPage("badges"); setShowBadgeInfo(true); }}>
             <img
               src={`/images/badges/badge-${lastMonthBadge ?? "normal"}.png`}
               alt={lastMonthBadge ?? "normal"}
@@ -352,23 +353,52 @@ export default function MyPage() {
         onClick={() => setShowBadgeInfo(false)}
       >
         <div className={styles.badgeInfoModal} onClick={(e) => e.stopPropagation()}>
-          <p className={styles.badgeInfoTitle}>バッジの仕組み</p>
-          <div className={styles.badgeInfoList}>
-            {[
-              { badge: "normal",   label: "ノーマル",   count: "月0回以上" },
-              { badge: "bronze",   label: "ブロンズ",   count: "月4回以上" },
-              { badge: "silver",   label: "シルバー",   count: "月8回以上" },
-              { badge: "gold",     label: "ゴールド",   count: "月12回以上" },
-              { badge: "platinum", label: "プラチナ",   count: "月20回以上" },
-              { badge: "diamond",  label: "ダイヤモンド", count: "月40回以上" },
-            ].map((b) => (
-              <div key={b.badge} className={styles.badgeInfoRow}>
-                <img src={`/images/badges/badge-${b.badge}.png`} alt={b.label} className={styles.badgeInfoImg} />
-                <span className={styles.badgeInfoLabel}>{b.label}</span>
-                <span className={styles.badgeInfoCount}>{b.count}</span>
+          {badgeInfoPage === "badges" ? (
+            <>
+              <div className={styles.badgeInfoHeader}>
+                <p className={styles.badgeInfoTitle}>バッジの仕組み</p>
+                <button className={styles.badgeInfoNext} onClick={() => setBadgeInfoPage("counts")}>回数の数え方 ›</button>
               </div>
-            ))}
-          </div>
+              <div className={styles.badgeInfoList}>
+                {[
+                  { badge: "normal",   label: "ノーマル",   count: "月0回以上" },
+                  { badge: "bronze",   label: "ブロンズ",   count: "月4回以上" },
+                  { badge: "silver",   label: "シルバー",   count: "月8回以上" },
+                  { badge: "gold",     label: "ゴールド",   count: "月12回以上" },
+                  { badge: "platinum", label: "プラチナ",   count: "月20回以上" },
+                  { badge: "diamond",  label: "ダイヤモンド", count: "月40回以上" },
+                ].map((b) => (
+                  <div key={b.badge} className={styles.badgeInfoRow}>
+                    <img src={`/images/badges/badge-${b.badge}.png`} alt={b.label} className={styles.badgeInfoImg} />
+                    <span className={styles.badgeInfoLabel}>{b.label}</span>
+                    <span className={styles.badgeInfoCount}>{b.count}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.badgeInfoHeader}>
+                <button className={styles.badgeInfoBack} onClick={() => setBadgeInfoPage("badges")}>‹ 戻る</button>
+                <p className={styles.badgeInfoTitle}>回数の数え方</p>
+              </div>
+              <div className={styles.badgeInfoList}>
+                {[
+                  { label: "通常・祝日レッスン",   count: "1回" },
+                  { label: "ポワント・プレモダン", count: "0.5回" },
+                  { label: "個人レッスン 15分",   count: "1回" },
+                  { label: "個人レッスン 30分",   count: "2回" },
+                  { label: "個人レッスン 45分",   count: "3回" },
+                  { label: "特別レッスン",         count: "カウント外" },
+                ].map((r) => (
+                  <div key={r.label} className={styles.badgeInfoRow}>
+                    <span className={styles.badgeCountLabel}>{r.label}</span>
+                    <span className={styles.badgeCountValue}>{r.count}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
           <button className={styles.badgeInfoClose} onClick={() => setShowBadgeInfo(false)}>閉じる</button>
         </div>
       </div>
