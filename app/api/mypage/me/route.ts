@@ -50,19 +50,41 @@ export async function GET(req: Request) {
     const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     const nextMonthStr = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, "0")}-01`;
 
-    // 今月・先月のバッジ
-    const [{ data: badge }, { data: lastBadge }] = await Promise.all([
+    // 今月・先月のバッジ + 全出席履歴 + 全バッジ履歴を並列取得
+    const [
+      { data: badge },
+      { data: lastBadge },
+      { data: allAttendances },
+      { data: allBadges },
+    ] = await Promise.all([
       supabaseAdmin.from("badges").select("badge").eq("user_id", user.id).eq("year_month", yearMonth).single(),
       supabaseAdmin.from("badges").select("badge").eq("user_id", user.id).eq("year_month", lastYearMonth).single(),
+      supabaseAdmin
+        .from("attendances")
+        .select("id, lesson_date, lesson_type, lesson_title, lesson_time, lesson_teacher, price_paid")
+        .eq("student_id", user.id)
+        .order("lesson_date", { ascending: true }),
+      supabaseAdmin
+        .from("badges")
+        .select("year_month, badge")
+        .eq("user_id", user.id)
+        .order("year_month", { ascending: true }),
     ]);
 
+    // 出席履歴: 維持費を分離して降順に
+    const monthSeen = new Set<string>();
+    const attendanceHistory = (allAttendances ?? []).map((a) => {
+      const ym = a.lesson_date.slice(0, 7);
+      const isFirst = !monthSeen.has(ym);
+      if (isFirst) monthSeen.add(ym);
+      const maintenance_fee = isFirst && a.price_paid > 0 ? 500 : 0;
+      return { ...a, maintenance_fee, lesson_fee: a.price_paid - maintenance_fee };
+    }).reverse();
+
     // 今月の出席（加重カウント）
-    const { data: monthlyAttendances } = await supabaseAdmin
-      .from("attendances")
-      .select("lesson_type, lesson_title, lesson_time")
-      .eq("student_id", user.id)
-      .gte("lesson_date", `${yearMonth}-01`)
-      .lt("lesson_date", nextMonthStr);
+    const monthlyAttendances = (allAttendances ?? []).filter(
+      (a) => a.lesson_date >= `${yearMonth}-01` && a.lesson_date < nextMonthStr
+    );
 
     const monthlyCount = (monthlyAttendances ?? []).reduce(
       (sum, a) => sum + calcLessonCount(a.lesson_type, a.lesson_title, a.lesson_time),
@@ -112,6 +134,8 @@ export async function GET(req: Request) {
       lastMonthBadge,
       monthlyCount,
       nextBadge: nextBadgeResult,
+      attendanceHistory,
+      badgeHistory: allBadges ?? [],
     });
   } catch (e) {
     console.error(e);

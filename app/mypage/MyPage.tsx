@@ -130,12 +130,10 @@ export default function MyPage() {
   const [historyMonth, setHistoryMonth] = useState(new Date().toISOString().slice(0, 7));
   const [historyYear, setHistoryYear] = useState(new Date().getFullYear());
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
-  const [historyLoading, setHistoryLoading] = useState(false);
 
   // バッジ履歴
   const [badgeData, setBadgeData] = useState<BadgeRecord[]>([]);
   const [badgeYear, setBadgeYear] = useState(new Date().getFullYear());
-  const [badgeLoading, setBadgeLoading] = useState(false);
 
   // タブ
   const [tab, setTab] = useState<"notices" | "history" | "badges">("notices");
@@ -180,6 +178,8 @@ export default function MyPage() {
         setCurrentBadge(data.currentBadge ?? null);
         setLastMonthBadge(data.lastMonthBadge ?? null);
         setNextBadge(data.nextBadge ?? null);
+        setHistoryData(data.attendanceHistory ?? []);
+        setBadgeData(data.badgeHistory ?? []);
 
         // バッジ獲得ポップアップの表示判定
         const lastBadge: string | null = data.lastMonthBadge ?? null;
@@ -215,23 +215,6 @@ export default function MyPage() {
     return () => clearInterval(id);
   }, [tab]);
 
-  // レッスン履歴取得
-  useEffect(() => {
-    if (!user || tab !== "history") return;
-    setHistoryLoading(true);
-    fetch(`/api/admin/attendance-history?userId=${user.id}`, { cache: "no-store" })
-      .then((r) => r.json())
-      .then((data) => { setHistoryData(data.attendances ?? []); setHistoryLoading(false); });
-  }, [user, tab]);
-
-  // バッジ履歴取得
-  useEffect(() => {
-    if (!user || tab !== "badges") return;
-    setBadgeLoading(true);
-    fetch(`/api/admin/badge-history?userId=${user.id}`, { cache: "no-store" })
-      .then((r) => r.json())
-      .then((data) => { setBadgeData(data.badges ?? []); setBadgeLoading(false); });
-  }, [user, tab]);
 
   const historyMonthData = historyData.filter((a) => a.lesson_date.startsWith(historyMonth));
 
@@ -444,9 +427,7 @@ export default function MyPage() {
             <button className={`${styles.historyModeBtn} ${historyMode === "year" ? styles.active : ""}`} onClick={() => setHistoryMode("year")}>年</button>
           </div>
 
-          {historyLoading ? (
-            <p className={styles.loading}>読み込み中...</p>
-          ) : historyMode === "month" ? (
+          {historyMode === "month" ? (
             <>
               <div className={styles.monthNav}>
                 <button className={styles.monthNavBtn} onClick={() => changeHistoryMonth(-1)}>‹</button>
@@ -544,10 +525,7 @@ export default function MyPage() {
       {/* ━━━ バッジ履歴 ━━━ */}
       {tab === "badges" && (
         <div className={`${styles.section} ${styles.sectionFit}`}>
-          {badgeLoading ? (
-            <p className={styles.loading}>読み込み中...</p>
-          ) : (
-            <div className={styles.badgeInner}>
+          <div className={styles.badgeInner}>
               <div className={styles.monthNav}>
                 <button
                   className={styles.monthNavBtn}
@@ -576,8 +554,7 @@ export default function MyPage() {
                   );
                 })}
               </div>
-            </div>
-          )}
+          </div>
         </div>
       )}
       </div>
