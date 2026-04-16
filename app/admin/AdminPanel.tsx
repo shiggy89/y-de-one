@@ -115,6 +115,8 @@ export default function AdminPanel() {
     isTeacher: boolean; lessonFee: number; maintenanceFee: number; total: number;
   }[]>([]);
   const [attendanceMonthData, setAttendanceMonthData] = useState<LedgerRecord[]>([]);
+  // 全期間の (lessonTime__lessonTitle) → { userId: count } マップ（ソート用）
+  const [allLessonCountsMap, setAllLessonCountsMap] = useState<Record<string, Record<number, number>>>({});
   const [attendanceError, setAttendanceError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -334,7 +336,11 @@ export default function AdminPanel() {
 
   const lessonMonth = lessonDate.slice(0, 7);
   useEffect(() => {
-    if (tab === "attendance" && isAdmin) fetchAttendanceMonth(lessonMonth);
+    if (tab === "attendance" && isAdmin) {
+      fetchAttendanceMonth(lessonMonth);
+      // 全カウントマップが未取得の場合のみ取得（一度きり）
+      if (Object.keys(allLessonCountsMap).length === 0) fetchAllLessonCounts();
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, isAdmin, lessonMonth]);
 
@@ -395,6 +401,19 @@ export default function AdminPanel() {
     setAttendanceMonthData(data.records ?? []);
   };
 
+  // 全期間の出席カウントマップを構築（ソート用・一度だけ取得）
+  const fetchAllLessonCounts = async () => {
+    const res = await fetch("/api/admin/lesson-counts-all");
+    const data = await res.json();
+    const map: Record<string, Record<number, number>> = {};
+    for (const row of data.rows ?? []) {
+      const key = `${row.lesson_time}__${row.lesson_title}`;
+      if (!map[key]) map[key] = {};
+      map[key][row.student_id] = (map[key][row.student_id] ?? 0) + 1;
+    }
+    setAllLessonCountsMap(map);
+  };
+
   // クライアント側で料金を即座に計算（APIコールなし）
   const calcClientFee = (userId: number, date: string, type: string, title: string | undefined, timeStart: string | null, minutes: number) => {
     const user = users.find((u) => u.id === userId);
@@ -446,8 +465,9 @@ export default function AdminPanel() {
       setHolidayLessonType("特別レッスン");
       setLessonDate(today);
       setAttendedIds([]);
-      // 月データを再取得して次のクリック時の料金計算を最新に
+      // 月データと全カウントマップを再取得（次回の即時計算を最新に）
       fetchAttendanceMonth(lessonDate.slice(0, 7));
+      fetchAllLessonCounts();
       const names = selectedUserIds.map((id) => users.find((u) => u.id === id)?.name ?? "").filter(Boolean).join("、");
       setToast(`${results.length}名の出席を記録しました\n${names}`);
       setTimeout(() => setToast(null), 4000);
@@ -631,7 +651,11 @@ export default function AdminPanel() {
                         setHolidayLessonType(t);
                         setSelectedUserIds([]);
                         setFeePreviews([]);
-                        fetchAttendedIds(lessonDate, null, t);
+                        // attendedIds: 当月データから即時計算
+                        const attended = attendanceMonthData
+                          .filter(r => r.lesson_date === lessonDate && r.lesson_title === t)
+                          .map(r => r.student_id);
+                        setAttendedIds([...new Set<number>(attended)]);
                       }}
                     >
                       <span className={styles.lessonBtnTitle}>{t}</span>
@@ -655,8 +679,14 @@ export default function AdminPanel() {
                           setSelectedLesson(l);
                           setSelectedUserIds([]);
                           setFeePreviews([]);
-                          fetchAttendedIds(lessonDate, `${l.start}〜${l.end}`, l.title);
-                          fetchLessonCounts(`${l.start}〜${l.end}`, l.title);
+                          // attendedIds: 当月データから即時計算
+                          const lessonTimeStr = `${l.start}〜${l.end}`;
+                          const attended = attendanceMonthData
+                            .filter(r => r.lesson_date === lessonDate && r.lesson_time === lessonTimeStr && r.lesson_title === l.title)
+                            .map(r => r.student_id);
+                          setAttendedIds([...new Set<number>(attended)]);
+                          // lessonCounts: 全期間マップから即時取得
+                          setLessonCounts(allLessonCountsMap[`${lessonTimeStr}__${l.title}`] ?? {});
                         }}
                       >
                         <span className={styles.lessonBtnTime}>{l.start}〜{l.end}</span>
