@@ -347,30 +347,31 @@ export default function MyPage() {
       )}
 
       {/* ━━━ バッジ説明モーダル ━━━ */}
-      {showBadgeInfo && (
-        <div className={styles.badgeInfoOverlay} onClick={() => setShowBadgeInfo(false)}>
-          <div className={styles.badgeInfoModal} onClick={(e) => e.stopPropagation()}>
-            <p className={styles.badgeInfoTitle}>バッジの仕組み</p>
-            <div className={styles.badgeInfoList}>
-              {[
-                { badge: "normal",   label: "ノーマル",   count: "月0回以上" },
-                { badge: "bronze",   label: "ブロンズ",   count: "月4回以上" },
-                { badge: "silver",   label: "シルバー",   count: "月8回以上" },
-                { badge: "gold",     label: "ゴールド",   count: "月12回以上" },
-                { badge: "platinum", label: "プラチナ",   count: "月20回以上" },
-                { badge: "diamond",  label: "ダイヤモンド", count: "月40回以上" },
-              ].map((b) => (
-                <div key={b.badge} className={styles.badgeInfoRow}>
-                  <img src={`/images/badges/badge-${b.badge}.png`} alt={b.label} className={styles.badgeInfoImg} />
-                  <span className={styles.badgeInfoLabel}>{b.label}</span>
-                  <span className={styles.badgeInfoCount}>{b.count}</span>
-                </div>
-              ))}
-            </div>
-            <button className={styles.badgeInfoClose} onClick={() => setShowBadgeInfo(false)}>閉じる</button>
+      <div
+        className={`${styles.badgeInfoOverlay} ${showBadgeInfo ? "" : styles.badgeInfoOverlayHidden}`}
+        onClick={() => setShowBadgeInfo(false)}
+      >
+        <div className={styles.badgeInfoModal} onClick={(e) => e.stopPropagation()}>
+          <p className={styles.badgeInfoTitle}>バッジの仕組み</p>
+          <div className={styles.badgeInfoList}>
+            {[
+              { badge: "normal",   label: "ノーマル",   count: "月0回以上" },
+              { badge: "bronze",   label: "ブロンズ",   count: "月4回以上" },
+              { badge: "silver",   label: "シルバー",   count: "月8回以上" },
+              { badge: "gold",     label: "ゴールド",   count: "月12回以上" },
+              { badge: "platinum", label: "プラチナ",   count: "月20回以上" },
+              { badge: "diamond",  label: "ダイヤモンド", count: "月40回以上" },
+            ].map((b) => (
+              <div key={b.badge} className={styles.badgeInfoRow}>
+                <img src={`/images/badges/badge-${b.badge}.png`} alt={b.label} className={styles.badgeInfoImg} />
+                <span className={styles.badgeInfoLabel}>{b.label}</span>
+                <span className={styles.badgeInfoCount}>{b.count}</span>
+              </div>
+            ))}
           </div>
+          <button className={styles.badgeInfoClose} onClick={() => setShowBadgeInfo(false)}>閉じる</button>
         </div>
-      )}
+      </div>
 
       {/* ━━━ バッジ獲得ポップアップ ━━━ */}
       {showBadgePopup && popupBadge && (
