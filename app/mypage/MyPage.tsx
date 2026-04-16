@@ -188,12 +188,11 @@ export default function MyPage() {
           const now = new Date();
           const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
           const storageKey = `badge_popup_${userId}_${yearMonth}`;
-          // id=14は毎回表示（テスト用）、それ以外は月1回
-          const shouldShow = userId === 14 || !localStorage.getItem(storageKey);
+          const shouldShow = !localStorage.getItem(storageKey);
           if (shouldShow) {
             setPopupBadge(lastBadge);
             setShowBadgePopup(true);
-            if (userId !== 14) localStorage.setItem(storageKey, "1");
+            localStorage.setItem(storageKey, "1");
           }
         }
       });
