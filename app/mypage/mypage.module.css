@@ -466,99 +466,51 @@
 }
 
 /* ━━━ リアクション ━━━ */
-.reactionRow {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  margin-top: 10px;
-  position: relative;
-}
-
-.reactionChip {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  padding: 3px 8px;
-  border-radius: 20px;
-  border: 1.5px solid #ddd;
-  background: #f8f8f8;
-  font-size: 15px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.reactionChipMine {
-  border-color: #e05080;
-  background: #fff0f4;
-}
-
-.reactionCount {
-  font-size: 12px;
-  color: #666;
-  font-weight: 700;
-}
-
-.reactionChipMine .reactionCount {
-  color: #e05080;
-}
-
-.reactionAddBtn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1.5px solid #ccc;
-  background: #f8f8f8;
-  font-size: 14px;
-  color: #888;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  -webkit-tap-highlight-color: transparent;
-  flex-shrink: 0;
-}
-
 .reactionPicker {
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 0;
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 24px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
   display: flex;
-  gap: 2px;
-  padding: 6px 10px;
-  z-index: 50;
+  gap: 0;
+  margin-top: 10px;
 }
 
 .reactionPickerEmoji {
-  font-size: 22px;
+  font-size: 24px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 8px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  line-height: 1;
+  opacity: 0.45;
+  transition: opacity 0.1s, transform 0.1s;
 }
 
 .reactionPickerEmoji:active {
-  background: #f0f0f0;
+  transform: scale(0.88);
 }
 
-.reactionUsers {
+.reactionPickerEmojiMine {
+  opacity: 1;
+  background: #fff0f4;
+}
+
+.reactionResults {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
   margin-top: 6px;
-  font-size: 12px;
-  color: #555;
-  background: #f5f5f5;
-  border-radius: 8px;
-  padding: 5px 10px;
-  cursor: pointer;
 }
 
-.reactionUsersEmoji {
-  margin-right: 4px;
+.reactionResult {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.5;
+}
+
+.reactionResultMine {
+  color: #e05080;
+  font-weight: 600;
 }
 
 /* ━━━ 月ナビ ━━━ */

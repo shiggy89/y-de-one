@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
-// リアクションのトグル (追加 or 削除)
+// 1人1notice1リアクション制限でトグル
 export async function POST(req: Request) {
   try {
     const { lineUserId, noticeId, emoji } = await req.json();
@@ -17,20 +17,22 @@ export async function POST(req: Request) {
 
     if (!user) return NextResponse.json({ error: "user not found" }, { status: 404 });
 
-    // 既存のリアクションを確認
+    // このユーザーのこのnoticeへの既存リアクションを取得
     const { data: existing } = await supabaseAdmin
       .from("reactions")
-      .select("id")
+      .select("id, emoji")
       .eq("notice_id", noticeId)
       .eq("user_id", user.id)
-      .eq("emoji", emoji)
       .single();
 
-    if (existing) {
-      // すでにリアクション済み → 削除
+    if (existing && existing.emoji === emoji) {
+      // 同じ絵文字をタップ → 削除（トグルオフ）
       await supabaseAdmin.from("reactions").delete().eq("id", existing.id);
     } else {
-      // 未リアクション → 追加
+      // 別の絵文字 or 未リアクション → 既存を削除して新しいものを追加
+      if (existing) {
+        await supabaseAdmin.from("reactions").delete().eq("id", existing.id);
+      }
       await supabaseAdmin.from("reactions").insert({ notice_id: noticeId, user_id: user.id, emoji });
     }
 
@@ -49,11 +51,9 @@ export async function POST(req: Request) {
       grouped[r.emoji].users.push(displayName);
     }
 
-    const myEmojis = (updated ?? [])
-      .filter((r) => r.user_id === user.id)
-      .map((r) => r.emoji);
+    const myEmoji = (updated ?? []).find((r) => r.user_id === user.id)?.emoji ?? null;
 
-    return NextResponse.json({ reactions: grouped, myEmojis });
+    return NextResponse.json({ reactions: grouped, myEmojis: myEmoji ? [myEmoji] : [] });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "サーバーエラー" }, { status: 500 });
