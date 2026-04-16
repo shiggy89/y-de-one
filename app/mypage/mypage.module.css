@@ -478,12 +478,12 @@
 .reactionChip {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 10px;
+  gap: 3px;
+  padding: 3px 8px;
   border-radius: 20px;
   border: 1.5px solid #ddd;
   background: #f8f8f8;
-  font-size: 18px;
+  font-size: 15px;
   cursor: pointer;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
@@ -505,12 +505,12 @@
 }
 
 .reactionAddBtn {
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   border: 1.5px solid #ccc;
   background: #f8f8f8;
-  font-size: 16px;
+  font-size: 14px;
   color: #888;
   cursor: pointer;
   display: flex;
@@ -536,15 +536,14 @@
 }
 
 .reactionPickerEmoji {
-  font-size: 24px;
+  font-size: 22px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px;
+  padding: 4px;
   border-radius: 8px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  line-height: 1;
 }
 
 .reactionPickerEmojiMine {
