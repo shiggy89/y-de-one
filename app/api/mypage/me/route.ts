@@ -80,7 +80,7 @@ export async function GET(req: Request) {
       const startRank = BADGE_THRESHOLDS.findIndex((b) => b.badge === fromBadge);
       for (let i = startRank + 1; i < BADGE_THRESHOLDS.length; i++) {
         const info = BADGE_THRESHOLDS[i];
-        const rem = Math.ceil(info.min - monthlyCount);
+        const rem = info.min - monthlyCount;
         if (rem > 0) {
           return { badge: info.badge, label: BADGE_LABEL[info.badge], remaining: rem, isContinuation: false };
         }
@@ -94,7 +94,7 @@ export async function GET(req: Request) {
     let nextBadgeResult: NextBadge = null;
     if (isContinuation) {
       const targetInfo = BADGE_THRESHOLDS.find((b) => b.badge === lastMonthBadge)!;
-      const remaining = Math.ceil(targetInfo.min - monthlyCount);
+      const remaining = targetInfo.min - monthlyCount;
       if (remaining > 0) {
         // まだ先月バッジ未達成 → 継続を促す
         nextBadgeResult = { badge: lastMonthBadge!, label: BADGE_LABEL[lastMonthBadge!], remaining, isContinuation: true };
