@@ -253,16 +253,22 @@ export default function AdminPanel() {
   const [badgeData, setBadgeData] = useState<{ year_month: string; badge: string }[]>([]);
   const [badgeLoading, setBadgeLoading] = useState(false);
   const [badgeYear, setBadgeYear] = useState(new Date().getFullYear());
+  // 全員分キャッシュ
+  const [allBadgesCache, setAllBadgesCache] = useState<Record<number, { year_month: string; badge: string }[]>>({});
 
-  const openBadge = async (user: User) => {
+  const openBadge = (user: User) => {
     setBadgeUser(user);
-    setBadgeData([]);
-    setBadgeLoading(true);
     setBadgeYear(new Date().getFullYear());
-    const res = await fetch(`/api/admin/badge-history?userId=${user.id}`);
-    const data = await res.json();
-    setBadgeData(data.badges ?? []);
-    setBadgeLoading(false);
+    if (allBadgesCache[user.id]) {
+      setBadgeData(allBadgesCache[user.id]);
+      setBadgeLoading(false);
+    } else {
+      setBadgeData([]);
+      setBadgeLoading(true);
+      fetch(`/api/admin/badge-history?userId=${user.id}`)
+        .then(r => r.json())
+        .then(d => { setBadgeData(d.badges ?? []); setBadgeLoading(false); });
+    }
   };
 
   const getBadgeMinYear = () => {
@@ -275,16 +281,22 @@ export default function AdminPanel() {
   const [historyData, setHistoryData] = useState<{ id: number; lesson_date: string; lesson_type: string; lesson_title: string | null; lesson_time: string | null; lesson_teacher: string | null; price_paid: number; maintenance_fee: number; lesson_fee: number }[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyMonth, setHistoryMonth] = useState(new Date().toISOString().slice(0, 7));
+  // 全員分キャッシュ
+  const [allHistoriesCache, setAllHistoriesCache] = useState<Record<number, typeof historyData>>({});
 
-  const openHistory = async (user: User) => {
+  const openHistory = (user: User) => {
     setHistoryUser(user);
-    setHistoryData([]);
-    setHistoryLoading(true);
     setHistoryMonth(new Date().toISOString().slice(0, 7));
-    const res = await fetch(`/api/admin/attendance-history?userId=${user.id}`);
-    const data = await res.json();
-    setHistoryData(data.attendances ?? []);
-    setHistoryLoading(false);
+    if (allHistoriesCache[user.id]) {
+      setHistoryData(allHistoriesCache[user.id]);
+      setHistoryLoading(false);
+    } else {
+      setHistoryData([]);
+      setHistoryLoading(true);
+      fetch(`/api/admin/attendance-history?userId=${user.id}`)
+        .then(r => r.json())
+        .then(d => { setHistoryData(d.attendances ?? []); setHistoryLoading(false); });
+    }
   };
 
   const historyMonthData = historyData.filter((a) => a.lesson_date.startsWith(historyMonth));
@@ -346,6 +358,20 @@ export default function AdminPanel() {
 
   useEffect(() => {
     if (tab === "notices" && isAdmin) fetchNotices();
+  }, [tab, isAdmin]);
+
+  useEffect(() => {
+    if (tab === "users" && isAdmin) {
+      // 履歴・バッジを全員分まとめて取得
+      Promise.all([
+        fetch("/api/admin/all-histories").then(r => r.json()),
+        fetch("/api/admin/all-badges").then(r => r.json()),
+      ]).then(([h, b]) => {
+        if (h.histories) setAllHistoriesCache(h.histories);
+        if (b.badges) setAllBadgesCache(b.badges);
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, isAdmin]);
 
   const fetchUsers = async () => {

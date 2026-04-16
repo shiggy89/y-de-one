@@ -44,7 +44,9 @@ export async function GET(req: Request) {
       };
     });
 
-    return NextResponse.json({ records });
+    return NextResponse.json({ records }, {
+      headers: { "Cache-Control": "private, max-age=30, stale-while-revalidate=60" },
+    });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ records: [] }, { status: 500 });
