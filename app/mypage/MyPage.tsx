@@ -17,14 +17,10 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
   const bodyRef = useRef<HTMLParagraphElement>(null);
   const [overflows, setOverflows] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  // optimisticな状態（APIレスポンス待たずに即反映）
-  const [optimisticReactions, setOptimisticReactions] = useState(n.reactions);
-  const [optimisticMyEmoji, setOptimisticMyEmoji] = useState<string | null>(n.myReactions[0] ?? null);
+  const [showPicker, setShowPicker] = useState(false);
+  const [sending, setSending] = useState(false);
   const isNew = Date.now() - new Date(n.created_at).getTime() < 24 * 60 * 60 * 1000;
-
-  // propsの更新を反映
-  useEffect(() => { setOptimisticReactions(n.reactions); }, [n.reactions]);
-  useEffect(() => { setOptimisticMyEmoji(n.myReactions[0] ?? null); }, [n.myReactions]);
+  const myEmoji = n.myReactions[0] ?? null;
 
   useEffect(() => {
     if (bodyRef.current) {
@@ -33,28 +29,9 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
   }, []);
 
   const handleReact = async (emoji: string) => {
-    if (!lineUserId) return;
-
-    // optimistic update: 先にUIを更新
-    const prevReactions = optimisticReactions;
-    const prevMyEmoji = optimisticMyEmoji;
-
-    const newReactions = { ...optimisticReactions };
-    // 前のリアクションを除去
-    if (prevMyEmoji && newReactions[prevMyEmoji]) {
-      const prevUsers = newReactions[prevMyEmoji].users.filter((u) => u !== (n.myReactions[0] ? "あなた" : ""));
-      newReactions[prevMyEmoji] = { count: newReactions[prevMyEmoji].count - 1, users: newReactions[prevMyEmoji].users.slice(0, -1) };
-      if (newReactions[prevMyEmoji].count <= 0) delete newReactions[prevMyEmoji];
-    }
-    const isToggleOff = prevMyEmoji === emoji;
-    if (!isToggleOff) {
-      if (!newReactions[emoji]) newReactions[emoji] = { count: 0, users: [] };
-      newReactions[emoji] = { count: newReactions[emoji].count + 1, users: [...newReactions[emoji].users] };
-    }
-    setOptimisticReactions(newReactions);
-    setOptimisticMyEmoji(isToggleOff ? null : emoji);
-
-    // APIコール
+    if (!lineUserId || sending) return;
+    setSending(true);
+    setShowPicker(false);
     const res = await fetch("/api/mypage/reactions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -63,14 +40,11 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
     const data = await res.json();
     if (data.reactions !== undefined) {
       onReactionUpdate(n.id, data.reactions, data.myEmojis);
-    } else {
-      // 失敗時はoptimisticを戻す
-      setOptimisticReactions(prevReactions);
-      setOptimisticMyEmoji(prevMyEmoji);
     }
+    setSending(false);
   };
 
-  const activeReactions = Object.entries(optimisticReactions).filter(([, v]) => v.count > 0);
+  const activeReactions = Object.entries(n.reactions).filter(([, v]) => v.count > 0);
 
   return (
     <div className={styles.noticeItem}>
@@ -89,29 +63,39 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
       )}
 
       {/* ━━ リアクション ━━ */}
-      {/* 絵文字ピッカー（常時表示） */}
-      <div className={styles.reactionPicker}>
-        {REACTION_EMOJIS.map((emoji) => (
+      <div className={styles.reactionRow}>
+        {activeReactions.map(([emoji, { count }]) => (
           <button
             key={emoji}
-            className={`${styles.reactionPickerEmoji} ${optimisticMyEmoji === emoji ? styles.reactionPickerEmojiMine : ""}`}
+            className={`${styles.reactionChip} ${myEmoji === emoji ? styles.reactionChipMine : ""}`}
             onClick={() => handleReact(emoji)}
+            disabled={sending}
           >
-            {emoji}
+            <span>{emoji}</span>
+            <span className={styles.reactionCount}>{count}</span>
           </button>
         ))}
+        <button
+          className={styles.reactionAddBtn}
+          onClick={() => setShowPicker(!showPicker)}
+          disabled={sending}
+        >
+          {showPicker ? "✕" : "＋"}
+        </button>
+        {showPicker && (
+          <div className={styles.reactionPicker}>
+            {REACTION_EMOJIS.map((emoji) => (
+              <button
+                key={emoji}
+                className={`${styles.reactionPickerEmoji} ${myEmoji === emoji ? styles.reactionPickerEmojiMine : ""}`}
+                onClick={() => handleReact(emoji)}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-
-      {/* リアクション済みチップ（カウント + 誰がリアクションしたか） */}
-      {activeReactions.length > 0 && (
-        <div className={styles.reactionResults}>
-          {activeReactions.map(([emoji, { count, users }]) => (
-            <span key={emoji} className={`${styles.reactionResult} ${optimisticMyEmoji === emoji ? styles.reactionResultMine : ""}`}>
-              {emoji} {count}人　{users.join("・")}
-            </span>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
