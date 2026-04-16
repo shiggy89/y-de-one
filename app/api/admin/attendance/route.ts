@@ -19,7 +19,7 @@ function calcPrice(countThisMonth: number, lessonType: string, privateMinutes = 
 }
 
 // レッスンのバッジ計算用カウント
-// 通常: ポワント/プレモダン=0.5, それ以外=1
+// 通常・特別: ポワント/プレモダン=0.5, それ以外=1
 // 祝日: ポワント/プレモダン=0.5, それ以外=1
 // 個人: 15分=1回（lesson_timeに分数が入っている）
 function calcLessonCount(lessonType: string, lessonTitle: string | null, lessonTime: string | null): number {
@@ -27,21 +27,21 @@ function calcLessonCount(lessonType: string, lessonTitle: string | null, lessonT
     const minutes = lessonTime ? parseInt(lessonTime) : 15;
     return isNaN(minutes) ? 1 : minutes / 15;
   }
-  if (lessonType === "通常" || lessonType === "祝日") {
+  if (lessonType === "通常" || lessonType === "祝日" || lessonType === "特別") {
     if (lessonTitle === "ポワント" || lessonTitle === "プレモダン") return 0.5;
     return 1;
   }
   return 0;
 }
 
-// 月間カウントからバッジを決定
-// 1回→normal, 2回→bronze, 3回→silver, 4回→gold, 5回→platinum, 6回→diamond
+// 月間カウントからバッジを決定（マイページのバッジ仕組みと同一）
+// 0→null, 4→bronze, 8→silver, 12→gold, 20→platinum, 40→diamond
 function calcBadge(count: number): string | null {
-  if (count >= 6) return "diamond";
-  if (count >= 5) return "platinum";
-  if (count >= 4) return "gold";
-  if (count >= 3) return "silver";
-  if (count >= 2) return "bronze";
+  if (count >= 40) return "diamond";
+  if (count >= 20) return "platinum";
+  if (count >= 12) return "gold";
+  if (count >= 8) return "silver";
+  if (count >= 4) return "bronze";
   if (count >= 1) return "normal";
   return null;
 }

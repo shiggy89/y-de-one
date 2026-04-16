@@ -8,7 +8,7 @@ function calcLessonCount(lessonType: string, lessonTitle: string | null, lessonT
     const minutes = lessonTime ? parseInt(lessonTime) : 15;
     return isNaN(minutes) ? 1 : minutes / 15;
   }
-  if (lessonType === "通常" || lessonType === "祝日") {
+  if (lessonType === "通常" || lessonType === "祝日" || lessonType === "特別") {
     if (lessonTitle === "ポワント" || lessonTitle === "プレモダン") return 0.5;
     return 1;
   }
