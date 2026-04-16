@@ -68,6 +68,21 @@ const BADGE_LABEL: Record<string, string> = {
   gold: "ゴールド", platinum: "プラチナ", diamond: "ダイヤモンド",
 };
 
+const CACHE_KEY = "mypage_cache_v1";
+type MypageCache = {
+  lineUserId: string;
+  user: UserInfo;
+  currentBadge: string | null;
+  lastMonthBadge: string | null;
+  nextBadge: NextBadge | null;
+};
+function loadCache(): MypageCache | null {
+  try { return JSON.parse(localStorage.getItem(CACHE_KEY) ?? "null"); } catch { return null; }
+}
+function saveCache(data: MypageCache) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch { /* ignore */ }
+}
+
 export default function MyPage() {
   const [lineUserId, setLineUserId] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
@@ -141,12 +156,22 @@ export default function MyPage() {
 
   // LIFF初期化
   useEffect(() => {
+    // キャッシュがあれば即座に表示
+    const cached = loadCache();
+    if (cached) {
+      setUser(cached.user);
+      setCurrentBadge(cached.currentBadge);
+      setLastMonthBadge(cached.lastMonthBadge);
+      setNextBadge(cached.nextBadge);
+      setLoading(false);
+    }
+
     const init = async () => {
       try {
         if (process.env.NODE_ENV !== "production") {
           setLineUserId("debug");
           setDisplayName("テストユーザー");
-          setLoading(false);
+          if (!cached) setLoading(false);
           return;
         }
 
@@ -163,10 +188,10 @@ export default function MyPage() {
         console.error(e);
         setError("LINEログインに失敗しました");
       } finally {
-        setLoading(false);
+        if (!cached) setLoading(false);
       }
     };
-    try { init(); } catch (e) { console.error(e); setLoading(false); }
+    try { init(); } catch (e) { console.error(e); if (!cached) setLoading(false); }
   }, []);
 
   // ユーザー情報取得
@@ -181,6 +206,16 @@ export default function MyPage() {
         setNextBadge(data.nextBadge ?? null);
         setHistoryData(data.attendanceHistory ?? []);
         setBadgeData(data.badgeHistory ?? []);
+        // 次回のために最新データをキャッシュ
+        if (data.user) {
+          saveCache({
+            lineUserId,
+            user: data.user,
+            currentBadge: data.currentBadge ?? null,
+            lastMonthBadge: data.lastMonthBadge ?? null,
+            nextBadge: data.nextBadge ?? null,
+          });
+        }
 
         // バッジ獲得ポップアップの表示判定
         const lastBadge: string | null = data.lastMonthBadge ?? null;
@@ -384,12 +419,11 @@ export default function MyPage() {
               </div>
               <div className={styles.badgeInfoList}>
                 {[
-                  { label: "通常・祝日レッスン",   count: "1回" },
-                  { label: "ポワント・プレモダン", count: "0.5回" },
-                  { label: "個人レッスン 15分",   count: "1回" },
-                  { label: "個人レッスン 30分",   count: "2回" },
-                  { label: "個人レッスン 45分",   count: "3回" },
-                  { label: "特別レッスン",         count: "カウント外" },
+                  { label: "通常レッスン",       count: "1回" },
+                  { label: "特別レッスン",       count: "1回" },
+                  { label: "ポワント",           count: "0.5回" },
+                  { label: "プレモダン",         count: "0.5回" },
+                  { label: "個人レッスン 15分", count: "1回" },
                 ].map((r) => (
                   <div key={r.label} className={styles.badgeInfoRow}>
                     <span className={styles.badgeCountLabel}>{r.label}</span>
