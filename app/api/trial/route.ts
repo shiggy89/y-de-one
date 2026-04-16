@@ -45,13 +45,6 @@ export async function POST(req: Request) {
         .eq("line_user_id", lineUserId)
         .single();
 
-      if (existing?.status === "member") {
-        return NextResponse.json(
-          { ok: false, error: "すでに会員登録済みのため、体験レッスンの申込みはできません。" },
-          { status: 409 }
-        );
-      }
-
       if (!existing) {
         await supabaseAdmin.from("users").insert({
           line_user_id: lineUserId,
