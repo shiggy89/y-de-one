@@ -4,10 +4,21 @@ import { useEffect, useRef, useState, type CSSProperties, type ChangeEvent } fro
 import liff from "@line/liff";
 import styles from "./mypage.module.css";
 
-function NoticeItem({ n }: { n: { id: number; title: string; body: string; author: string | null; created_at: string } }) {
+const REACTION_EMOJIS = ["❤️", "👍", "😊", "😮", "😢"];
+
+type ReactionGroup = { count: number; users: string[] };
+type NoticeItemProps = {
+  n: { id: number; title: string; body: string; author: string | null; created_at: string; reactions: Record<string, ReactionGroup>; myReactions: string[] };
+  lineUserId: string | null;
+  onReactionUpdate: (noticeId: number, reactions: Record<string, ReactionGroup>, myEmojis: string[]) => void;
+};
+
+function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
   const bodyRef = useRef<HTMLParagraphElement>(null);
   const [overflows, setOverflows] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const [usersPopup, setUsersPopup] = useState<{ emoji: string; users: string[] } | null>(null);
   const isNew = Date.now() - new Date(n.created_at).getTime() < 24 * 60 * 60 * 1000;
 
   useEffect(() => {
@@ -15,6 +26,22 @@ function NoticeItem({ n }: { n: { id: number; title: string; body: string; autho
       setOverflows(bodyRef.current.scrollHeight > bodyRef.current.clientHeight + 1);
     }
   }, []);
+
+  const handleReact = async (emoji: string) => {
+    if (!lineUserId) return;
+    setShowPicker(false);
+    const res = await fetch("/api/mypage/reactions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lineUserId, noticeId: n.id, emoji }),
+    });
+    const data = await res.json();
+    if (data.reactions !== undefined) {
+      onReactionUpdate(n.id, data.reactions, data.myEmojis);
+    }
+  };
+
+  const activeReactions = Object.entries(n.reactions).filter(([, v]) => v.count > 0);
 
   return (
     <div className={styles.noticeItem}>
@@ -30,6 +57,47 @@ function NoticeItem({ n }: { n: { id: number; title: string; body: string; autho
         <button className={styles.noticeToggle} onClick={() => setExpanded(!expanded)}>
           {expanded ? "閉じる ▲" : "全文を表示 ▼"}
         </button>
+      )}
+
+      {/* ━━ リアクション ━━ */}
+      <div className={styles.reactionRow}>
+        {/* 既存リアクションチップ */}
+        {activeReactions.map(([emoji, { count, users }]) => (
+          <button
+            key={emoji}
+            className={`${styles.reactionChip} ${n.myReactions.includes(emoji) ? styles.reactionChipMine : ""}`}
+            onClick={() => handleReact(emoji)}
+            onContextMenu={(e) => { e.preventDefault(); setUsersPopup({ emoji, users }); }}
+          >
+            <span>{emoji}</span>
+            <span
+              className={styles.reactionCount}
+              onClick={(e) => { e.stopPropagation(); setUsersPopup(usersPopup?.emoji === emoji ? null : { emoji, users }); }}
+            >{count}</span>
+          </button>
+        ))}
+        {/* ピッカー開閉ボタン */}
+        <button className={styles.reactionAddBtn} onClick={() => setShowPicker(!showPicker)}>
+          {showPicker ? "✕" : "＋"}
+        </button>
+        {/* 絵文字ピッカー */}
+        {showPicker && (
+          <div className={styles.reactionPicker}>
+            {REACTION_EMOJIS.map((emoji) => (
+              <button key={emoji} className={styles.reactionPickerEmoji} onClick={() => handleReact(emoji)}>
+                {emoji}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 誰がリアクションしたかポップアップ */}
+      {usersPopup && (
+        <div className={styles.reactionUsers} onClick={() => setUsersPopup(null)}>
+          <span className={styles.reactionUsersEmoji}>{usersPopup.emoji}</span>
+          {usersPopup.users.join("・")}
+        </div>
       )}
     </div>
   );
@@ -47,7 +115,11 @@ type UserInfo = {
 
 type NextBadge = { badge: string; label: string; remaining: number; isContinuation: boolean };
 
-type Notice = { id: number; title: string; body: string; author: string | null; created_at: string };
+type Notice = {
+  id: number; title: string; body: string; author: string | null; created_at: string;
+  reactions: Record<string, ReactionGroup>;
+  myReactions: string[];
+};
 
 type Attendance = {
   id: number;
@@ -235,8 +307,9 @@ export default function MyPage() {
   }, [lineUserId]);
 
   // お知らせ取得
-  const fetchNotices = () => {
-    fetch("/api/mypage/notices", { cache: "no-store" })
+  const fetchNotices = (uid?: string) => {
+    const q = uid ? `?lineUserId=${uid}` : lineUserId ? `?lineUserId=${lineUserId}` : "";
+    fetch(`/api/mypage/notices${q}`, { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => setNotices(data.notices ?? []));
   };
@@ -245,11 +318,20 @@ export default function MyPage() {
     fetchNotices();
   }, []);
 
+  // lineUserId 確定後に再取得（リアクションの「自分」判定のため）
+  useEffect(() => {
+    if (lineUserId) fetchNotices(lineUserId);
+  }, [lineUserId]);
+
   useEffect(() => {
     if (tab !== "notices") return;
-    const id = setInterval(fetchNotices, 10000);
+    const id = setInterval(() => fetchNotices(), 10000);
     return () => clearInterval(id);
-  }, [tab]);
+  }, [tab, lineUserId]);
+
+  const handleReactionUpdate = (noticeId: number, reactions: Record<string, ReactionGroup>, myEmojis: string[]) => {
+    setNotices((prev) => prev.map((n) => n.id === noticeId ? { ...n, reactions, myReactions: myEmojis } : n));
+  };
 
 
   const historyMonthData = historyData.filter((a) => a.lesson_date.startsWith(historyMonth));
@@ -479,7 +561,7 @@ export default function MyPage() {
         <div className={styles.section}>
           {notices.length === 0 ? (
             <p className={styles.empty}>お知らせはありません</p>
-          ) : notices.map((n) => <NoticeItem key={n.id} n={n} />)}
+          ) : notices.map((n) => <NoticeItem key={n.id} n={n} lineUserId={lineUserId} onReactionUpdate={handleReactionUpdate} />)}
         </div>
       )}
 
