@@ -128,43 +128,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // バッジ判定：月間全レッスンを加重カウント
-
-    const monthlyCount = (monthlyAttendances ?? []).reduce(
-      (sum, a) => sum + calcLessonCount(a.lesson_type, a.lesson_title, a.lesson_time),
-      0
-    );
-    const badge = calcBadge(monthlyCount);
-
-    const badgeOrder = ["normal", "bronze", "silver", "gold", "platinum", "diamond"];
-
-    if (badge) {
-      const { data: existingBadge } = await supabaseAdmin
-        .from("badges")
-        .select("id, badge")
-        .eq("user_id", userId)
-        .eq("year_month", yearMonth)
-        .single();
-
-      const newBadgeRank = badgeOrder.indexOf(badge);
-      const currentBadgeRank = existingBadge ? badgeOrder.indexOf(existingBadge.badge) : -1;
-
-      if (!existingBadge) {
-        await supabaseAdmin.from("badges").insert({
-          user_id: userId,
-          year_month: yearMonth,
-          badge,
-          notified: false,
-        });
-      } else if (newBadgeRank > currentBadgeRank) {
-        await supabaseAdmin
-          .from("badges")
-          .update({ badge, notified: false })
-          .eq("id", existingBadge.id);
-      }
-    }
-
-    return NextResponse.json({ ok: true, price, lessonFee, maintenanceFee, countThisMonth, badge });
+    return NextResponse.json({ ok: true, price, lessonFee, maintenanceFee, countThisMonth });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "サーバーエラーが発生しました" }, { status: 500 });
