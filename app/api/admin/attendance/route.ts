@@ -55,38 +55,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "必須項目が不足しています" }, { status: 400 });
     }
 
-    // 先生は料金0円
-    const { data: user } = await supabaseAdmin
-      .from("users")
-      .select("status")
-      .eq("id", userId)
-      .single();
-
-    const isTeacher = user?.status === "teacher";
-
-    // 今月の出席回数を取得
     const yearMonth = lessonDate.slice(0, 7); // "2026-04"
     const nextMonth = new Date(`${yearMonth}-01`);
     nextMonth.setMonth(nextMonth.getMonth() + 1);
     const nextMonthStr = nextMonth.toISOString().split("T")[0];
 
-    // lessonDate より前の件数
-    const { data: beforeDate } = await supabaseAdmin
-      .from("attendances")
-      .select("id")
-      .eq("student_id", userId)
-      .gte("lesson_date", `${yearMonth}-01`)
-      .lt("lesson_date", lessonDate);
+    // 先生チェック・当月レッスン回数カウントを並列取得
+    const [{ data: user }, { data: beforeDate }, { data: sameDay }] = await Promise.all([
+      supabaseAdmin.from("users").select("status").eq("id", userId).single(),
+      supabaseAdmin.from("attendances").select("id").eq("student_id", userId).gte("lesson_date", `${yearMonth}-01`).lt("lesson_date", lessonDate),
+      lessonTimeStart
+        ? supabaseAdmin.from("attendances").select("id").eq("student_id", userId).eq("lesson_date", lessonDate).lt("lesson_time", lessonTimeStart)
+        : Promise.resolve({ data: [] as { id: number }[] }),
+    ]);
 
-    // 同日でlessonTimeより前の件数（同日複数レッスン対応）
-    const { data: sameDay } = lessonTimeStart
-      ? await supabaseAdmin
-          .from("attendances")
-          .select("id")
-          .eq("student_id", userId)
-          .eq("lesson_date", lessonDate)
-          .lt("lesson_time", lessonTimeStart)
-      : { data: [] };
+    const isTeacher = user?.status === "teacher";
 
     const prevCount = (beforeDate?.length ?? 0) + (sameDay?.length ?? 0);
     const countThisMonth = prevCount + 1;
@@ -115,20 +98,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // 遡及追加の場合のみ月間料金を再計算（通常は今日の記録なのでスキップ）
-    // 新しく追加したレコードより後の日付・時刻のレコードが存在する場合のみ再計算が必要
-    const { data: laterRecords } = await supabaseAdmin
-      .from("attendances")
-      .select("id")
-      .eq("student_id", userId)
-      .gte("lesson_date", `${yearMonth}-01`)
-      .lt("lesson_date", nextMonthStr)
-      .gt("lesson_date", lessonDate)
-      .limit(1);
+    // 遡及チェックとバッジ用カウントを並列取得
+    const [{ data: laterRecords }, { data: monthlyAttendances }] = await Promise.all([
+      supabaseAdmin.from("attendances").select("id").eq("student_id", userId).gte("lesson_date", `${yearMonth}-01`).lt("lesson_date", nextMonthStr).gt("lesson_date", lessonDate).limit(1),
+      supabaseAdmin.from("attendances").select("lesson_type, lesson_title, lesson_time").eq("student_id", userId).gte("lesson_date", `${yearMonth}-01`).lt("lesson_date", nextMonthStr),
+    ]);
 
-    const hasLaterRecords = (laterRecords?.length ?? 0) > 0;
-
-    if (hasLaterRecords) {
+    // 遡及追加の場合のみ月間料金を再計算
+    if ((laterRecords?.length ?? 0) > 0) {
       const { data: monthAll } = await supabaseAdmin
         .from("attendances")
         .select("id, lesson_date, lesson_time, lesson_type, lesson_title")
@@ -152,12 +129,6 @@ export async function POST(req: Request) {
     }
 
     // バッジ判定：月間全レッスンを加重カウント
-    const { data: monthlyAttendances } = await supabaseAdmin
-      .from("attendances")
-      .select("lesson_type, lesson_title, lesson_time")
-      .eq("student_id", userId)
-      .gte("lesson_date", `${yearMonth}-01`)
-      .lt("lesson_date", nextMonthStr);
 
     const monthlyCount = (monthlyAttendances ?? []).reduce(
       (sum, a) => sum + calcLessonCount(a.lesson_type, a.lesson_title, a.lesson_time),

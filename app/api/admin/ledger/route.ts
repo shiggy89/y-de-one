@@ -11,22 +11,20 @@ export async function GET(req: Request) {
     nextMonth.setMonth(nextMonth.getMonth() + 1);
     const nextMonthStr = nextMonth.toISOString().split("T")[0];
 
-    const { data: attendances, error } = await supabaseAdmin
-      .from("attendances")
-      .select("id, lesson_date, lesson_type, lesson_title, lesson_time, lesson_teacher, price_paid, student_id")
-      .gte("lesson_date", `${month}-01`)
-      .lt("lesson_date", nextMonthStr)
-      .order("lesson_date", { ascending: true })
-      .order("lesson_time", { ascending: true, nullsFirst: false });
+    // 出席データとユーザー情報を並列取得
+    const [{ data: attendances, error }, { data: users }] = await Promise.all([
+      supabaseAdmin
+        .from("attendances")
+        .select("id, lesson_date, lesson_type, lesson_title, lesson_time, lesson_teacher, price_paid, student_id")
+        .gte("lesson_date", `${month}-01`)
+        .lt("lesson_date", nextMonthStr)
+        .order("lesson_date", { ascending: true })
+        .order("lesson_time", { ascending: true, nullsFirst: false }),
+      supabaseAdmin.from("users").select("id, name, line_picture_url"),
+    ]);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     if (!attendances?.length) return NextResponse.json({ records: [] });
-
-    const studentIds = [...new Set(attendances.map((a) => a.student_id))];
-    const { data: users } = await supabaseAdmin
-      .from("users")
-      .select("id, name, line_picture_url")
-      .in("id", studentIds);
 
     const userMap = new Map((users ?? []).map((u) => [u.id, u]));
 
