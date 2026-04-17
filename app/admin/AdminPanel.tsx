@@ -67,6 +67,12 @@ function buildCalendar(yearMonth: string): (number | null)[][] {
 
 const LESSON_FEES_ONLY = [2800, 5400, 7800, 9600, 11800, 14000, 16200, 17600];
 
+function isStandardLesson(lessonType: string, lessonTitle: string | null | undefined): boolean {
+  if (lessonType !== "通常" && lessonType !== "祝日") return false;
+  if (lessonTitle === "ポワント" || lessonTitle === "プレモダン" || lessonTitle === "特別レッスン") return false;
+  return true;
+}
+
 function calcLessonFee(countThisMonth: number, lessonType: string, privateMinutes = 15, lessonTitle?: string): number {
   if (lessonType === "個人") return 2500 * (privateMinutes / 15);
   if (lessonType === "祝日") {
@@ -450,14 +456,16 @@ export default function AdminPanel() {
   const calcClientFee = (userId: number, date: string, type: string, title: string | undefined, timeStart: string | null, minutes: number) => {
     const user = users.find((u) => u.id === userId);
     const isTeacher = user?.status === "teacher";
-    const prevCount = attendanceMonthData.filter((r) =>
+    const prevRecords = attendanceMonthData.filter((r) =>
       r.student_id === userId &&
       (r.lesson_date < date || (r.lesson_date === date && timeStart && r.lesson_time && r.lesson_time.split("〜")[0] < timeStart))
-    ).length;
-    const countThisMonth = prevCount + 1;
-    const isFirst = prevCount === 0;
+    );
+    const isFirst = prevRecords.length === 0;
+    // 料金段階は標準レッスン（通常/祝日でポワント・プレモダン・特別以外）のみカウント
+    const prevStandardCount = prevRecords.filter((r) => isStandardLesson(r.lesson_type, r.lesson_title)).length;
+    const standardCount = prevStandardCount + (isStandardLesson(type, title ?? null) ? 1 : 0);
     const maintenanceFee = isTeacher ? 0 : (isFirst ? 500 : 0);
-    const lessonFee = isTeacher ? 0 : calcLessonFee(countThisMonth, type, minutes, title);
+    const lessonFee = isTeacher ? 0 : calcLessonFee(standardCount, type, minutes, title);
     const total = isTeacher ? 0 : lessonFee + maintenanceFee;
     return { isTeacher: isTeacher ?? false, lessonFee, maintenanceFee, total };
   };
