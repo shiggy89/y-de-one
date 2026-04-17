@@ -84,7 +84,7 @@ function NoticeItem({ n, lineUserId, onReactionUpdate, myDisplayName, myPictureU
   const activeReactions = Object.entries(localReactions).filter(([, v]) => v.count > 0);
 
   return (
-    <div className={styles.noticeItem}>
+    <div className={styles.noticeItem} onClick={() => setExpanded(!expanded)} style={{ cursor: "pointer" }}>
       <div className={styles.noticeDateRow}>
         <p className={styles.noticeDate}>
           {new Date(n.created_at).toLocaleString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}
@@ -94,12 +94,10 @@ function NoticeItem({ n, lineUserId, onReactionUpdate, myDisplayName, myPictureU
       </div>
       {n.title && <p className={styles.noticeTitle}>{n.title}</p>}
       {expanded && <p className={styles.noticeBody}>{n.body}</p>}
-      <button className={styles.noticeToggle} onClick={() => setExpanded(!expanded)}>
-        {expanded ? "閉じる ▲" : "本文を表示 ▼"}
-      </button>
+      <span className={styles.noticeToggle}>{expanded ? "閉じる ▲" : "本文を表示 ▼"}</span>
 
       {/* ━━ リアクション ━━ */}
-      <div className={styles.reactionRow}>
+      <div className={styles.reactionRow} onClick={(e) => e.stopPropagation()}>
         {/* + ボタンは常に一番左 */}
         <div className={styles.reactionAddWrap}>
           <button
@@ -139,7 +137,7 @@ function NoticeItem({ n, lineUserId, onReactionUpdate, myDisplayName, myPictureU
 
       {/* 全リアクション一覧ポップアップ（絵文字問わず誰が何でリアクションしたか） */}
       {showReactionPopup && totalReactionCount > 0 && (
-        <div className={styles.reactionPopup}>
+        <div className={styles.reactionPopup} onClick={(e) => e.stopPropagation()}>
           <div className={styles.reactionPopupHeader}>
             <span className={styles.reactionPopupTitle}>リアクション ({totalReactionCount})</span>
             <button className={styles.reactionPopupClose} onClick={() => setShowReactionPopup(false)}>✕</button>
@@ -442,8 +440,7 @@ export default function MyPage() {
   if (loading) return <main className={styles.mypage}><p className={styles.loading}>読み込み中...</p></main>;
   if (error) return <main className={styles.mypage}><p className={styles.errorMsg}>{error}</p></main>;
 
-  const name = user?.name ?? displayName ?? "ゲスト";
-  const displayedName = user?.mypage_name ?? name;
+  const displayedName = user?.mypage_name ?? user?.line_display_name ?? displayName ?? "ゲスト";
   const now = new Date();
   const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
@@ -463,8 +460,8 @@ export default function MyPage() {
           <input ref={fileInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFileChange} />
           <div className={styles.headerInfo}>
             <p className={styles.headerName}>
-              <button className={styles.nameEditBtn} onClick={() => { setEditName(user?.mypage_name ?? name); setShowNameEdit(true); }}>
-                <span className={styles.headerNameText}>{user?.mypage_name ?? name}</span>さん ✎
+              <button className={styles.nameEditBtn} onClick={() => { setEditName(displayedName); setShowNameEdit(true); }}>
+                <span className={styles.headerNameText}>{displayedName}</span>さん ✎
               </button>
             </p>
           </div>
