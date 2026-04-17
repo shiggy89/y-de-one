@@ -464,6 +464,23 @@ export default function AdminPanel() {
     const prevAttendedIds = attendedIds;
     setAttendedIds((prev) => [...new Set([...prev, ...selectedUserIds])]);
 
+    // attendanceMonthDataへも即時追加（fetchAttendanceMonth完了前に再選択されても二重出席防止）
+    const lessonTitle = lessonType === "祝日" ? holidayLessonType : selectedLesson?.title ?? null;
+    const lessonTime = selectedLesson ? `${selectedLesson.start}〜${selectedLesson.end}` : null;
+    const optimisticRecords: LedgerRecord[] = selectedUserIds.map((userId) => ({
+      id: -(userId * 100000 + Date.now() % 100000), // 一時的な負のID
+      student_id: userId,
+      lesson_date: lessonDate,
+      lesson_type: lessonType,
+      lesson_title: lessonTitle,
+      lesson_time: lessonTime,
+      lesson_teacher: selectedLesson?.teacher ?? null,
+      price_paid: 0,
+      name: users.find((u) => u.id === userId)?.name ?? "",
+      line_picture_url: null,
+    }));
+    setAttendanceMonthData((prev) => [...prev, ...optimisticRecords]);
+
     setSubmitting(true);
     const results = await Promise.all(
       selectedUserIds.map((userId) =>
@@ -485,6 +502,7 @@ export default function AdminPanel() {
     if (failed.length > 0) {
       setAttendanceError("一部の記録に失敗しました");
       setAttendedIds(prevAttendedIds); // 楽観更新を元に戻す
+      setAttendanceMonthData((prev) => prev.filter((r) => r.id >= 0)); // 楽観レコードを削除
     } else {
       const n = new Date();
       const today = `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`;
