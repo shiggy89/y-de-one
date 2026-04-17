@@ -18,6 +18,7 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
   const [overflows, setOverflows] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
+  const [usersPopup, setUsersPopup] = useState<{ emoji: string; users: string[] } | null>(null);
   const [sending, setSending] = useState(false);
   const isNew = Date.now() - new Date(n.created_at).getTime() < 24 * 60 * 60 * 1000;
   const myEmoji = n.myReactions[0] ?? null;
@@ -64,38 +65,60 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
 
       {/* ━━ リアクション ━━ */}
       <div className={styles.reactionRow}>
-        {activeReactions.map(([emoji, { count }]) => (
+        {/* + ボタンは常に一番左 */}
+        <div className={styles.reactionAddWrap}>
+          <button
+            className={`${styles.reactionAddBtn} ${showPicker ? styles.reactionAddBtnOpen : ""}`}
+            onClick={() => { setShowPicker(!showPicker); setUsersPopup(null); }}
+            disabled={sending}
+          >＋</button>
+          {showPicker && (
+            <div className={styles.reactionPicker}>
+              {REACTION_EMOJIS.map((emoji) => (
+                <button
+                  key={emoji}
+                  className={`${styles.reactionPickerEmoji} ${myEmoji === emoji ? styles.reactionPickerEmojiMine : ""}`}
+                  onClick={() => handleReact(emoji)}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* アクティブなリアクションチップ（タップ→誰がリアクションしたか表示） */}
+        {activeReactions.map(([emoji, { count, users }]) => (
           <button
             key={emoji}
             className={`${styles.reactionChip} ${myEmoji === emoji ? styles.reactionChipMine : ""}`}
-            onClick={() => handleReact(emoji)}
-            disabled={sending}
+            onClick={() => {
+              setShowPicker(false);
+              setUsersPopup(usersPopup?.emoji === emoji ? null : { emoji, users });
+            }}
           >
             <span>{emoji}</span>
             <span className={styles.reactionCount}>{count}</span>
           </button>
         ))}
-        <button
-          className={styles.reactionAddBtn}
-          onClick={() => setShowPicker(!showPicker)}
-          disabled={sending}
-        >
-          {showPicker ? "✕" : "＋"}
-        </button>
-        {showPicker && (
-          <div className={styles.reactionPicker}>
-            {REACTION_EMOJIS.map((emoji) => (
-              <button
-                key={emoji}
-                className={`${styles.reactionPickerEmoji} ${myEmoji === emoji ? styles.reactionPickerEmojiMine : ""}`}
-                onClick={() => handleReact(emoji)}
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
+
+      {/* 誰がリアクションしたかポップアップ */}
+      {usersPopup && (
+        <div className={styles.reactionPopup}>
+          <div className={styles.reactionPopupHeader}>
+            <span className={styles.reactionPopupTitle}>リアクション ({usersPopup.users.length})</span>
+            <button className={styles.reactionPopupClose} onClick={() => setUsersPopup(null)}>✕</button>
+          </div>
+          {usersPopup.users.map((name, i) => (
+            <div key={i} className={styles.reactionPopupRow}>
+              <div className={styles.reactionPopupAvatar}><i className="fa-solid fa-user" /></div>
+              <span className={styles.reactionPopupName}>{name}</span>
+              <span className={styles.reactionPopupEmoji}>{usersPopup.emoji}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

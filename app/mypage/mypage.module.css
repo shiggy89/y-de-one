@@ -554,6 +554,86 @@
   background: #f0f0f0;
 }
 
+.reactionAddWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.reactionAddBtnOpen {
+  border-color: #e05080;
+  color: #e05080;
+  background: #fff0f4;
+}
+
+.reactionPopup {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.reactionPopupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.reactionPopupTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+}
+
+.reactionPopupClose {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.reactionPopupRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-bottom: 1px solid #f8f8f8;
+}
+
+.reactionPopupRow:last-child {
+  border-bottom: none;
+}
+
+.reactionPopupAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #aaa;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.reactionPopupName {
+  font-size: 13px;
+  color: #333;
+  flex: 1;
+}
+
+.reactionPopupEmoji {
+  font-size: 18px;
+}
+
 /* ━━━ 月ナビ ━━━ */
 .monthNav {
   display: flex;
