@@ -3,6 +3,12 @@ import { supabaseAdmin } from "@/lib/supabase";
 
 const LESSON_FEES_ONLY = [2800, 5400, 7800, 9600, 11800, 14000, 16200, 17600];
 
+function isStandardLesson(lessonType: string, lessonTitle: string | null | undefined): boolean {
+  if (lessonType !== "通常" && lessonType !== "祝日") return false;
+  if (lessonTitle === "ポワント" || lessonTitle === "プレモダン" || lessonTitle === "特別レッスン") return false;
+  return true;
+}
+
 function calcPrice(countThisMonth: number, lessonType: string, privateMinutes = 15, lessonTitle?: string): number {
   if (lessonType === "個人") return 2500 * (privateMinutes / 15);
   if (lessonType === "祝日") {
@@ -59,13 +65,14 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
         .order("lesson_time", { ascending: true, nullsFirst: false });
 
       if (remaining && remaining.length > 0) {
+        let standardCount = 0;
         await Promise.all(
           remaining.map((a, i) => {
-            const newCount = i + 1;
+            if (isStandardLesson(a.lesson_type, a.lesson_title)) standardCount++;
             const newIsFirst = i === 0;
             const newMaintenanceFee = isTeacher ? 0 : (newIsFirst ? 500 : 0);
             const mins = a.lesson_type === "個人" ? parseInt(a.lesson_time ?? "15") : undefined;
-            const newLessonFee = isTeacher ? 0 : calcPrice(newCount, a.lesson_type, mins, a.lesson_title ?? undefined);
+            const newLessonFee = isTeacher ? 0 : calcPrice(standardCount, a.lesson_type, mins, a.lesson_title ?? undefined);
             const newPrice = newLessonFee + newMaintenanceFee;
             return supabaseAdmin.from("attendances").update({ price_paid: newPrice }).eq("id", a.id);
           })

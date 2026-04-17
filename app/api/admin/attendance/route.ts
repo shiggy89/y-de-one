@@ -18,6 +18,14 @@ function calcPrice(countThisMonth: number, lessonType: string, privateMinutes = 
   return total - prev;
 }
 
+// 通常レッスン料金の段階カウントに含める「標準レッスン」判定
+// ポワント・プレモダン・特別レッスンは固定料金のためカウント対象外
+function isStandardLesson(lessonType: string, lessonTitle: string | null | undefined): boolean {
+  if (lessonType !== "通常" && lessonType !== "祝日") return false;
+  if (lessonTitle === "ポワント" || lessonTitle === "プレモダン" || lessonTitle === "特別レッスン") return false;
+  return true;
+}
+
 // レッスンのバッジ計算用カウント
 // 通常・特別: ポワント/プレモダン=0.5, それ以外=1
 // 祝日: ポワント/プレモダン=0.5, それ以外=1
@@ -61,21 +69,26 @@ export async function POST(req: Request) {
     const nextMonthStr = nextMonth.toISOString().split("T")[0];
 
     // 先生チェック・当月レッスン回数カウントを並列取得
+    type AttendanceRow = { id: number; lesson_type: string; lesson_title: string | null };
     const [{ data: user }, { data: beforeDate }, { data: sameDay }] = await Promise.all([
       supabaseAdmin.from("users").select("status").eq("id", userId).single(),
-      supabaseAdmin.from("attendances").select("id").eq("student_id", userId).gte("lesson_date", `${yearMonth}-01`).lt("lesson_date", lessonDate),
+      supabaseAdmin.from("attendances").select("id, lesson_type, lesson_title").eq("student_id", userId).gte("lesson_date", `${yearMonth}-01`).lt("lesson_date", lessonDate),
       lessonTimeStart
-        ? supabaseAdmin.from("attendances").select("id").eq("student_id", userId).eq("lesson_date", lessonDate).lt("lesson_time", lessonTimeStart)
-        : Promise.resolve({ data: [] as { id: number }[] }),
+        ? supabaseAdmin.from("attendances").select("id, lesson_type, lesson_title").eq("student_id", userId).eq("lesson_date", lessonDate).lt("lesson_time", lessonTimeStart)
+        : Promise.resolve({ data: [] as AttendanceRow[] }),
     ]);
 
     const isTeacher = user?.status === "teacher";
 
-    const prevCount = (beforeDate?.length ?? 0) + (sameDay?.length ?? 0);
-    const countThisMonth = prevCount + 1;
-    const isFirstOfMonth = prevCount === 0;
+    const prevAll = [...(beforeDate ?? []), ...(sameDay ?? [])] as AttendanceRow[];
+    // 維持費: 月最初のレッスン（種別問わず）
+    const isFirstOfMonth = prevAll.length === 0;
+    // 料金段階: 標準レッスン（通常/祝日でポワント・プレモダン・特別以外）のみカウント
+    const prevStandardCount = prevAll.filter((a) => isStandardLesson(a.lesson_type, a.lesson_title)).length;
+    const standardCount = prevStandardCount + (isStandardLesson(lessonType, lessonTitle ?? null) ? 1 : 0);
+
     const maintenanceFee = isFirstOfMonth ? 500 : 0;
-    const lessonFee = isTeacher ? 0 : calcPrice(countThisMonth, lessonType, privateMinutes, lessonTitle);
+    const lessonFee = isTeacher ? 0 : calcPrice(standardCount, lessonType, privateMinutes, lessonTitle);
     const price = lessonFee + (isTeacher ? 0 : maintenanceFee);
 
     // 個人レッスンはlesson_timeに分数を保存（バッジ計算用）
@@ -128,7 +141,7 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({ ok: true, price, lessonFee, maintenanceFee, countThisMonth });
+    return NextResponse.json({ ok: true, price, lessonFee, maintenanceFee, countThisMonth: standardCount });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ error: "サーバーエラーが発生しました" }, { status: 500 });
