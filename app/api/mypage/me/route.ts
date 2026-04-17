@@ -63,7 +63,8 @@ export async function GET(req: Request) {
         .from("attendances")
         .select("id, lesson_date, lesson_type, lesson_title, lesson_time, lesson_teacher, price_paid")
         .eq("student_id", user.id)
-        .order("lesson_date", { ascending: true }),
+        .order("lesson_date", { ascending: true })
+        .order("lesson_time", { ascending: true, nullsFirst: false }),
       supabaseAdmin
         .from("badges")
         .select("year_month, badge")
