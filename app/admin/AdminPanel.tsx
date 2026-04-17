@@ -777,6 +777,7 @@ export default function AdminPanel() {
                           ? selectedUserIds.filter((id) => id !== u.id)
                           : [...selectedUserIds, u.id];
                       setSelectedUserIds(next);
+                      setAttendanceError(null);
                       const lessonTitle = lessonType === "祝日" ? holidayLessonType : selectedLesson?.title;
                       const timeStart = selectedLesson?.start ?? null;
                       if (lessonType !== "通常" || selectedLesson) {
