@@ -1060,11 +1060,13 @@ export default function AdminPanel() {
                     )}
                     <div className={styles.historyRow}>
                       <span className={styles.historyDate}>{a.maintenance_fee > 0 ? "\u00A0" : a.lesson_date.split("-").slice(1).map(Number).join("/")}</span>
-                      <span className={styles.historyType}>
-                        {a.lesson_title ?? { 通常: "通常レッスン", 祝日: "祝日レッスン", 個人: "個人レッスン", 特別: "特別レッスン" }[a.lesson_type] ?? a.lesson_type}
-                        {a.lesson_time && <><br /><span className={styles.historyTime}>{a.lesson_time}</span></>}
-                        {a.lesson_teacher && <><br /><span className={styles.historyTeacher}>{a.lesson_teacher}</span></>}
-                      </span>
+                      <div className={styles.historyInfo}>
+                        <div className={styles.historyMainLine}>
+                          {a.lesson_time && <span className={styles.historyTimeTag}>{a.lesson_time}</span>}
+                          <span>{a.lesson_title ?? { 通常: "通常レッスン", 祝日: "祝日レッスン", 個人: "個人レッスン", 特別: "特別レッスン" }[a.lesson_type] ?? a.lesson_type}</span>
+                        </div>
+                        {a.lesson_teacher && <span className={styles.historyTeacher}>{a.lesson_teacher}</span>}
+                      </div>
                       <span className={styles.historyPrice}>¥{a.lesson_fee.toLocaleString()}</span>
                     </div>
                   </div>
