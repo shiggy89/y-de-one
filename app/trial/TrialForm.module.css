@@ -42,7 +42,6 @@
 }
 
 .formField:nth-child(2) {
-  padding-right: 16px;
   margin-bottom: 16px;
 }
 
@@ -78,6 +77,8 @@
 .formInput[type="date"] {
   -webkit-appearance: none;
   appearance: none;
+  min-height: 40px;
+  line-height: 1.5;
 }
 
 .formInput:focus,
