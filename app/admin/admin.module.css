@@ -1089,28 +1089,10 @@
 }
 
 .historyDate {
-  font-size: 13px;
-  color: #555;
+  font-size: 12px;
+  color: #888;
   flex-shrink: 0;
-  width: 90px;
-}
-
-.historyInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.historyMainLine {
-  display: flex;
-  align-items: baseline;
-  gap: 5px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #333;
-  line-height: 1.3;
-  flex-wrap: wrap;
+  width: 38px;
 }
 
 .historyTimeTag {
@@ -1118,12 +1100,59 @@
   color: #aaa;
   font-weight: 400;
   white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.historyLessonName {
+  font-size: 13px;
+  color: #333;
+  font-weight: 600;
+  flex: 1;
+  line-height: 1.3;
 }
 
 .historyTeacher {
   font-size: 11px;
   color: #999;
   font-weight: 400;
+}
+
+.historyTeacherRow {
+  font-size: 11px;
+  color: #999;
+  padding: 0 12px 4px 50px;
+}
+
+.historyPager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 0 4px;
+  flex-shrink: 0;
+}
+
+.historyPagerBtn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #e05080;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.historyPagerBtn:disabled {
+  color: #ccc;
+  cursor: default;
+}
+
+.historyPagerLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+  min-width: 50px;
+  text-align: center;
 }
 
 .historyTypeMaint {

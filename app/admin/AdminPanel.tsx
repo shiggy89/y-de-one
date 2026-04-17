@@ -283,12 +283,15 @@ export default function AdminPanel() {
   const [historyData, setHistoryData] = useState<{ id: number; lesson_date: string; lesson_type: string; lesson_title: string | null; lesson_time: string | null; lesson_teacher: string | null; price_paid: number; maintenance_fee: number; lesson_fee: number }[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyMonth, setHistoryMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [historyPage, setHistoryPage] = useState(1);
+  const HISTORY_PER_PAGE = 6;
   // 全員分キャッシュ
   const [allHistoriesCache, setAllHistoriesCache] = useState<Record<number, typeof historyData>>({});
 
   const openHistory = (user: User) => {
     setHistoryUser(user);
     setHistoryMonth(new Date().toISOString().slice(0, 7));
+    setHistoryPage(1);
     if (allHistoriesCache[user.id]) {
       setHistoryData(allHistoriesCache[user.id]);
       setHistoryLoading(false);
@@ -307,6 +310,7 @@ export default function AdminPanel() {
     const [y, m] = historyMonth.split("-").map(Number);
     const d = new Date(y, m - 1 + delta, 1);
     setHistoryMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+    setHistoryPage(1);
   };
 
   useEffect(() => {
@@ -1047,32 +1051,41 @@ export default function AdminPanel() {
               <p className={styles.modalLoading}>読み込み中...</p>
             ) : historyMonthData.length === 0 ? (
               <p className={styles.modalEmpty}>この月の履歴がありません</p>
-            ) : (
-              <div className={styles.historyList}>
-                {historyMonthData.map((a) => (
-                  <div key={a.id} className={styles.historyItem}>
-                    {a.maintenance_fee > 0 && (
-                      <div className={styles.historyRow}>
-                        <span className={styles.historyDate}>{a.lesson_date.split("-").slice(1).map(Number).join("/")}</span>
-                        <span className={styles.historyTypeMaint}>維持費</span>
-                        <span className={styles.historyPrice}>¥{a.maintenance_fee.toLocaleString()}</span>
-                      </div>
-                    )}
-                    <div className={styles.historyRow}>
-                      <span className={styles.historyDate}>{a.maintenance_fee > 0 ? "\u00A0" : a.lesson_date.split("-").slice(1).map(Number).join("/")}</span>
-                      <div className={styles.historyInfo}>
-                        <div className={styles.historyMainLine}>
+            ) : (() => {
+              const totalPages = Math.ceil(historyMonthData.length / HISTORY_PER_PAGE);
+              const pageData = historyMonthData.slice((historyPage - 1) * HISTORY_PER_PAGE, historyPage * HISTORY_PER_PAGE);
+              return (
+                <>
+                  <div className={styles.historyList}>
+                    {pageData.map((a) => (
+                      <div key={a.id} className={styles.historyItem}>
+                        {a.maintenance_fee > 0 && (
+                          <div className={styles.historyRow}>
+                            <span className={styles.historyDate}>{a.lesson_date.split("-").slice(1).map(Number).join("/")}</span>
+                            <span className={styles.historyTypeMaint}>維持費</span>
+                            <span className={styles.historyPrice}>¥{a.maintenance_fee.toLocaleString()}</span>
+                          </div>
+                        )}
+                        <div className={styles.historyRow}>
+                          <span className={styles.historyDate}>{a.maintenance_fee > 0 ? "" : a.lesson_date.split("-").slice(1).map(Number).join("/")}</span>
                           {a.lesson_time && <span className={styles.historyTimeTag}>{a.lesson_time}</span>}
-                          <span>{a.lesson_title ?? { 通常: "通常レッスン", 祝日: "祝日レッスン", 個人: "個人レッスン", 特別: "特別レッスン" }[a.lesson_type] ?? a.lesson_type}</span>
+                          <span className={styles.historyLessonName}>{a.lesson_title ?? { 通常: "通常レッスン", 祝日: "祝日レッスン", 個人: "個人レッスン", 特別: "特別レッスン" }[a.lesson_type] ?? a.lesson_type}</span>
+                          <span className={styles.historyPrice}>¥{a.lesson_fee.toLocaleString()}</span>
                         </div>
-                        {a.lesson_teacher && <span className={styles.historyTeacher}>{a.lesson_teacher}</span>}
+                        {a.lesson_teacher && <div className={styles.historyTeacherRow}>{a.lesson_teacher}</div>}
                       </div>
-                      <span className={styles.historyPrice}>¥{a.lesson_fee.toLocaleString()}</span>
-                    </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            )}
+                  {totalPages > 1 && (
+                    <div className={styles.historyPager}>
+                      <button className={styles.historyPagerBtn} onClick={() => setHistoryPage((p) => p - 1)} disabled={historyPage <= 1}>‹</button>
+                      <span className={styles.historyPagerLabel}>{historyPage} / {totalPages}</span>
+                      <button className={styles.historyPagerBtn} onClick={() => setHistoryPage((p) => p + 1)} disabled={historyPage >= totalPages}>›</button>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       )}
