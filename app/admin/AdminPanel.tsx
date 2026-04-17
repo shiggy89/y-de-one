@@ -186,6 +186,8 @@ export default function AdminPanel() {
 
   // 選択日にすでに出席済みの生徒ID
   const [attendedIds, setAttendedIds] = useState<number[]>([]);
+  // このセッション内で記録済み: "date__time__title" → student IDs（fetchAttendanceMonthの上書きに左右されない）
+  const [justRecordedMap, setJustRecordedMap] = useState<Record<string, number[]>>({});
 
   const fetchAttendedIds = async (date: string, lessonTime?: string | null, lessonTitle?: string | null) => {
     if (!lessonTime && !lessonTitle) { setAttendedIds([]); return; }
@@ -514,6 +516,12 @@ export default function AdminPanel() {
       setHolidayLessonType("特別レッスン");
       setLessonDate(today);
       setAttendedIds([]);
+      // 記録済みマップに追加（fetchAttendanceMonthの完了を待たずに再選択時の二重出席を防ぐ）
+      const recordedKey = `${lessonDate}__${lessonTime}__${lessonTitle}`;
+      setJustRecordedMap((prev) => ({
+        ...prev,
+        [recordedKey]: [...new Set([...(prev[recordedKey] ?? []), ...selectedUserIds])],
+      }));
       // 月データと全カウントマップを再取得（次回の即時計算を最新に）
       fetchAttendanceMonth(lessonDate.slice(0, 7));
       fetchAllLessonCounts();
@@ -700,11 +708,11 @@ export default function AdminPanel() {
                         setHolidayLessonType(t);
                         setSelectedUserIds([]);
                         setFeePreviews([]);
-                        // attendedIds: 当月データから即時計算
-                        const attended = attendanceMonthData
+                        const fromHistory = attendanceMonthData
                           .filter(r => r.lesson_date === lessonDate && r.lesson_title === t)
                           .map(r => r.student_id);
-                        setAttendedIds([...new Set<number>(attended)]);
+                        const fromJustRecorded = justRecordedMap[`${lessonDate}__null__${t}`] ?? [];
+                        setAttendedIds([...new Set<number>([...fromHistory, ...fromJustRecorded])]);
                       }}
                     >
                       <span className={styles.lessonBtnTitle}>{t}</span>
@@ -728,12 +736,12 @@ export default function AdminPanel() {
                           setSelectedLesson(l);
                           setSelectedUserIds([]);
                           setFeePreviews([]);
-                          // attendedIds: 当月データから即時計算
                           const lessonTimeStr = `${l.start}〜${l.end}`;
-                          const attended = attendanceMonthData
+                          const fromHistory = attendanceMonthData
                             .filter(r => r.lesson_date === lessonDate && r.lesson_time === lessonTimeStr && r.lesson_title === l.title)
                             .map(r => r.student_id);
-                          setAttendedIds([...new Set<number>(attended)]);
+                          const fromJustRecorded = justRecordedMap[`${lessonDate}__${lessonTimeStr}__${l.title}`] ?? [];
+                          setAttendedIds([...new Set<number>([...fromHistory, ...fromJustRecorded])]);
                           // lessonCounts: 全期間マップから即時取得
                           setLessonCounts(allLessonCountsMap[`${lessonTimeStr}__${l.title}`] ?? {});
                         }}
