@@ -25,7 +25,7 @@ export async function GET(req: Request) {
       if (isFirst) monthSeen.add(ym);
       const maintenance_fee = isFirst && a.price_paid > 0 ? 500 : 0;
       return { ...a, maintenance_fee, lesson_fee: a.price_paid - maintenance_fee };
-    }).reverse();
+    });
 
     return NextResponse.json({ attendances });
   } catch (e) {
