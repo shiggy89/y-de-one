@@ -11,14 +11,16 @@ type NoticeItemProps = {
   n: { id: number; title: string; body: string; author: string | null; created_at: string; reactions: Record<string, ReactionGroup>; myReactions: string[] };
   lineUserId: string | null;
   onReactionUpdate: (noticeId: number, reactions: Record<string, ReactionGroup>, myEmojis: string[]) => void;
+  myDisplayName: string;
+  myPictureUrl: string | null;
 };
 
-function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
+function NoticeItem({ n, lineUserId, onReactionUpdate, myDisplayName, myPictureUrl }: NoticeItemProps) {
   const bodyRef = useRef<HTMLParagraphElement>(null);
   const [overflows, setOverflows] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
-  const [activePopupEmoji, setActivePopupEmoji] = useState<string | null>(null);
+  const [showReactionPopup, setShowReactionPopup] = useState(false);
   // ローカルstate: 親を経由せず即時更新するためNoticeItem内で管理
   const [localReactions, setLocalReactions] = useState<Record<string, ReactionGroup>>(() => n.reactions);
   const [localMyEmojis, setLocalMyEmojis] = useState<string[]>(() => n.myReactions);
@@ -26,9 +28,11 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
   const isNew = Date.now() - new Date(n.created_at).getTime() < 24 * 60 * 60 * 1000;
   const myEmoji = localMyEmojis[0] ?? null;
 
-  // ポップアップ: usersはlocalReactionsから導出、countもlocalReactionsを使う
-  const popupUsers = activePopupEmoji ? (localReactions[activePopupEmoji]?.users ?? []) : [];
-  const popupCount = activePopupEmoji ? (localReactions[activePopupEmoji]?.count ?? 0) : 0;
+  // 全リアクションを結合（絵文字ごとではなく全員分をフラットに）
+  const allReactionUsers = Object.entries(localReactions)
+    .filter(([, v]) => v.count > 0)
+    .flatMap(([emoji, { users }]) => users.map((u) => ({ ...u, emoji })));
+  const totalReactionCount = Object.values(localReactions).reduce((sum, v) => sum + v.count, 0);
 
   useEffect(() => {
     if (bodyRef.current) {
@@ -41,22 +45,30 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
     sendingRef.current = true;
     setShowPicker(false);
 
-    // 即時ローカル更新（親を経由しないので1レンダーで完結）
+    // 即時ローカル更新（usersにも自分を追加してカクカク解消）
     const optimistic = structuredClone(localReactions) as Record<string, ReactionGroup>;
+    const myUser = { name: myDisplayName, pictureUrl: myPictureUrl };
     let optimisticMyEmojis: string[];
     if (myEmoji === emoji) {
       if (optimistic[emoji]) {
         optimistic[emoji].count = Math.max(0, optimistic[emoji].count - 1);
+        optimistic[emoji].users = optimistic[emoji].users.filter(
+          (u) => u.name !== myDisplayName || u.pictureUrl !== myPictureUrl
+        );
         if (optimistic[emoji].count === 0) delete optimistic[emoji];
       }
       optimisticMyEmojis = [];
     } else {
       if (myEmoji && optimistic[myEmoji]) {
         optimistic[myEmoji].count = Math.max(0, optimistic[myEmoji].count - 1);
+        optimistic[myEmoji].users = optimistic[myEmoji].users.filter(
+          (u) => u.name !== myDisplayName || u.pictureUrl !== myPictureUrl
+        );
         if (optimistic[myEmoji].count === 0) delete optimistic[myEmoji];
       }
       if (!optimistic[emoji]) optimistic[emoji] = { count: 0, users: [] };
       optimistic[emoji].count++;
+      optimistic[emoji].users = [...optimistic[emoji].users, myUser];
       optimisticMyEmojis = [emoji];
     }
     setLocalReactions(optimistic);
@@ -101,7 +113,7 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
         <div className={styles.reactionAddWrap}>
           <button
             className={`${styles.reactionAddBtn} ${showPicker ? styles.reactionAddBtnOpen : ""}`}
-            onClick={() => { setShowPicker(!showPicker); setActivePopupEmoji(null); }}
+            onClick={() => { setShowPicker(!showPicker); setShowReactionPopup(false); }}
           >＋</button>
           {showPicker && (
             <div className={styles.reactionPicker}>
@@ -118,14 +130,14 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
           )}
         </div>
 
-        {/* アクティブなリアクションチップ（タップ→誰がリアクションしたか表示） */}
+        {/* アクティブなリアクションチップ（タップ→全リアクション一覧表示） */}
         {activeReactions.map(([emoji, { count }]) => (
           <button
             key={emoji}
             className={`${styles.reactionChip} ${myEmoji === emoji ? styles.reactionChipMine : ""}`}
             onClick={() => {
               setShowPicker(false);
-              setActivePopupEmoji(activePopupEmoji === emoji ? null : emoji);
+              setShowReactionPopup(!showReactionPopup);
             }}
           >
             <span>{emoji}</span>
@@ -134,14 +146,14 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
         ))}
       </div>
 
-      {/* 誰がリアクションしたかポップアップ（n.reactionsから常に最新を導出） */}
-      {activePopupEmoji && (
+      {/* 全リアクション一覧ポップアップ（絵文字問わず誰が何でリアクションしたか） */}
+      {showReactionPopup && totalReactionCount > 0 && (
         <div className={styles.reactionPopup}>
           <div className={styles.reactionPopupHeader}>
-            <span className={styles.reactionPopupTitle}>リアクション ({popupCount})</span>
-            <button className={styles.reactionPopupClose} onClick={() => setActivePopupEmoji(null)}>✕</button>
+            <span className={styles.reactionPopupTitle}>リアクション ({totalReactionCount})</span>
+            <button className={styles.reactionPopupClose} onClick={() => setShowReactionPopup(false)}>✕</button>
           </div>
-          {popupUsers.map((u, i) => (
+          {allReactionUsers.map((u, i) => (
             <div key={i} className={styles.reactionPopupRow}>
               <div className={styles.reactionPopupAvatar}>
                 {u.pictureUrl
@@ -149,7 +161,7 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
                   : <i className="fa-solid fa-user" />}
               </div>
               <span className={styles.reactionPopupName}>{u.name}</span>
-              <span className={styles.reactionPopupEmoji}>{activePopupEmoji}</span>
+              <span className={styles.reactionPopupEmoji}>{u.emoji}</span>
             </div>
           ))}
         </div>
@@ -616,7 +628,16 @@ export default function MyPage() {
         <div className={styles.section}>
           {notices.length === 0 ? (
             <p className={styles.empty}>お知らせはありません</p>
-          ) : notices.map((n) => <NoticeItem key={n.id} n={n} lineUserId={lineUserId} onReactionUpdate={handleReactionUpdate} />)}
+          ) : notices.map((n) => (
+            <NoticeItem
+              key={n.id}
+              n={n}
+              lineUserId={lineUserId}
+              onReactionUpdate={handleReactionUpdate}
+              myDisplayName={user?.mypage_name ?? user?.line_display_name ?? displayName ?? ""}
+              myPictureUrl={user?.mypage_picture_url ?? user?.line_picture_url ?? null}
+            />
+          ))}
         </div>
       )}
 
