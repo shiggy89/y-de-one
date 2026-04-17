@@ -6,7 +6,7 @@ import styles from "./mypage.module.css";
 
 const REACTION_EMOJIS = ["❤️", "👍", "😊", "😮", "😢"];
 
-type ReactionGroup = { count: number; users: string[] };
+type ReactionGroup = { count: number; users: { name: string; pictureUrl: string | null }[] };
 type NoticeItemProps = {
   n: { id: number; title: string; body: string; author: string | null; created_at: string; reactions: Record<string, ReactionGroup>; myReactions: string[] };
   lineUserId: string | null;
@@ -18,7 +18,7 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
   const [overflows, setOverflows] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
-  const [usersPopup, setUsersPopup] = useState<{ emoji: string; users: string[] } | null>(null);
+  const [usersPopup, setUsersPopup] = useState<{ emoji: string; users: { name: string; pictureUrl: string | null }[] } | null>(null);
   const [sending, setSending] = useState(false);
   const isNew = Date.now() - new Date(n.created_at).getTime() < 24 * 60 * 60 * 1000;
   const myEmoji = n.myReactions[0] ?? null;
@@ -33,6 +33,27 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
     if (!lineUserId || sending) return;
     setSending(true);
     setShowPicker(false);
+
+    // 楽観的UI: 即時カウント更新
+    const optimistic = JSON.parse(JSON.stringify(n.reactions)) as Record<string, ReactionGroup>;
+    let optimisticMyEmojis: string[];
+    if (myEmoji === emoji) {
+      if (optimistic[emoji]) {
+        optimistic[emoji].count = Math.max(0, optimistic[emoji].count - 1);
+        if (optimistic[emoji].count === 0) delete optimistic[emoji];
+      }
+      optimisticMyEmojis = [];
+    } else {
+      if (myEmoji && optimistic[myEmoji]) {
+        optimistic[myEmoji].count = Math.max(0, optimistic[myEmoji].count - 1);
+        if (optimistic[myEmoji].count === 0) delete optimistic[myEmoji];
+      }
+      if (!optimistic[emoji]) optimistic[emoji] = { count: 0, users: [] };
+      optimistic[emoji].count++;
+      optimisticMyEmojis = [emoji];
+    }
+    onReactionUpdate(n.id, optimistic, optimisticMyEmojis);
+
     const res = await fetch("/api/mypage/reactions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -110,10 +131,14 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
             <span className={styles.reactionPopupTitle}>リアクション ({usersPopup.users.length})</span>
             <button className={styles.reactionPopupClose} onClick={() => setUsersPopup(null)}>✕</button>
           </div>
-          {usersPopup.users.map((name, i) => (
+          {usersPopup.users.map((u, i) => (
             <div key={i} className={styles.reactionPopupRow}>
-              <div className={styles.reactionPopupAvatar}><i className="fa-solid fa-user" /></div>
-              <span className={styles.reactionPopupName}>{name}</span>
+              <div className={styles.reactionPopupAvatar}>
+                {u.pictureUrl
+                  ? <img src={u.pictureUrl} alt={u.name} className={styles.reactionPopupAvatarImg} />
+                  : <i className="fa-solid fa-user" />}
+              </div>
+              <span className={styles.reactionPopupName}>{u.name}</span>
               <span className={styles.reactionPopupEmoji}>{usersPopup.emoji}</span>
             </div>
           ))}

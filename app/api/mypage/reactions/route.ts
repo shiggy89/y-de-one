@@ -39,16 +39,17 @@ export async function POST(req: Request) {
     // 更新後のリアクションを返す
     const { data: updated } = await supabaseAdmin
       .from("reactions")
-      .select("emoji, user_id, users(name, mypage_name)")
+      .select("emoji, user_id, users(line_display_name, line_picture_url)")
       .eq("notice_id", noticeId);
 
-    const grouped: Record<string, { count: number; users: string[] }> = {};
+    const grouped: Record<string, { count: number; users: { name: string; pictureUrl: string | null }[] }> = {};
     for (const r of updated ?? []) {
-      const u = r.users as unknown as { name: string | null; mypage_name: string | null } | null;
-      const displayName = u?.mypage_name ?? u?.name ?? "名前なし";
+      const u = r.users as unknown as { line_display_name: string | null; line_picture_url: string | null } | null;
+      const displayName = u?.line_display_name ?? "名前なし";
+      const pictureUrl = u?.line_picture_url ?? null;
       if (!grouped[r.emoji]) grouped[r.emoji] = { count: 0, users: [] };
       grouped[r.emoji].count++;
-      grouped[r.emoji].users.push(displayName);
+      grouped[r.emoji].users.push({ name: displayName, pictureUrl });
     }
 
     const myEmoji = (updated ?? []).find((r) => r.user_id === user.id)?.emoji ?? null;

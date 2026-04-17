@@ -17,7 +17,7 @@ export async function GET(req: Request) {
         .order("created_at", { ascending: false }),
       supabaseAdmin
         .from("reactions")
-        .select("notice_id, emoji, user_id, users(name, mypage_name)"),
+        .select("notice_id, emoji, user_id, users(line_display_name, line_picture_url)"),
       lineUserId
         ? supabaseAdmin.from("users").select("id").eq("line_user_id", lineUserId).single()
         : Promise.resolve({ data: null }),
@@ -28,17 +28,18 @@ export async function GET(req: Request) {
     const myUserId = currentUser?.id ?? null;
 
     // notice_idごとにリアクションをグループ化
-    const reactionMap: Record<number, { grouped: Record<string, { count: number; users: string[] }>; myEmojis: string[] }> = {};
+    const reactionMap: Record<number, { grouped: Record<string, { count: number; users: { name: string; pictureUrl: string | null }[] }>; myEmojis: string[] }> = {};
 
     for (const r of reactionsRaw ?? []) {
-      const u = r.users as unknown as { name: string | null; mypage_name: string | null } | null;
-      const displayName = u?.mypage_name ?? u?.name ?? "名前なし";
+      const u = r.users as unknown as { line_display_name: string | null; line_picture_url: string | null } | null;
+      const displayName = u?.line_display_name ?? "名前なし";
+      const pictureUrl = u?.line_picture_url ?? null;
       if (!reactionMap[r.notice_id]) reactionMap[r.notice_id] = { grouped: {}, myEmojis: [] };
       if (!reactionMap[r.notice_id].grouped[r.emoji]) {
         reactionMap[r.notice_id].grouped[r.emoji] = { count: 0, users: [] };
       }
       reactionMap[r.notice_id].grouped[r.emoji].count++;
-      reactionMap[r.notice_id].grouped[r.emoji].users.push(displayName);
+      reactionMap[r.notice_id].grouped[r.emoji].users.push({ name: displayName, pictureUrl });
       if (myUserId && r.user_id === myUserId) {
         reactionMap[r.notice_id].myEmojis.push(r.emoji);
       }
