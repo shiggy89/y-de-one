@@ -37,11 +37,6 @@ export async function GET() {
       });
     }
 
-    // 各ユーザーの配列を降順に反転
-    for (const uid of Object.keys(grouped)) {
-      grouped[Number(uid)].reverse();
-    }
-
     return NextResponse.json({ histories: grouped });
   } catch (e) {
     console.error(e);
