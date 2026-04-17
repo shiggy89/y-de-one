@@ -19,12 +19,16 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
   const [expanded, setExpanded] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [activePopupEmoji, setActivePopupEmoji] = useState<string | null>(null);
+  // ローカルstate: 親を経由せず即時更新するためNoticeItem内で管理
+  const [localReactions, setLocalReactions] = useState<Record<string, ReactionGroup>>(() => n.reactions);
+  const [localMyEmojis, setLocalMyEmojis] = useState<string[]>(() => n.myReactions);
   const sendingRef = useRef(false);
   const isNew = Date.now() - new Date(n.created_at).getTime() < 24 * 60 * 60 * 1000;
-  const myEmoji = n.myReactions[0] ?? null;
+  const myEmoji = localMyEmojis[0] ?? null;
 
-  // ポップアップのusersは常にn.reactionsから導出（スナップショット保持しない）
-  const popupUsers = activePopupEmoji ? (n.reactions[activePopupEmoji]?.users ?? []) : [];
+  // ポップアップ: usersはlocalReactionsから導出、countもlocalReactionsを使う
+  const popupUsers = activePopupEmoji ? (localReactions[activePopupEmoji]?.users ?? []) : [];
+  const popupCount = activePopupEmoji ? (localReactions[activePopupEmoji]?.count ?? 0) : 0;
 
   useEffect(() => {
     if (bodyRef.current) {
@@ -37,8 +41,8 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
     sendingRef.current = true;
     setShowPicker(false);
 
-    // 楽観的UI: 即時カウント更新（re-renderなしでブロック、stateは親のみ更新）
-    const optimistic = structuredClone(n.reactions) as Record<string, ReactionGroup>;
+    // 即時ローカル更新（親を経由しないので1レンダーで完結）
+    const optimistic = structuredClone(localReactions) as Record<string, ReactionGroup>;
     let optimisticMyEmojis: string[];
     if (myEmoji === emoji) {
       if (optimistic[emoji]) {
@@ -55,7 +59,8 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
       optimistic[emoji].count++;
       optimisticMyEmojis = [emoji];
     }
-    onReactionUpdate(n.id, optimistic, optimisticMyEmojis);
+    setLocalReactions(optimistic);
+    setLocalMyEmojis(optimisticMyEmojis);
 
     const res = await fetch("/api/mypage/reactions", {
       method: "POST",
@@ -64,12 +69,15 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
     });
     const data = await res.json();
     if (data.reactions !== undefined) {
+      // API応答でusers配列含む正確なデータに上書き
+      setLocalReactions(data.reactions);
+      setLocalMyEmojis(data.myEmojis);
       onReactionUpdate(n.id, data.reactions, data.myEmojis);
     }
     sendingRef.current = false;
   };
 
-  const activeReactions = Object.entries(n.reactions).filter(([, v]) => v.count > 0);
+  const activeReactions = Object.entries(localReactions).filter(([, v]) => v.count > 0);
 
   return (
     <div className={styles.noticeItem}>
@@ -130,7 +138,7 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
       {activePopupEmoji && (
         <div className={styles.reactionPopup}>
           <div className={styles.reactionPopupHeader}>
-            <span className={styles.reactionPopupTitle}>リアクション ({popupUsers.length})</span>
+            <span className={styles.reactionPopupTitle}>リアクション ({popupCount})</span>
             <button className={styles.reactionPopupClose} onClick={() => setActivePopupEmoji(null)}>✕</button>
           </div>
           {popupUsers.map((u, i) => (
