@@ -16,8 +16,6 @@ type NoticeItemProps = {
 };
 
 function NoticeItem({ n, lineUserId, onReactionUpdate, myDisplayName, myPictureUrl }: NoticeItemProps) {
-  const bodyRef = useRef<HTMLParagraphElement>(null);
-  const [overflows, setOverflows] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [showReactionPopup, setShowReactionPopup] = useState(false);
@@ -33,12 +31,6 @@ function NoticeItem({ n, lineUserId, onReactionUpdate, myDisplayName, myPictureU
     .filter(([, v]) => v.count > 0)
     .flatMap(([emoji, { users }]) => users.map((u) => ({ ...u, emoji })));
   const totalReactionCount = Object.values(localReactions).reduce((sum, v) => sum + v.count, 0);
-
-  useEffect(() => {
-    if (bodyRef.current) {
-      setOverflows(bodyRef.current.scrollHeight > bodyRef.current.clientHeight + 1);
-    }
-  }, []);
 
   const handleReact = async (emoji: string) => {
     if (!lineUserId || sendingRef.current) return;
@@ -100,12 +92,11 @@ function NoticeItem({ n, lineUserId, onReactionUpdate, myDisplayName, myPictureU
         </p>
         {isNew && <span className={styles.noticeBadgeNew}>NEW</span>}
       </div>
-      <p ref={bodyRef} className={`${styles.noticeBody} ${expanded ? "" : styles.noticeBodyClamped}`}>{n.body}</p>
-      {(overflows || expanded) && (
-        <button className={styles.noticeToggle} onClick={() => setExpanded(!expanded)}>
-          {expanded ? "閉じる ▲" : "全文を表示 ▼"}
-        </button>
-      )}
+      {n.title && <p className={styles.noticeTitle}>{n.title}</p>}
+      {expanded && <p className={styles.noticeBody}>{n.body}</p>}
+      <button className={styles.noticeToggle} onClick={() => setExpanded(!expanded)}>
+        {expanded ? "閉じる ▲" : "本文を表示 ▼"}
+      </button>
 
       {/* ━━ リアクション ━━ */}
       <div className={styles.reactionRow}>

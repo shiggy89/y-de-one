@@ -1399,12 +1399,19 @@ export default function AdminPanel() {
         <div className={styles.section}>
           <p className={styles.sectionTitle}>お知らせを投稿する</p>
           <div className={styles.noticeForm}>
+            <input
+              type="text"
+              className={styles.noticeInput}
+              placeholder="タイトルを入力してください"
+              value={noticeTitle}
+              onChange={(e) => setNoticeTitle(e.target.value)}
+            />
             <textarea
               className={styles.noticeTextarea}
-              placeholder="お知らせ内容を入力してください"
+              placeholder="本文を入力してください"
               value={noticeBody}
               onChange={(e) => setNoticeBody(e.target.value)}
-              rows={4}
+              rows={8}
             />
             <button
               className={styles.noticePostBtn}
