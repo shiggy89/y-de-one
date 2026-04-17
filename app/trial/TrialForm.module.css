@@ -67,11 +67,17 @@
 .formTextarea,
 .formSelect {
   width: 100%;
+  max-width: 100%;
   box-sizing: border-box;
   padding: 8px 10px;
   border-radius: 4px;
   border: 1px solid #ccc;
   font-size: 16px;
+}
+
+.formInput[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .formInput:focus,
