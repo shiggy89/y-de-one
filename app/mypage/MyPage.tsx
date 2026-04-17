@@ -18,10 +18,13 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
   const [overflows, setOverflows] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
-  const [usersPopup, setUsersPopup] = useState<{ emoji: string; users: { name: string; pictureUrl: string | null }[] } | null>(null);
-  const [sending, setSending] = useState(false);
+  const [activePopupEmoji, setActivePopupEmoji] = useState<string | null>(null);
+  const sendingRef = useRef(false);
   const isNew = Date.now() - new Date(n.created_at).getTime() < 24 * 60 * 60 * 1000;
   const myEmoji = n.myReactions[0] ?? null;
+
+  // ポップアップのusersは常にn.reactionsから導出（スナップショット保持しない）
+  const popupUsers = activePopupEmoji ? (n.reactions[activePopupEmoji]?.users ?? []) : [];
 
   useEffect(() => {
     if (bodyRef.current) {
@@ -30,12 +33,12 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
   }, []);
 
   const handleReact = async (emoji: string) => {
-    if (!lineUserId || sending) return;
-    setSending(true);
+    if (!lineUserId || sendingRef.current) return;
+    sendingRef.current = true;
     setShowPicker(false);
 
-    // 楽観的UI: 即時カウント更新
-    const optimistic = JSON.parse(JSON.stringify(n.reactions)) as Record<string, ReactionGroup>;
+    // 楽観的UI: 即時カウント更新（re-renderなしでブロック、stateは親のみ更新）
+    const optimistic = structuredClone(n.reactions) as Record<string, ReactionGroup>;
     let optimisticMyEmojis: string[];
     if (myEmoji === emoji) {
       if (optimistic[emoji]) {
@@ -63,7 +66,7 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
     if (data.reactions !== undefined) {
       onReactionUpdate(n.id, data.reactions, data.myEmojis);
     }
-    setSending(false);
+    sendingRef.current = false;
   };
 
   const activeReactions = Object.entries(n.reactions).filter(([, v]) => v.count > 0);
@@ -90,8 +93,7 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
         <div className={styles.reactionAddWrap}>
           <button
             className={`${styles.reactionAddBtn} ${showPicker ? styles.reactionAddBtnOpen : ""}`}
-            onClick={() => { setShowPicker(!showPicker); setUsersPopup(null); }}
-            disabled={sending}
+            onClick={() => { setShowPicker(!showPicker); setActivePopupEmoji(null); }}
           >＋</button>
           {showPicker && (
             <div className={styles.reactionPicker}>
@@ -109,13 +111,13 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
         </div>
 
         {/* アクティブなリアクションチップ（タップ→誰がリアクションしたか表示） */}
-        {activeReactions.map(([emoji, { count, users }]) => (
+        {activeReactions.map(([emoji, { count }]) => (
           <button
             key={emoji}
             className={`${styles.reactionChip} ${myEmoji === emoji ? styles.reactionChipMine : ""}`}
             onClick={() => {
               setShowPicker(false);
-              setUsersPopup(usersPopup?.emoji === emoji ? null : { emoji, users });
+              setActivePopupEmoji(activePopupEmoji === emoji ? null : emoji);
             }}
           >
             <span>{emoji}</span>
@@ -124,14 +126,14 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
         ))}
       </div>
 
-      {/* 誰がリアクションしたかポップアップ */}
-      {usersPopup && (
+      {/* 誰がリアクションしたかポップアップ（n.reactionsから常に最新を導出） */}
+      {activePopupEmoji && (
         <div className={styles.reactionPopup}>
           <div className={styles.reactionPopupHeader}>
-            <span className={styles.reactionPopupTitle}>リアクション ({usersPopup.users.length})</span>
-            <button className={styles.reactionPopupClose} onClick={() => setUsersPopup(null)}>✕</button>
+            <span className={styles.reactionPopupTitle}>リアクション ({popupUsers.length})</span>
+            <button className={styles.reactionPopupClose} onClick={() => setActivePopupEmoji(null)}>✕</button>
           </div>
-          {usersPopup.users.map((u, i) => (
+          {popupUsers.map((u, i) => (
             <div key={i} className={styles.reactionPopupRow}>
               <div className={styles.reactionPopupAvatar}>
                 {u.pictureUrl
@@ -139,7 +141,7 @@ function NoticeItem({ n, lineUserId, onReactionUpdate }: NoticeItemProps) {
                   : <i className="fa-solid fa-user" />}
               </div>
               <span className={styles.reactionPopupName}>{u.name}</span>
-              <span className={styles.reactionPopupEmoji}>{usersPopup.emoji}</span>
+              <span className={styles.reactionPopupEmoji}>{activePopupEmoji}</span>
             </div>
           ))}
         </div>
