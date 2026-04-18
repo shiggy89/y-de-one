@@ -99,11 +99,11 @@ export async function POST(req: Request) {
         `・バレエ経験：${experience}\n` +
         (question ? `・ご質問 / 不安なこと：${question}\n` : "") +
         `\n当日はスタジオでお会いできることを楽しみにしております😊\n\n` +
-        `📍Y-de-ONEスタジオ\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n\n` +
+        `📍Y-de-ONEスタジオ\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n` +
         (question
-          ? `P.S.ご質問については、担当者より追ってご連絡いたします。\n`
+          ? `\nP.S.ご質問については、担当者より追ってご連絡いたします。\n\n`
           : ``) +
-        `\n何か変更やキャンセルがある場合は、このLINEからお知らせください。`;
+        `何か変更やキャンセルがある場合は、このLINEからお知らせください。`;
 
       const lineResponse = await fetch(LINE_ENDPOINT, {
         method: "POST",
