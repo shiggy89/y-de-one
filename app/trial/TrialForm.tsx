@@ -42,6 +42,7 @@ export default function TrialPage() {
   const [experience, setExperience] = useState("");
   const [question, setQuestion] = useState("");
   const [dateError, setDateError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
   const [datePlaceholder, setDatePlaceholder] = useState("希望日を選択してください");
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -181,6 +182,7 @@ export default function TrialPage() {
       return;
     }
 
+    setSubmitting(true);
     try {
       await fetch("/api/trial", {
         method: "POST",
@@ -214,6 +216,7 @@ export default function TrialPage() {
       setError(
         "送信中にエラーが発生しました。時間をおいて再度お試しください。"
       );
+      setSubmitting(false);
     }
   };
 
@@ -405,8 +408,8 @@ export default function TrialPage() {
             {/* エラー表示 */}
             {error && <p className={styles.formError}>{error}</p>}
 
-            <button type="submit" className={styles.formSubmit}>
-              この内容で体験レッスンを申込む
+            <button type="submit" className={styles.formSubmit} disabled={submitting}>
+              {submitting ? "送信中..." : "この内容で体験レッスンを申込む"}
             </button>
           </form>
         </section>
