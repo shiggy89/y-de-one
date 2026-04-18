@@ -103,7 +103,7 @@ export async function POST(req: Request) {
         (question
           ? `\nP.S.ご質問については、担当者より追ってご連絡いたします。\n\n`
           : ``) +
-        `何か変更やキャンセルがある場合は、このLINEからお知らせください。`;
+        `\n何か変更やキャンセルがある場合は、このLINEからお知らせください。`;
 
       const lineResponse = await fetch(LINE_ENDPOINT, {
         method: "POST",
