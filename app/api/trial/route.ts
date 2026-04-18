@@ -101,7 +101,7 @@ export async function POST(req: Request) {
         `\n当日はスタジオでお会いできることを楽しみにしております😊\n\n` +
         `📍Y-de-ONEスタジオ\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n` +
         (question
-          ? `\nP.S.ご質問については、担当者より追ってご連絡いたします。\n\n`
+          ? `\nP.S.ご質問については、担当者より追ってご連絡いたします。\n`
           : ``) +
         `\n何か変更やキャンセルがある場合は、このLINEからお知らせください。`;
 
