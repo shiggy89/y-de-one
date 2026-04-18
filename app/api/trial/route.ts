@@ -99,7 +99,7 @@ export async function POST(req: Request) {
         `・バレエ経験：${experience}\n` +
         (question ? `・ご質問 / 不安なこと：${question}\n` : "") +
         `\n当日はスタジオでお会いできることを楽しみにしております😊\n\n` +
-        `📍Y-de-ONEスタジオ\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n` +
+        `📍Y-de-ONEスタジオ\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n\n` +
         (question
           ? `\nP.S.ご質問については、担当者より追ってご連絡いたします。\n\n`
           : ``) +
@@ -152,8 +152,8 @@ export async function POST(req: Request) {
           `・希望日：${dateWithYoubi}\n` +
           `・時間帯：${timeSlot}\n` +
           `・バレエ経験：${experience}\n` +
-          (question ? `・ご質問／不安なこと：${question}\n` : "") +
-          (question ? `\n⚠️質問がきています⚠️\n${name} 様へ質問の返信をしてください。` : "");
+          (question ? `\n⚠️質問がきています⚠️\n${name} 様へ質問の返信をしてください。` : "") +
+          (question ? `\n・ご質問／不安なこと：${question}\n` : "");
 
         // 管理者の人数分だけ push を回す（3〜4人ならこれで十分）
         for (const adminId of adminUserIds) {
