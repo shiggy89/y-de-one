@@ -56,6 +56,10 @@
   margin-bottom: 28px;
 }
 
+.leadBr {
+  display: none;
+}
+
 .noteBr {
   display: none;
 }
@@ -67,6 +71,10 @@
 
   .note {
     text-align: left;
+  }
+
+  .leadBr {
+    display: block;
   }
 
   .noteBr {

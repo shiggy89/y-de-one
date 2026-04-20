@@ -32,7 +32,7 @@ export default function ThanksPage() {
             <h1 className={styles.title}>お問い合わせありがとうございます</h1>
           </div>
           <p className={styles.lead}>
-            担当者より<strong className={styles.highlight}>48時間以内</strong>にご返信いたします。
+            担当者より<strong className={styles.highlight}>48時間以内</strong>にご返信いたします。<br className={styles.leadBr} />
           </p>
           <p className={styles.note}>
             返信がない場合はメールが届いていない可能性がございますので、<br className={styles.noteBr} />お手数ですが、Y-de-ONE 公式LINE、またはお電話にてご連絡ください。
