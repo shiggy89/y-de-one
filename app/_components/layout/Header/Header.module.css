@@ -83,14 +83,16 @@
   color: #333;
 }
 
-.dropdown li a:hover span {
-  background: linear-gradient(transparent 60%, #ffff66 0%);
-}
+/* ホバー時の黄色アンダーライン（マウスあり端末のみ） */
+@media (hover: hover) {
+  .dropdownTrigger:hover span,
+  .globalNav > li > a:hover {
+    background: linear-gradient(transparent 60%, #ffff66 0%);
+  }
 
-/* ホバー時の黄色アンダーライン */
-.dropdownTrigger:hover span,
-.globalNav > li > a:hover {
-  background: linear-gradient(transparent 60%, #ffff66 0%);
+  .dropdown li a:hover span {
+    background: linear-gradient(transparent 60%, #ffff66 0%);
+  }
 }
 
 /* デスクトップ: ホバーで表示 */
@@ -204,7 +206,7 @@
   }
 
   .dropdownInner {
-    background: #f9f9f9;
+    background: none;
     border-radius: 0;
     box-shadow: none;
     padding: 4px 0;
@@ -220,7 +222,4 @@
     text-align: center;
   }
 
-  .dropdown li a:hover {
-    background: #f0f0f0;
-  }
 }
