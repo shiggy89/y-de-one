@@ -20,7 +20,7 @@
 .lineSubText {
   display: block;
   font-size: 14px;
-  margin-top: 2px;
+  margin-top: 0;
 }
 
 .lineAddText :global(.fa-line) {
