@@ -2,15 +2,6 @@
   padding: 48px 0 64px;
 }
 
-.brSp {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .brSp {
-    display: inline;
-  }
-}
 
 .card {
   max-width: 640px;
