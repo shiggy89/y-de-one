@@ -36,7 +36,7 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   { label: "お問い合わせ", href: "/contact" },
-  { label: "体験レッスン", href: "https://lin.ee/iz33eCM" },
+  { label: "見学・体験レッスン", href: "https://lin.ee/iz33eCM" },
 ];
 
 export default function Header() {
@@ -85,7 +85,7 @@ export default function Header() {
         <nav className="header-right">
           <ul className={`${styles.globalNav} ${isOpen ? styles.isOpen : ""}`}>
             {NAV_ITEMS.map((item) => {
-              const isCta = item.label === "体験レッスン";
+              const isCta = item.label === "見学・体験レッスン";
 
               if (item.children) {
                 const isDropdownOpen = openDropdown === item.label;
