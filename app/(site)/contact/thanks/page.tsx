@@ -29,14 +29,14 @@ export default function ThanksPage() {
           <div className={styles.icon}>✉️</div>
           <div className={styles.titleBlock}>
             {data && <p className={styles.nameLabel}>{data.name} 様</p>}
-            <h1 className={styles.title}>お問い合わせありがとうございます</h1>
+            <h1 className={styles.title}>お問い合わせ<br className={styles.brSp} />ありがとうございます</h1>
           </div>
           <p className={styles.lead}>
-            担当者より<strong className={styles.highlight}>48時間以内</strong>にご返信いたします。
+            担当者より<strong className={styles.highlight}>48時間以内</strong>に<br className={styles.brSp} />ご返信いたします。
           </p>
           <p className={styles.note}>
-            返信がない場合はメールが届いていない可能性がございますので、<br />
-            お手数ですが、Y-de-ONE 公式LINE、またはお電話にてご確認ください。
+            返信がない場合は<br className={styles.brSp} />メールが届いていない<br className={styles.brSp} />可能性がございますので、<br />
+            お手数ですが、<br className={styles.brSp} />Y-de-ONE 公式LINE、または<br className={styles.brSp} />お電話にてご確認ください。
           </p>
 
           <div className={styles.contacts}>
