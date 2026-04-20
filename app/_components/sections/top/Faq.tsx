@@ -127,10 +127,10 @@ export default function Faq() {
           />
         </div>
         <div className={ctaStyles.centerBtn}>
-          <a href="https://lin.ee/iz33eCM" className={styles.lastBtn}>体験レッスンはこちら <i className="fa-solid fa-arrow-up-right-from-square"></i></a>
+          <a href="https://lin.ee/iz33eCM" className={styles.lastBtn}>見学・体験レッスン <i className="fa-solid fa-arrow-up-right-from-square"></i></a>
           <span className={ctaStyles.lineAddText}>
             <i className="fa-brands fa-line"></i>
-            友だち追加をして体験レッスンにお申込み下さい
+            友だち追加をして見学・体験レッスンにお申込み下さい
           </span>
         </div>
       </div>
