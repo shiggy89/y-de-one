@@ -458,7 +458,9 @@ export default function AdminPanel() {
     const isTeacher = user?.status === "teacher";
     const prevRecords = attendanceMonthData.filter((r) =>
       r.student_id === userId &&
-      (r.lesson_date < date || (r.lesson_date === date && timeStart && r.lesson_time && r.lesson_time.split("〜")[0] < timeStart))
+      (r.lesson_date < date ||
+        (r.lesson_date === date &&
+          (!timeStart || !r.lesson_time || r.lesson_time.split("〜")[0] <= timeStart)))
     );
     const isFirst = prevRecords.length === 0;
     // 料金段階は標準レッスン（通常/祝日でポワント・プレモダン・特別以外）のみカウント
