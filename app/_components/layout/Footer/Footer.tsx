@@ -84,6 +84,7 @@ export default function Footer() {
             <li><Link href="/access">アクセス</Link></li>
             <li><Link href="/blog">ブログ</Link></li>
             <li><Link href="/news">お知らせ</Link></li>
+            <li><Link href="/contact">お問い合わせ</Link></li>
             <li><Link href="#trial">体験レッスン</Link></li>
           </ul>
         </div>

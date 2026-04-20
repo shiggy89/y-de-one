@@ -53,6 +53,7 @@ export default function Header() {
             <li><Link href="/access" onClick={handleClose}>アクセス</Link></li>
             <li><Link href="/blog" onClick={handleClose}>ブログ</Link></li>
             <li><Link href="/news" onClick={handleClose}>お知らせ</Link></li>
+            <li><Link href="/contact" onClick={handleClose}>お問い合わせ</Link></li>
             <li><Link href="https://lin.ee/iz33eCM" onClick={handleClose}>体験レッスン</Link></li>
           </ul>
         </nav>

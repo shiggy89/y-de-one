@@ -1,0 +1,162 @@
+.thanks {
+  padding: 48px 0 64px;
+}
+
+.card {
+  max-width: 640px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0090e8;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.lead {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.highlight {
+  color: #e05080;
+  font-size: 20px;
+}
+
+.note {
+  font-size: 13px;
+  line-height: 1.8;
+  color: #666;
+  margin-bottom: 28px;
+}
+
+.contacts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.lineBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  background: #06c755;
+  color: #fff;
+  border-radius: 12px;
+  padding: 16px 24px;
+  width: 100%;
+  max-width: 240px;
+  transition: opacity 0.2s;
+}
+
+.lineBlock:hover {
+  opacity: 0.85;
+}
+
+.qr {
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  background: #fff;
+  padding: 4px;
+}
+
+.lineLabel {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.phoneBlock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  background: #f5f5f5;
+  border-radius: 12px;
+  padding: 16px 24px;
+  width: 100%;
+  max-width: 240px;
+  box-sizing: border-box;
+  transition: background 0.2s;
+}
+
+.phoneBlock:hover {
+  background: #ebebeb;
+}
+
+.phoneIcon {
+  font-size: 24px;
+}
+
+.phoneNumber {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 0.05em;
+}
+
+.summary {
+  background: #f5f8ff;
+  border-radius: 8px;
+  padding: 20px 16px;
+  text-align: left;
+  margin-bottom: 32px;
+}
+
+.summaryTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+.dl {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px 12px;
+  font-size: 14px;
+}
+
+.dl dt {
+  font-weight: 600;
+  color: #555;
+}
+
+.dl dd {
+  margin: 0;
+  color: #333;
+  word-break: break-all;
+}
+
+.messageText {
+  white-space: pre-wrap;
+}
+
+.backLink {
+  display: inline-block;
+  padding: 12px 32px;
+  background-color: #0090e8;
+  color: #fff;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+}
