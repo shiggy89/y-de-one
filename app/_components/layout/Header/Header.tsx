@@ -5,15 +5,56 @@ import Link from "next/link";
 import Image from "next/image";
 import styles from "./Header.module.css";
 
+type NavChild = { label: string; href: string };
+type NavItem =
+  | { label: string; href: string; children?: undefined }
+  | { label: string; href?: undefined; children: NavChild[] };
+
+const NAV_ITEMS: NavItem[] = [
+  { label: "ホーム", href: "/" },
+  {
+    label: "レッスン",
+    children: [
+      { label: "クラス", href: "/class" },
+      { label: "料金", href: "/price" },
+      { label: "講師", href: "/instructor" },
+    ],
+  },
+  {
+    label: "Y-de-ONEについて",
+    children: [
+      { label: "スタジオ紹介", href: "/studio" },
+      { label: "作品・活動", href: "/works" },
+    ],
+  },
+  { label: "アクセス", href: "/access" },
+  {
+    label: "最新情報",
+    children: [
+      { label: "ブログ", href: "/blog" },
+      { label: "お知らせ", href: "/news" },
+    ],
+  },
+  { label: "お問い合わせ", href: "/contact" },
+  { label: "体験レッスン", href: "https://lin.ee/iz33eCM" },
+];
+
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   const handleToggle = () => {
     setIsOpen((prev) => !prev);
+    setOpenDropdown(null);
   };
 
   const handleClose = () => {
     setIsOpen(false);
+    setOpenDropdown(null);
+  };
+
+  const handleDropdownToggle = (label: string) => {
+    setOpenDropdown((prev) => (prev === label ? null : label));
   };
 
   return (
@@ -34,27 +75,53 @@ export default function Header() {
           className={styles.navToggle}
           aria-label="メニューを開く"
           onClick={handleToggle}
-          // onClick={()=> {setIsOpen(!isOpen)}}
         >
           {isOpen ? (
             <i className="fa-solid fa-xmark"></i>
-            ) : (
+          ) : (
             <i className="fa-solid fa-bars"></i>
           )}
         </button>
         <nav className="header-right">
           <ul className={`${styles.globalNav} ${isOpen ? styles.isOpen : ""}`}>
-            <li><Link href="/" onClick={handleClose}>ホーム</Link></li>
-            <li><Link href="/class" onClick={handleClose}>クラス</Link></li>
-            <li><Link href="/price" onClick={handleClose}>料金</Link></li>
-            <li><Link href="/instructor" onClick={handleClose}>講師</Link></li>
-            <li><Link href="/studio" onClick={handleClose}>スタジオ紹介</Link></li>
-            <li><Link href="/works" onClick={handleClose}>作品・活動</Link></li>
-            <li><Link href="/access" onClick={handleClose}>アクセス</Link></li>
-            <li><Link href="/blog" onClick={handleClose}>ブログ</Link></li>
-            <li><Link href="/news" onClick={handleClose}>お知らせ</Link></li>
-            <li><Link href="/contact" onClick={handleClose}>お問い合わせ</Link></li>
-            <li><Link href="https://lin.ee/iz33eCM" onClick={handleClose}>体験レッスン</Link></li>
+            {NAV_ITEMS.map((item) => {
+              const isCta = item.label === "体験レッスン";
+
+              if (item.children) {
+                const isDropdownOpen = openDropdown === item.label;
+                return (
+                  <li key={item.label} className={styles.navItem}>
+                    <button
+                      className={styles.dropdownTrigger}
+                      onClick={() => handleDropdownToggle(item.label)}
+                      aria-expanded={isDropdownOpen}
+                    >
+                      <span>{item.label}</span>
+                      <i className={`fa-solid fa-chevron-down ${styles.chevron} ${isDropdownOpen ? styles.chevronOpen : ""}`} />
+                    </button>
+                    <ul className={`${styles.dropdown} ${isDropdownOpen ? styles.dropdownOpen : ""}`}>
+                      <div className={styles.dropdownInner}>
+                        {item.children.map((child) => (
+                          <li key={child.href}>
+                            <Link href={child.href} onClick={handleClose}>
+                              <span>{child.label}</span>
+                            </Link>
+                          </li>
+                        ))}
+                      </div>
+                    </ul>
+                  </li>
+                );
+              }
+
+              return (
+                <li key={item.label} className={isCta ? styles.ctaItem : ""}>
+                  <Link href={item.href} onClick={handleClose}>
+                    {item.label}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
       </div>

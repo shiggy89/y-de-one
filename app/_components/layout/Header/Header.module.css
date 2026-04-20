@@ -1,4 +1,4 @@
-/*------------------------- 
+/*-------------------------
    header
 --------------------------*/
 .header {
@@ -18,16 +18,91 @@
 .globalNav {
   display: flex;
   gap: 16px;
-  font-size: 13px;
+  font-size: 14px;
   flex-wrap: nowrap;
   align-items: center;
 }
 
-.globalNav a {
+.globalNav > li > a {
   font-weight: 700;
 }
 
-.globalNav li:last-child a {
+/* ドロップダウン親アイテム */
+.navItem {
+  position: relative;
+}
+
+.dropdownTrigger {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  font-family: inherit;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chevron {
+  font-size: 9px;
+  transition: transform 0.2s;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* ドロップダウンメニュー */
+.dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding-top: 12px;
+  white-space: nowrap;
+  z-index: 100;
+  min-width: 140px;
+}
+
+.dropdownInner {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  padding: 8px 0;
+}
+
+.dropdown li a {
+  display: block;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.dropdown li a:hover span {
+  background: linear-gradient(transparent 60%, #ffff66 0%);
+}
+
+/* ホバー時の黄色アンダーライン */
+.dropdownTrigger:hover span,
+.globalNav > li > a:hover {
+  background: linear-gradient(transparent 60%, #ffff66 0%);
+}
+
+/* デスクトップ: ホバーで表示 */
+@media (min-width: 769px) {
+  .navItem:hover .dropdown,
+  .dropdown.dropdownOpen {
+    display: block;
+  }
+}
+
+/* 体験レッスンCTA */
+.ctaItem a {
   color: #0090e8;
   border-bottom: 2px solid #0090e8;
   padding-bottom: 2px;
@@ -51,6 +126,9 @@
   height: auto;
 }
 
+/* ----------------------
+   モバイル
+---------------------- */
 @media (max-width: 768px) {
   .header {
     position: sticky;
@@ -91,12 +169,58 @@
     padding: 16px 0;
     border-bottom: 1px solid #ddd;
     text-align: center;
-    gap: 16px;
-    font-size: 16px;
+    gap: 0;
+    font-size: 14px;
   }
 
-  .globalNav.isOpen,
-  .isOpen {
+  .globalNav.isOpen {
     display: flex;
+  }
+
+  .globalNav > li {
+    width: 100%;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .globalNav > li:last-child {
+    border-bottom: none;
+  }
+
+  .dropdownTrigger {
+    font-size: 14px;
+    font-weight: 700;
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* モバイルドロップダウン */
+  .dropdown {
+    position: static;
+    transform: none;
+    padding-top: 0;
+    white-space: normal;
+    min-width: unset;
+  }
+
+  .dropdownInner {
+    background: #f9f9f9;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 4px 0;
+  }
+
+  .dropdown.dropdownOpen {
+    display: block;
+  }
+
+  .dropdown li a {
+    padding: 10px 0;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .dropdown li a:hover {
+    background: #f0f0f0;
   }
 }
