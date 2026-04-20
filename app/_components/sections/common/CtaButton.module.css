@@ -14,14 +14,13 @@
 .lineAddText {
   display: block;
   font-size: 14px;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .lineSubText {
   display: block;
-  font-size: 13px;
-  color: #666;
-  margin-top: 4px;
+  font-size: 14px;
+  margin-top: 2px;
 }
 
 .lineAddText :global(.fa-line) {
