@@ -40,8 +40,12 @@
   }
 
   .lineAddText {
-    margin-bottom: 32px;
+    margin-bottom: 0;
     text-align: center;
+  }
+
+  .lineSubText {
+    margin-bottom: 32px;
   }
 
   .ctaBtn {
