@@ -194,6 +194,11 @@
     font-weight: 700;
     justify-content: center;
     width: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .globalNav > li > a {
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* モバイルドロップダウン */
