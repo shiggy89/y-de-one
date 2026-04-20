@@ -214,7 +214,7 @@
     background: none;
     border-radius: 0;
     box-shadow: none;
-    padding: 4px 0;
+    padding: 4px 0 0;
   }
 
   .dropdown.dropdownOpen {
@@ -225,6 +225,10 @@
     padding: 10px 0;
     font-size: 14px;
     text-align: center;
+  }
+
+  .dropdown li:last-child a {
+    padding-bottom: 0;
   }
 
 }
