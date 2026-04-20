@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import liff from "@line/liff";
 import Heading2 from "../_components/sections/common/Heading2";
 import { useRouter } from "next/navigation";
@@ -11,7 +11,8 @@ type Profile = {
   displayName: string;
 };
 
-const TIME_SLOTS: Record<string, Record<number, string[]>> = {
+// 体験レッスン用（ジャンル×曜日）
+const TRIAL_SLOTS: Record<string, Record<number, string[]>> = {
   バレエ: {
     2: ["13:00 - 14:30"],
     3: ["13:00 - 14:30", "19:15 - 20:45"],
@@ -28,6 +29,40 @@ const TIME_SLOTS: Record<string, Record<number, string[]>> = {
   },
 };
 
+// 見学用（曜日 → 全クラス一覧）
+const VISIT_SLOTS: Record<number, string[]> = {
+  0: [ // 日
+    "12:30 - 14:00　バレエ入門（青山佳樹）",
+    "14:30 - 16:00　バレエ基礎（青山佳樹）",
+    "16:00 - 16:35　ポワント（青山佳樹）",
+  ],
+  2: [ // 火
+    "13:00 - 14:30　バレエ入門（門馬和樹）",
+    "14:30 - 15:05　プレモダン（門馬和樹）",
+    "19:30 - 21:00　モダンバレエ（青山佳樹）",
+  ],
+  3: [ // 水
+    "13:00 - 14:30　バレエ基礎（門馬和樹）",
+    "15:00 - 16:30　モダンバレエ（門馬和樹）",
+    "19:15 - 20:45　バレエ入門基礎（青山佳樹）",
+  ],
+  4: [ // 木
+    "13:00 - 14:30　バレエ基礎（青山佳樹）",
+    "14:30 - 15:05　ポワント（青山佳樹）",
+    "15:30 - 17:00　モダンバレエ（青山佳樹）",
+    "19:30 - 21:00　モダンバレエ（門馬和樹）",
+  ],
+  5: [ // 金
+    "15:00 - 16:30　バレエ入門（青山佳樹）",
+    "16:30 - 17:05　ポワント（青山佳樹）",
+  ],
+  6: [ // 土
+    "12:30 - 14:00　バレエ入門基礎（門馬和樹）",
+    "14:30 - 16:00　バレエ基礎（青山佳樹）",
+    "16:30 - 18:00　モダンバレエ（青山佳樹）",
+  ],
+};
+
 export default function TrialPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -35,6 +70,7 @@ export default function TrialPage() {
   const [error, setError] = useState<string | null>(null);
 
   // フォーム
+  const [formType, setFormType] = useState<"trial" | "visit">("trial");
   const [name, setName] = useState("");
   const [genre, setGenre] = useState("");
   const [date, setDate] = useState("");
@@ -47,10 +83,6 @@ export default function TrialPage() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todayStr = today.toISOString().split("T")[0];
-  const balletWomanStyle = {
-    "--heading-icon-width": "172px",
-  } as CSSProperties;
-
   // ===== LIFF 初期化 =====
   useEffect(() => {
     const initLiff = async () => {
@@ -63,12 +95,8 @@ export default function TrialPage() {
           return;
         }
 
-        // 開発用：ブラウザから直接アクセスしたときのダミープロフィール
         if (!liff.isInClient() && process.env.NODE_ENV !== "production") {
-          setProfile({
-            userId: "debug",
-            displayName: "テストユーザー",
-          });
+          setProfile({ userId: "debug", displayName: "テストユーザー" });
           setLoading(false);
           return;
         }
@@ -81,59 +109,49 @@ export default function TrialPage() {
         }
 
         const p = await liff.getProfile();
-        setProfile({
-          userId: p.userId,
-          displayName: p.displayName,
-        });
-
+        setProfile({ userId: p.userId, displayName: p.displayName });
       } catch (e) {
         console.error(e);
-        setError(
-          "LINEログインに失敗しました。時間をおいて再度お試しください。"
-        );
+        setError("LINEログインに失敗しました。時間をおいて再度お試しください。");
       } finally {
         setLoading(false);
       }
     };
 
-    // isInClient() が投げる環境もあるので try で包む
-    try {
-      initLiff();
-    } catch (e) {
-      console.error(e);
-      setLoading(false);
-    }
+    try { initLiff(); } catch (e) { console.error(e); setLoading(false); }
   }, []);
+
+  // 申込み種別が変わったらジャンル・時間帯・経験をリセット
+  const handleFormTypeChange = (type: "trial" | "visit") => {
+    setFormType(type);
+    setGenre("");
+    setTimeSlot("");
+    setExperience("");
+  };
 
   // ===== 日付変更 =====
   const handleDateChange = (value: string) => {
     setTimeSlot("");
     setDateError(null);
 
-    // 入力クリアされた場合
     if (!value) {
       setDate("");
       setDatePlaceholder("希望日を選択してください");
       return;
     }
 
-    // ▼ ここで「過去日付かどうか」をチェック
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // 今日の0:00に揃える
-
+    today.setHours(0, 0, 0, 0);
     const selected = new Date(value + "T00:00:00");
 
     if (selected < today) {
-      // 過去の日付が選ばれたら、値を戻してエラー表示
       setDate("");
       setDatePlaceholder("希望日を選択してください");
       setDateError("過去の日付は選択できません。本日以降の日付をお選びください。");
       return;
     }
 
-    // ここまで来たら「今日以降」なので確定
     setDate(value);
-
     const day = selected.getDay();
     const youbi = ["日", "月", "火", "水", "木", "金", "土"][day];
     setDatePlaceholder(`${value}（${youbi}）`);
@@ -143,44 +161,26 @@ export default function TrialPage() {
     }
   };
 
-  const getTimeSlotsForSelectedDate = (): string[] => {
-    if (!date || !genre) return [];
-    const d = new Date(date + "T00:00:00");
-    const day = d.getDay();
-    return TIME_SLOTS[genre]?.[day] ?? [];
+  const getSlots = (): string[] => {
+    if (!date) return [];
+    const day = new Date(date + "T00:00:00").getDay();
+    if (formType === "visit") return VISIT_SLOTS[day] ?? [];
+    if (!genre) return [];
+    return TRIAL_SLOTS[genre]?.[day] ?? [];
   };
 
   // ===== 送信 =====
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: { preventDefault(): void }) => {
     e.preventDefault();
     setError(null);
 
-    // 必須チェック
-    if (!name.trim()) {
-      setError("氏名を入力してください。");
-      return;
-    }
-    if (!genre) {
-      setError("体験レッスンの種類を選択してください。");
-      return;
-    }
-    if (!date) {
-      setError("体験レッスン希望日を選択してください。");
-      return;
-    }
+    if (!name.trim()) { setError("氏名を入力してください。"); return; }
+    if (formType === "trial" && !genre) { setError("体験レッスンの種類を選択してください。"); return; }
+    if (!date) { setError("希望日を選択してください。"); return; }
     const d = new Date(date + "T00:00:00");
-    if (d.getDay() === 1) {
-      setError("月曜日はレッスン休講日のため、別の日付をお選びください。");
-      return;
-    }
-    if (!timeSlot) {
-      setError("体験レッスン時間帯を選択してください。");
-      return;
-    }
-    if (!experience) {
-      setError("バレエ経験を選択してください。");
-      return;
-    }
+    if (d.getDay() === 1) { setError("月曜日はレッスン休講日のため、別の日付をお選びください。"); return; }
+    if (!timeSlot) { setError("時間帯を選択してください。"); return; }
+    if (formType === "trial" && !experience) { setError("バレエ経験を選択してください。"); return; }
 
     setSubmitting(true);
     try {
@@ -191,31 +191,24 @@ export default function TrialPage() {
           lineUserId: profile?.userId,
           lineDisplayName: profile?.displayName,
           name,
-          genre,
+          formType,
+          genre: formType === "trial" ? genre : undefined,
           date,
           timeSlot,
-          experience,
+          experience: formType === "trial" ? experience : undefined,
           question,
         }),
       });
 
-      alert(
-        "体験レッスンのお申込みありがとうございます。\n詳細はこの後LINEでご連絡いたします。"
-      );
+      const msg = formType === "visit"
+        ? "見学のお申込みありがとうございます。\n詳細はこの後LINEでご連絡いたします。"
+        : "体験レッスンのお申込みありがとうございます。\n詳細はこの後LINEでご連絡いたします。";
+      alert(msg);
       router.push("/");
-      // 必要であればLIFFを閉じる
-      try {
-        if (liff.isInClient()) {
-          liff.closeWindow();
-        }
-      } catch {
-        // ブラウザ直アクセス時などは何もしない
-      }
+      try { if (liff.isInClient()) liff.closeWindow(); } catch { /* ignore */ }
     } catch (e) {
       console.error(e);
-      setError(
-        "送信中にエラーが発生しました。時間をおいて再度お試しください。"
-      );
+      setError("送信中にエラーが発生しました。時間をおいて再度お試しください。");
       setSubmitting(false);
     }
   };
@@ -223,46 +216,65 @@ export default function TrialPage() {
   if (loading) {
     return (
       <main className={styles.trial}>
-        <div className={`inner `}>
-          <p>読み込み中です…</p>
-        </div>
+        <div className="inner"><p>読み込み中です…</p></div>
       </main>
     );
   }
 
+  const slots = getSlots();
 
-  const slots = getTimeSlotsForSelectedDate();
-
-  // ここから下（return 内）は、あなたのHTMLをそのまま残しています
   return (
     <main className={styles.trial}>
-      <div className={`inner `}>
-<section aria-labelledby="trial-form-heading">
+      <div className="inner">
+        <section aria-labelledby="trial-form-heading">
           <Heading2
-            title="体験レッスン申込みフォーム"
+            title="体験レッスン・見学 申込みフォーム"
             lead={
               <>
                 高田馬場・東中野・落合・新宿エリアにある「質問できる大人バレエ教室」
-                Y-de-ONE（ワイデワン）の体験レッスンお申込みページです。
+                Y-de-ONE（ワイデワン）の体験レッスン・見学お申込みページです。
               </>
             }
           />
 
           {profile && (
-            // <p className={styles.trialLineName}>
-            //     <strong>{profile.displayName}</strong>
-            //     さん、Y-de-ONEのバレエ体験レッスンに興味をもっていただきありがとうございます。
-            // </p>
-            <>
-              <p className={styles.trialLineName}>
-                <strong>{profile.displayName}</strong>
-                さん、Y-de-ONEのバレエ体験レッスンに興味をもっていただきありがとうございます。
-              </p>
-            </>
-
+            <p className={styles.trialLineName}>
+              <strong>{profile.displayName}</strong>
+              さん、Y-de-ONEに興味をもっていただきありがとうございます。
+            </p>
           )}
 
           <form className={styles.trialForm} onSubmit={handleSubmit}>
+
+            {/* 申込み種別（必須） */}
+            <div className={styles.formField}>
+              <label className={styles.formLabel}>
+                申込み種別 <span className={styles.formRequired}>必須</span>
+              </label>
+              <div className={styles.radioGroup}>
+                <label className={styles.radioItem}>
+                  <input
+                    type="radio"
+                    name="formType"
+                    value="trial"
+                    checked={formType === "trial"}
+                    onChange={() => handleFormTypeChange("trial")}
+                  />
+                  <span>体験レッスン（¥3,300）</span>
+                </label>
+                <label className={styles.radioItem}>
+                  <input
+                    type="radio"
+                    name="formType"
+                    value="visit"
+                    checked={formType === "visit"}
+                    onChange={() => handleFormTypeChange("visit")}
+                  />
+                  <span>レッスン見学（無料）</span>
+                </label>
+              </div>
+            </div>
+
             {/* 氏名（必須） */}
             <div className={styles.formField}>
               <label className={styles.formLabel}>
@@ -278,32 +290,34 @@ export default function TrialPage() {
               />
             </div>
 
-            {/* ジャンル（必須） */}
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>
-                体験レッスンの種類 <span className={styles.formRequired}>必須</span>
-              </label>
-              <div className={styles.radioGroup}>
-                {["バレエ", "モダンバレエ"].map((g) => (
-                  <label key={g} className={styles.radioItem}>
-                    <input
-                      type="radio"
-                      name="genre"
-                      value={g}
-                      required
-                      checked={genre === g}
-                      onChange={(e) => { setGenre(e.target.value); setTimeSlot(""); }}
-                    />
-                    <span>{g}</span>
-                  </label>
-                ))}
+            {/* ジャンル（体験のみ・必須） */}
+            {formType === "trial" && (
+              <div className={styles.formField}>
+                <label className={styles.formLabel}>
+                  体験レッスンの種類 <span className={styles.formRequired}>必須</span>
+                </label>
+                <div className={styles.radioGroup}>
+                  {["バレエ", "モダンバレエ"].map((g) => (
+                    <label key={g} className={styles.radioItem}>
+                      <input
+                        type="radio"
+                        name="genre"
+                        value={g}
+                        checked={genre === g}
+                        onChange={(e) => { setGenre(e.target.value); setTimeSlot(""); }}
+                      />
+                      <span>{g}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* 希望日（必須） */}
             <div className={styles.formField}>
               <label className={styles.formLabel}>
-                体験レッスン希望日 <span className={styles.formRequired}>必須</span>
+                {formType === "visit" ? "見学希望日" : "体験レッスン希望日"}{" "}
+                <span className={styles.formRequired}>必須</span>
               </label>
               <input
                 type="date"
@@ -313,38 +327,29 @@ export default function TrialPage() {
                 onChange={(e) => handleDateChange(e.target.value)}
                 min={todayStr}
               />
-              {date && (
-                <p className={styles.formNote}>
-                  選択した日：{datePlaceholder}
-                </p>
-              )}
+              {date && <p className={styles.formNote}>選択した日：{datePlaceholder}</p>}
               {dateError && <p className={styles.formError}>{dateError}</p>}
-              {/* <p className={styles.formNote}>
-                ※ 月曜日はレッスン休講日のため選択できません。
-              </p> */}
             </div>
 
             {/* 時間帯（必須） */}
             <div className={styles.formField}>
               <label className={styles.formLabel}>
-                体験レッスン時間帯 <span className={styles.formRequired}>必須</span>
+                時間帯 <span className={styles.formRequired}>必須</span>
               </label>
 
-              {!genre && (
-                <p className={styles.formNote}>
-                  先に「体験レッスンの種類」を選択してください。
-                </p>
+              {formType === "trial" && !genre && (
+                <p className={styles.formNote}>先に「体験レッスンの種類」を選択してください。</p>
               )}
 
-              {genre && !date && (
-                <p className={styles.formNote}>
-                  先に「体験レッスン希望日」を選択してください。
-                </p>
+              {(formType === "visit" || genre) && !date && (
+                <p className={styles.formNote}>先に「希望日」を選択してください。</p>
               )}
 
-              {genre && date && slots.length === 0 && (
+              {(formType === "visit" || genre) && date && slots.length === 0 && (
                 <p className={styles.formNote}>
-                  この日は{genre}の体験レッスンを行っていません。別の日付をお選びください。
+                  {formType === "visit"
+                    ? "この日はレッスンを行っていません。別の日付をお選びください。"
+                    : `この日は${genre}の体験レッスンを行っていません。別の日付をお選びください。`}
                 </p>
               )}
 
@@ -356,7 +361,6 @@ export default function TrialPage() {
                         type="radio"
                         name="timeSlot"
                         value={slot}
-                        required
                         checked={timeSlot === slot}
                         onChange={(e) => setTimeSlot(e.target.value)}
                       />
@@ -367,49 +371,53 @@ export default function TrialPage() {
               )}
             </div>
 
-            {/* バレエ経験（必須） */}
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>
-                バレエ経験 <span className={styles.formRequired}>必須</span>
-              </label>
-              <div className={styles.radioGroup}>
-                {["はじめて", "少しだけ経験あり", "昔やっていた", "今も現役"].map(
-                  (label) => (
+            {/* バレエ経験（体験のみ・必須） */}
+            {formType === "trial" && (
+              <div className={styles.formField}>
+                <label className={styles.formLabel}>
+                  バレエ経験 <span className={styles.formRequired}>必須</span>
+                </label>
+                <div className={styles.radioGroup}>
+                  {["はじめて", "少しだけ経験あり", "昔やっていた", "今も現役"].map((label) => (
                     <label key={label} className={styles.radioItem}>
                       <input
                         type="radio"
                         name="experience"
                         value={label}
-                        required
                         checked={experience === label}
                         onChange={(e) => setExperience(e.target.value)}
                       />
                       <span>{label}</span>
                     </label>
-                  )
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* ご質問（任意） */}
             <div className={styles.formField}>
-              <label className={styles.formLabel}>
-                ご質問・不安なことなど（任意）
-              </label>
+              <label className={styles.formLabel}>ご質問・不安なことなど（任意）</label>
               <textarea
                 className={styles.formTextarea}
                 rows={4}
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                placeholder="例）服装・持ち物が知りたい／からだが硬いのが心配 など"
+                placeholder={
+                  formType === "visit"
+                    ? "例）服装について知りたい／子連れでも大丈夫か など"
+                    : "例）服装・持ち物が知りたい／からだが硬いのが心配 など"
+                }
               />
             </div>
 
-            {/* エラー表示 */}
             {error && <p className={styles.formError}>{error}</p>}
 
             <button type="submit" className={styles.formSubmit} disabled={submitting}>
-              {submitting ? "送信中..." : "この内容で体験レッスンを申込む"}
+              {submitting
+                ? "送信中..."
+                : formType === "visit"
+                  ? "この内容で見学を申込む"
+                  : "この内容で体験レッスンを申込む"}
             </button>
           </form>
         </section>
