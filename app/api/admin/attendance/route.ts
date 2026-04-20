@@ -141,6 +141,29 @@ export async function POST(req: Request) {
       );
     }
 
+    // ── 累計バッジ更新 ──────────────────────────────
+    const BADGE_ORDER = ["normal", "bronze", "silver", "gold", "platinum", "diamond"];
+
+    const [{ data: allUserAttendances }, { data: currentUser }] = await Promise.all([
+      supabaseAdmin.from("attendances").select("lesson_type, lesson_title, lesson_time").eq("student_id", userId),
+      supabaseAdmin.from("users").select("current_badge").eq("id", userId).single(),
+    ]);
+
+    const totalCount = (allUserAttendances ?? []).reduce(
+      (sum, a) => sum + calcLessonCount(a.lesson_type, a.lesson_title, a.lesson_time),
+      0
+    );
+    const newBadge = calcBadge(totalCount);
+
+    if (newBadge) {
+      const newRank = BADGE_ORDER.indexOf(newBadge);
+      const currentRank = currentUser?.current_badge ? BADGE_ORDER.indexOf(currentUser.current_badge) : -1;
+      if (newRank > currentRank) {
+        await supabaseAdmin.from("users").update({ current_badge: newBadge, badge_notified: false }).eq("id", userId);
+      }
+    }
+    // ────────────────────────────────────────────────
+
     return NextResponse.json({ ok: true, price, lessonFee, maintenanceFee, countThisMonth: standardCount });
   } catch (e) {
     console.error(e);
