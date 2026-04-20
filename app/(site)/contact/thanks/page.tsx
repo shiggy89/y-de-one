@@ -27,7 +27,10 @@ export default function ThanksPage() {
       <div className="inner">
         <div className={styles.card}>
           <div className={styles.icon}>✉️</div>
-          <h1 className={styles.title}>お問い合わせありがとうございます</h1>
+          <div className={styles.titleBlock}>
+            {data && <p className={styles.nameLabel}>{data.name} 様</p>}
+            <h1 className={styles.title}>お問い合わせありがとうございます</h1>
+          </div>
           <p className={styles.lead}>
             担当者より<strong className={styles.highlight}>48時間以内</strong>にご返信いたします。
           </p>

@@ -17,11 +17,22 @@
   margin-bottom: 16px;
 }
 
+.titleBlock {
+  display: inline-block;
+  text-align: left;
+  margin-bottom: 12px;
+}
+
+.nameLabel {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
 .title {
   font-size: 22px;
   font-weight: 700;
   color: #0090e8;
-  margin-bottom: 12px;
   line-height: 1.5;
 }
 
@@ -114,6 +125,9 @@
 }
 
 .summary {
+  display: inline-block;
+  width: 100%;
+  box-sizing: border-box;
   background: #f5f8ff;
   border-radius: 8px;
   padding: 20px 16px;

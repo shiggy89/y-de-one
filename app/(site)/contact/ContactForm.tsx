@@ -22,6 +22,7 @@ export default function ContactForm() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [emailConfirm, setEmailConfirm] = useState("");
   const [category, setCategory] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -34,6 +35,8 @@ export default function ContactForm() {
     if (!name.trim()) { setError("お名前を入力してください。"); return; }
     if (!email.trim()) { setError("メールアドレスを入力してください。"); return; }
     if (!EMAIL_REGEX.test(email.trim())) { setError("正しいメールアドレスの形式で入力してください。"); return; }
+    if (!emailConfirm.trim()) { setError("メールアドレス（確認）を入力してください。"); return; }
+    if (email.trim() !== emailConfirm.trim()) { setError("メールアドレスが一致していません。"); return; }
     if (!message.trim()) { setError("お問い合わせ内容を入力してください。"); return; }
 
     setSubmitting(true);
@@ -60,7 +63,7 @@ export default function ContactForm() {
         <section>
           <Heading2
             title="お問い合わせ"
-            lead="Y-de-ONEへのご質問・ご相談はこちらからお気軽にどうぞ。"
+            lead="Y-de-ONEへのご質問・ご相談はこちらからお気軽にご連絡ください。"
           />
 
           <form className={styles.form} onSubmit={handleSubmit}>
@@ -88,6 +91,20 @@ export default function ContactForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="例）hanako@example.com"
+                required
+              />
+            </div>
+
+            <div className={styles.field}>
+              <label className={styles.label}>
+                メールアドレス（確認） <span className={styles.required}>必須</span>
+              </label>
+              <input
+                type="email"
+                className={styles.input}
+                value={emailConfirm}
+                onChange={(e) => setEmailConfirm(e.target.value)}
+                placeholder="もう一度入力してください"
                 required
               />
             </div>
