@@ -10,8 +10,8 @@ type Props = {
 
 export default function SectionCtaButton({
   href = "https://lin.ee/iz33eCM",
-  label = "見学・体験レッスン",
-  note = "友だち追加をして見学・体験レッスンにお申込み下さい",
+  label = "体験レッスンはこちら",
+  note = "友だち追加をして体験レッスンにお申込み下さい",
   className,
 }: Props) {
   return (
@@ -25,6 +25,7 @@ export default function SectionCtaButton({
         <i className="fa-brands fa-line"></i>
         {note}
       </span>
+      <span className={styles.lineSubText}>レッスン見学（無料）もお申込みいただけます</span>
     </div>
   );
 }

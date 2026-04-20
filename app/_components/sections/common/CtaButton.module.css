@@ -17,6 +17,13 @@
   margin-top: 8px;
 }
 
+.lineSubText {
+  display: block;
+  font-size: 13px;
+  color: #666;
+  margin-top: 4px;
+}
+
 .lineAddText :global(.fa-line) {
   color: #08b949;
 }
