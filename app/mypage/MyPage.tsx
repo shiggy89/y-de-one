@@ -467,11 +467,11 @@ export default function MyPage() {
         {user && (
           <button className={styles.headerBadge} onClick={() => { setBadgeInfoPage("badges"); setShowBadgeInfo(true); }}>
             <img
-              src={`/images/badges/badge-${currentBadge ?? lastMonthBadge ?? "normal"}.png`}
-              alt={currentBadge ?? lastMonthBadge ?? "normal"}
+              src={`/images/badges/badge-${lastMonthBadge ?? currentBadge ?? "normal"}.png`}
+              alt={lastMonthBadge ?? currentBadge ?? "normal"}
               className={styles.headerBadgeImg}
             />
-            <p className={styles.headerBadgeLabel}>{BADGE_LABEL[currentBadge ?? lastMonthBadge ?? "normal"]}</p>
+            <p className={styles.headerBadgeLabel}>{BADGE_LABEL[lastMonthBadge ?? currentBadge ?? "normal"]}</p>
           </button>
         )}
       </div>
@@ -756,7 +756,10 @@ export default function MyPage() {
               <div className={styles.badgeGrid}>
                 {[1,2,3,4,5,6,7,8,9,10,11,12].map((m) => {
                   const ym = `${badgeYear}-${String(m).padStart(2, "0")}`;
-                  const b = badgeData.find((b) => b.year_month === ym);
+                  const isCurrentMonth = ym === yearMonth;
+                  const b = isCurrentMonth && currentBadge
+                    ? { year_month: ym, badge: currentBadge }
+                    : badgeData.find((bd) => bd.year_month === ym);
                   return (
                     <div key={m} className={styles.badgeCell}>
                       {b ? (
