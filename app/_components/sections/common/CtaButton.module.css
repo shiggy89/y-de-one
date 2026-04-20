@@ -14,13 +14,15 @@
 .lineAddText {
   display: block;
   font-size: 14px;
+  line-height: 1.4;
   margin-top: 6px;
 }
 
 .lineSubText {
   display: block;
   font-size: 14px;
-  margin-top: 0;
+  line-height: 1.4;
+  margin-top: -2px;
 }
 
 .lineAddText :global(.fa-line) {
