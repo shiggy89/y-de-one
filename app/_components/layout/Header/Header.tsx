@@ -41,20 +41,28 @@ const NAV_ITEMS: NavItem[] = [
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set());
 
   const handleToggle = () => {
     setIsOpen((prev) => !prev);
-    setOpenDropdown(null);
+    setOpenDropdowns(new Set());
   };
 
   const handleClose = () => {
     setIsOpen(false);
-    setOpenDropdown(null);
+    setOpenDropdowns(new Set());
   };
 
   const handleDropdownToggle = (label: string) => {
-    setOpenDropdown((prev) => (prev === label ? null : label));
+    setOpenDropdowns((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) {
+        next.delete(label);
+      } else {
+        next.add(label);
+      }
+      return next;
+    });
   };
 
   return (
@@ -88,7 +96,7 @@ export default function Header() {
               const isCta = item.label === "見学・体験レッスン";
 
               if (item.children) {
-                const isDropdownOpen = openDropdown === item.label;
+                const isDropdownOpen = openDropdowns.has(item.label);
                 return (
                   <li key={item.label} className={styles.navItem}>
                     <button
