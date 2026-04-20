@@ -6,9 +6,11 @@ type TrialRequestBody = {
   lineUserId?: string;
   lineDisplayName?: string;
   name: string;
+  formType?: "trial" | "visit";
+  genre?: string;
   date: string;
   timeSlot: string;
-  experience: string;
+  experience?: string;
   question?: string;
 };
 
@@ -23,14 +25,18 @@ export async function POST(req: Request) {
       lineUserId,
       lineDisplayName,
       name,
+      formType = "trial",
+      genre,
       date,
       timeSlot,
       experience,
       question,
     } = body;
 
+    const isVisit = formType === "visit";
+
     // ② 簡単なバリデーション（必須項目チェック）
-    if (!name || !date || !timeSlot || !experience) {
+    if (!name || !date || !timeSlot || (!isVisit && !experience)) {
       return NextResponse.json(
         { ok: false, error: "必須項目が送信されていません。" },
         { status: 400 }
@@ -87,23 +93,36 @@ export async function POST(req: Request) {
 
       const displayNameForMessage = name || lineDisplayName || "お客様";
 
-      const text =
-        `${displayNameForMessage} 様\n\n` +
-        `Y-de-ONEバレエ教室です🩰\n` +
-        `体験レッスンのお申込みありがとうございます。\n\n` +
-        `🎉【ご予約が確定しました】🎉\n\n` +
-        `▼ ご予約内容\n` +
-        `・お名前：${displayNameForMessage}\n` +
-        `・希望日：${dateWithYoubi}\n` +
-        `・時間帯：${timeSlot}\n` +
-        `・バレエ経験：${experience}\n` +
-        (question ? `・ご質問 / 不安なこと：${question}\n` : "") +
-        `\n当日はスタジオでお会いできることを楽しみにしております😊\n\n` +
-        `📍Y-de-ONEスタジオ\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n` +
-        (question
-          ? `\nP.S.ご質問については、担当者より追ってご連絡いたします。\n`
-          : ``) +
-        `\n何か変更やキャンセルがある場合は、このLINEからお知らせください。`;
+      const text = isVisit
+        ? `${displayNameForMessage} 様\n\n` +
+          `Y-de-ONEバレエ教室です🩰\n` +
+          `レッスン見学のお申込みありがとうございます。\n\n` +
+          `🎉【見学のご予約が確定しました】🎉\n\n` +
+          `▼ ご予約内容\n` +
+          `・お名前：${displayNameForMessage}\n` +
+          `・見学希望日：${dateWithYoubi}\n` +
+          `・時間帯：${timeSlot}\n` +
+          (question ? `・ご質問 / 不安なこと：${question}\n` : "") +
+          `\n当日はスタジオでお待ちしております😊\n` +
+          `動きやすい服装でお越しください。\n\n` +
+          `📍Y-de-ONEスタジオ\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n` +
+          (question ? `\nP.S.ご質問については、担当者より追ってご連絡いたします。\n` : ``) +
+          `\n何か変更やキャンセルがある場合は、このLINEからお知らせください。`
+        : `${displayNameForMessage} 様\n\n` +
+          `Y-de-ONEバレエ教室です🩰\n` +
+          `体験レッスンのお申込みありがとうございます。\n\n` +
+          `🎉【ご予約が確定しました】🎉\n\n` +
+          `▼ ご予約内容\n` +
+          `・お名前：${displayNameForMessage}\n` +
+          `・レッスン種類：${genre ?? ""}\n` +
+          `・希望日：${dateWithYoubi}\n` +
+          `・時間帯：${timeSlot}\n` +
+          `・バレエ経験：${experience ?? ""}\n` +
+          (question ? `・ご質問 / 不安なこと：${question}\n` : "") +
+          `\n当日はスタジオでお会いできることを楽しみにしております😊\n\n` +
+          `📍Y-de-ONEスタジオ\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n` +
+          (question ? `\nP.S.ご質問については、担当者より追ってご連絡いたします。\n` : ``) +
+          `\n何か変更やキャンセルがある場合は、このLINEからお知らせください。`;
 
       const lineResponse = await fetch(LINE_ENDPOINT, {
         method: "POST",
@@ -144,16 +163,25 @@ export async function POST(req: Request) {
         .filter((id) => isValidLineUserId(id));
 
       if (adminUserIds.length > 0) {
-        const adminText =
-          `【体験レッスン申込み通知】\n\n` +
-          `▼ お申込み内容\n` +
-          `・お名前：${name}\n` +
-          `・LINE表示名：${lineDisplayName ?? "不明"}\n` +
-          `・希望日：${dateWithYoubi}\n` +
-          `・時間帯：${timeSlot}\n` +
-          `・バレエ経験：${experience}\n` +
-          (question ? `\n⚠️質問がきています⚠️\n${name} 様へ質問の返信をしてください。` : "") +
-          (question ? `\n\n・ご質問／不安なこと：${question}\n` : "");
+        const adminText = isVisit
+          ? `【見学申込み通知】\n\n` +
+            `▼ お申込み内容\n` +
+            `・お名前：${name}\n` +
+            `・LINE表示名：${lineDisplayName ?? "不明"}\n` +
+            `・見学希望日：${dateWithYoubi}\n` +
+            `・時間帯：${timeSlot}\n` +
+            (question ? `\n⚠️質問がきています⚠️\n${name} 様へ質問の返信をしてください。` : "") +
+            (question ? `\n\n・ご質問／不安なこと：${question}\n` : "")
+          : `【体験レッスン申込み通知】\n\n` +
+            `▼ お申込み内容\n` +
+            `・お名前：${name}\n` +
+            `・LINE表示名：${lineDisplayName ?? "不明"}\n` +
+            `・レッスン種類：${genre ?? ""}\n` +
+            `・希望日：${dateWithYoubi}\n` +
+            `・時間帯：${timeSlot}\n` +
+            `・バレエ経験：${experience ?? ""}\n` +
+            (question ? `\n⚠️質問がきています⚠️\n${name} 様へ質問の返信をしてください。` : "") +
+            (question ? `\n\n・ご質問／不安なこと：${question}\n` : "");
 
         // 管理者の人数分だけ push を回す（3〜4人ならこれで十分）
         for (const adminId of adminUserIds) {
