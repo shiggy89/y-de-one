@@ -436,7 +436,22 @@ export default function AdminPanel() {
   const fetchAttendanceMonth = async (month: string) => {
     const res = await fetch(`/api/admin/ledger?month=${month}`);
     const data = await res.json();
-    setAttendanceMonthData(data.records ?? []);
+    const serverRecords: LedgerRecord[] = data.records ?? [];
+    setAttendanceMonthData((prev) => {
+      // サーバーデータにまだ反映されていない楽観的レコード（負のID）を保持
+      const stillOptimistic = prev.filter(
+        (r) =>
+          r.id < 0 &&
+          !serverRecords.some(
+            (s) =>
+              s.student_id === r.student_id &&
+              s.lesson_date === r.lesson_date &&
+              s.lesson_time === r.lesson_time &&
+              s.lesson_title === r.lesson_title
+          )
+      );
+      return [...serverRecords, ...stillOptimistic];
+    });
   };
 
   // 全期間の出席カウントマップを構築（ソート用・一度だけ取得）
