@@ -70,12 +70,18 @@ export async function POST(req: Request) {
 
     // 先生チェック・当月レッスン回数カウントを並列取得
     type AttendanceRow = { id: number; lesson_type: string; lesson_title: string | null };
+    const baseSameDayQuery = supabaseAdmin
+      .from("attendances")
+      .select("id, lesson_type, lesson_title")
+      .eq("student_id", userId)
+      .eq("lesson_date", lessonDate);
+    const sameDayQuery = lessonTimeStart
+      ? baseSameDayQuery.lte("lesson_time", lessonTimeStart)
+      : baseSameDayQuery;
     const [{ data: user }, { data: beforeDate }, { data: sameDay }] = await Promise.all([
       supabaseAdmin.from("users").select("status").eq("id", userId).single(),
       supabaseAdmin.from("attendances").select("id, lesson_type, lesson_title").eq("student_id", userId).gte("lesson_date", `${yearMonth}-01`).lt("lesson_date", lessonDate),
-      lessonTimeStart
-        ? supabaseAdmin.from("attendances").select("id, lesson_type, lesson_title").eq("student_id", userId).eq("lesson_date", lessonDate).lt("lesson_time", lessonTimeStart)
-        : Promise.resolve({ data: [] as AttendanceRow[] }),
+      sameDayQuery,
     ]);
 
     const isTeacher = user?.status === "teacher";
