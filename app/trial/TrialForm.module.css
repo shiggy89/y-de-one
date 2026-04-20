@@ -2,6 +2,17 @@
   padding: 32px 0 48px;
 }
 
+/* スマホのみ改行、PCでは非表示 */
+.titleBr {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .titleBr {
+    display: block;
+  }
+}
+
 .innerTrial {
   max-width: 720px;
   margin: 0 auto;

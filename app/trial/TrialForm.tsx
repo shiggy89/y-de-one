@@ -228,7 +228,7 @@ export default function TrialPage() {
       <div className="inner">
         <section aria-labelledby="trial-form-heading">
           <Heading2
-            title="体験レッスン・見学 申込みフォーム"
+            title={<>見学・体験レッスン<br className={styles.titleBr} />申込みフォーム</>}
             lead={
               <>
                 高田馬場・東中野・落合・新宿エリアにある「質問できる大人バレエ教室」
