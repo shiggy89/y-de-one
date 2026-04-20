@@ -879,7 +879,18 @@
   font-size: 22px;
   font-weight: 900;
   color: #e05080;
-  margin: 2px 0 12px;
+  margin: 2px 0 8px;
+}
+
+.badgePopupHint {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 12px;
+}
+
+.badgePopupHint strong {
+  color: #e05080;
+  font-weight: 700;
 }
 
 .badgePopupClose {

@@ -169,7 +169,7 @@ type UserInfo = {
   status: string;
 };
 
-type NextBadge = { badge: string; label: string; remaining: number };
+type NextBadge = { badge: string; label: string; remaining: number; isContinuation: boolean };
 
 type Notice = {
   id: number; title: string; body: string; author: string | null; created_at: string;
@@ -196,11 +196,12 @@ const BADGE_LABEL: Record<string, string> = {
   gold: "ゴールド", platinum: "プラチナ", diamond: "ダイヤモンド",
 };
 
-const CACHE_KEY = "mypage_cache_v2";
+const CACHE_KEY = "mypage_cache_v3";
 type MypageCache = {
   lineUserId: string;
   user: UserInfo;
   currentBadge: string | null;
+  lastMonthBadge: string | null;
   nextBadge: NextBadge | null;
 };
 function loadCache(): MypageCache | null {
@@ -218,6 +219,7 @@ export default function MyPage() {
 
   const [user, setUser] = useState<UserInfo | null>(null);
   const [currentBadge, setCurrentBadge] = useState<string | null>(null);
+  const [lastMonthBadge, setLastMonthBadge] = useState<string | null>(null);
   const [nextBadge, setNextBadge] = useState<NextBadge | null>(null);
   const [notices, setNotices] = useState<Notice[]>([]);
   const [showBadgeInfo, setShowBadgeInfo] = useState(false);
@@ -287,6 +289,7 @@ export default function MyPage() {
     if (cached) {
       setUser(cached.user);
       setCurrentBadge(cached.currentBadge);
+      setLastMonthBadge(cached.lastMonthBadge);
       setNextBadge(cached.nextBadge);
       setLoading(false);
     }
@@ -327,6 +330,7 @@ export default function MyPage() {
       .then((data) => {
         if (data.user) setUser(data.user);
         setCurrentBadge(data.currentBadge ?? null);
+        setLastMonthBadge(data.lastMonthBadge ?? null);
         setNextBadge(data.nextBadge ?? null);
         setHistoryData(data.attendanceHistory ?? []);
         setBadgeData(data.badgeHistory ?? []);
@@ -336,6 +340,7 @@ export default function MyPage() {
             lineUserId,
             user: data.user,
             currentBadge: data.currentBadge ?? null,
+            lastMonthBadge: data.lastMonthBadge ?? null,
             nextBadge: data.nextBadge ?? null,
           });
         }
@@ -462,11 +467,11 @@ export default function MyPage() {
         {user && (
           <button className={styles.headerBadge} onClick={() => { setBadgeInfoPage("badges"); setShowBadgeInfo(true); }}>
             <img
-              src={`/images/badges/badge-${currentBadge ?? "normal"}.png`}
-              alt={currentBadge ?? "normal"}
+              src={`/images/badges/badge-${currentBadge ?? lastMonthBadge ?? "normal"}.png`}
+              alt={currentBadge ?? lastMonthBadge ?? "normal"}
               className={styles.headerBadgeImg}
             />
-            <p className={styles.headerBadgeLabel}>{BADGE_LABEL[currentBadge ?? "normal"]}</p>
+            <p className={styles.headerBadgeLabel}>{BADGE_LABEL[currentBadge ?? lastMonthBadge ?? "normal"]}</p>
           </button>
         )}
       </div>
@@ -477,7 +482,10 @@ export default function MyPage() {
           <img src={`/images/badges/badge-${nextBadge.badge}.png`} alt="" className={styles.nextBadgeImg} />
           <p className={styles.nextBadgeText}>
             あと<span className={styles.nextBadgeNum}>{nextBadge.remaining}</span>回で
-            <span className={styles.nextBadgeName}>{nextBadge.label}バッジ</span>獲得！
+            {nextBadge.isContinuation
+              ? <><span className={styles.nextBadgeName}>{nextBadge.label}バッジ</span>継続！</>
+              : <><span className={styles.nextBadgeName}>{nextBadge.label}バッジ</span>獲得！</>
+            }
           </p>
         </div>
       )}
@@ -523,12 +531,12 @@ export default function MyPage() {
               </div>
               <div className={styles.badgeInfoList}>
                 {[
-                  { badge: "normal",   label: "ノーマル",   count: "累計1回以上" },
-                  { badge: "bronze",   label: "ブロンズ",   count: "累計4回以上" },
-                  { badge: "silver",   label: "シルバー",   count: "累計8回以上" },
-                  { badge: "gold",     label: "ゴールド",   count: "累計12回以上" },
-                  { badge: "platinum", label: "プラチナ",   count: "累計20回以上" },
-                  { badge: "diamond",  label: "ダイヤモンド", count: "累計40回以上" },
+                  { badge: "normal",   label: "ノーマル",   count: "月1回以上" },
+                  { badge: "bronze",   label: "ブロンズ",   count: "月4回以上" },
+                  { badge: "silver",   label: "シルバー",   count: "月8回以上" },
+                  { badge: "gold",     label: "ゴールド",   count: "月12回以上" },
+                  { badge: "platinum", label: "プラチナ",   count: "月20回以上" },
+                  { badge: "diamond",  label: "ダイヤモンド", count: "月40回以上" },
                 ].map((b) => (
                   <div key={b.badge} className={styles.badgeInfoRow}>
                     <img src={`/images/badges/badge-${b.badge}.png`} alt={b.label} className={styles.badgeInfoImg} />
@@ -585,6 +593,11 @@ export default function MyPage() {
               className={styles.badgePopupImg}
             />
             <p className={styles.badgePopupName}>{BADGE_LABEL[popupBadge]}バッジ</p>
+            {nextBadge && nextBadge.isContinuation && (
+              <p className={styles.badgePopupHint}>
+                あと<strong>{nextBadge.remaining}</strong>回で{nextBadge.label}バッジ継続！
+              </p>
+            )}
             <button className={styles.badgePopupClose} onClick={() => setShowBadgePopup(false)}>
               やったー！
             </button>
