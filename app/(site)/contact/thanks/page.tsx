@@ -35,8 +35,7 @@ export default function ThanksPage() {
             担当者より<strong className={styles.highlight}>48時間以内</strong>にご返信いたします。
           </p>
           <p className={styles.note}>
-            返信がない場合はメールが届いていない可能性がございますので、<br />
-            お手数ですが、Y-de-ONE 公式LINE、またはお電話にてご確認ください。
+            返信がない場合はメールが届いていない可能性がございますので、お手数ですが、Y-de-ONE 公式LINE、またはお電話にてご確認ください。
           </p>
 
           <div className={styles.contacts}>

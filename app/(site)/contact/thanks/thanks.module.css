@@ -56,6 +56,16 @@
   margin-bottom: 28px;
 }
 
+@media (max-width: 640px) {
+  .title {
+    font-size: 19px;
+  }
+
+  .note {
+    text-align: left;
+  }
+}
+
 .contacts {
   display: flex;
   flex-direction: column;
