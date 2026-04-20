@@ -141,25 +141,26 @@ export async function POST(req: Request) {
       );
     }
 
-    // ── 累計バッジ更新 ──────────────────────────────
+    // ── 月間バッジ更新 ──────────────────────────────
     const BADGE_ORDER = ["normal", "bronze", "silver", "gold", "platinum", "diamond"];
 
-    const [{ data: allUserAttendances }, { data: currentUser }] = await Promise.all([
-      supabaseAdmin.from("attendances").select("lesson_type, lesson_title, lesson_time").eq("student_id", userId),
-      supabaseAdmin.from("users").select("current_badge").eq("id", userId).single(),
-    ]);
-
-    const totalCount = (allUserAttendances ?? []).reduce(
+    // monthlyAttendances は今月全レッスン（新規登録分含む）
+    const newMonthlyCount = (monthlyAttendances ?? []).reduce(
       (sum, a) => sum + calcLessonCount(a.lesson_type, a.lesson_title, a.lesson_time),
       0
     );
-    const newBadge = calcBadge(totalCount);
+    // 今回登録分を除いた直前の月間カウント
+    const currentLessonCount = calcLessonCount(lessonType, lessonTitle ?? null, storedLessonTime);
+    const prevMonthlyCount = Math.max(0, newMonthlyCount - currentLessonCount);
 
-    if (newBadge) {
-      const newRank = BADGE_ORDER.indexOf(newBadge);
-      const currentRank = currentUser?.current_badge ? BADGE_ORDER.indexOf(currentUser.current_badge) : -1;
-      if (newRank > currentRank) {
-        await supabaseAdmin.from("users").update({ current_badge: newBadge, badge_notified: false }).eq("id", userId);
+    const prevMonthlyBadge = calcBadge(prevMonthlyCount);
+    const newMonthlyBadge = calcBadge(newMonthlyCount);
+
+    if (newMonthlyBadge) {
+      const newRank = BADGE_ORDER.indexOf(newMonthlyBadge);
+      const prevRank = prevMonthlyBadge ? BADGE_ORDER.indexOf(prevMonthlyBadge) : -1;
+      if (newRank > prevRank) {
+        await supabaseAdmin.from("users").update({ current_badge: newMonthlyBadge, badge_notified: false }).eq("id", userId);
       }
     }
     // ────────────────────────────────────────────────

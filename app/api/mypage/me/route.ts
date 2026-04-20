@@ -15,14 +15,26 @@ function calcLessonCount(lessonType: string, lessonTitle: string | null, lessonT
   return 0;
 }
 
+function calcBadge(count: number): string | null {
+  if (count >= 40) return "diamond";
+  if (count >= 20) return "platinum";
+  if (count >= 12) return "gold";
+  if (count >= 8) return "silver";
+  if (count >= 4) return "bronze";
+  if (count >= 1) return "normal";
+  return null;
+}
+
 const BADGE_THRESHOLDS = [
-  { badge: "normal",   min: 0  },
+  { badge: "normal",   min: 1  },
   { badge: "bronze",   min: 4  },
   { badge: "silver",   min: 8  },
   { badge: "gold",     min: 12 },
   { badge: "platinum", min: 20 },
   { badge: "diamond",  min: 40 },
 ];
+
+const BADGE_ORDER = ["normal", "bronze", "silver", "gold", "platinum", "diamond"];
 
 const BADGE_LABEL: Record<string, string> = {
   normal: "ノーマル", bronze: "ブロンズ", silver: "シルバー",
@@ -44,6 +56,9 @@ export async function GET(req: Request) {
     if (!user) return NextResponse.json({ error: "user not found" }, { status: 404 });
 
     const now = new Date();
+    const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastYearMonth = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, "0")}`;
     const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     const nextMonthStr = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, "0")}-01`;
 
@@ -72,34 +87,54 @@ export async function GET(req: Request) {
       return { ...a, maintenance_fee, lesson_fee: a.price_paid - maintenance_fee };
     });
 
-    // 累計レッスン数（バッジ計算用）
-    const totalCount = (allAttendances ?? []).reduce(
+    // 今月の月間カウント（バッジ判定用）
+    const monthlyAttendances = (allAttendances ?? []).filter(
+      (a) => a.lesson_date >= `${yearMonth}-01` && a.lesson_date < nextMonthStr
+    );
+    const monthlyCount = monthlyAttendances.reduce(
       (sum, a) => sum + calcLessonCount(a.lesson_type, a.lesson_title, a.lesson_time),
       0
     );
+    const currentBadge = calcBadge(monthlyCount);
 
-    const currentBadge = user.current_badge ?? null;
+    // 先月のバッジ（badges テーブルから）
+    const lastMonthBadge = (allBadges ?? []).find((b) => b.year_month === lastYearMonth)?.badge ?? null;
 
-    // 次のバッジまでの残り回数（累計ベース）
-    const currentRank = BADGE_THRESHOLDS.findIndex((b) => b.badge === currentBadge);
-    let nextBadgeResult: { badge: string; label: string; remaining: number } | null = null;
-    for (let i = currentRank + 1; i < BADGE_THRESHOLDS.length; i++) {
-      const info = BADGE_THRESHOLDS[i];
-      const rem = info.min - totalCount;
-      if (rem > 0) {
-        nextBadgeResult = { badge: info.badge, label: BADGE_LABEL[info.badge], remaining: rem };
-        break;
+    // 未通知バッジがあれば返す（users.current_badge はポップアップ用）
+    const newBadge = user.badge_notified === false ? (user.current_badge ?? null) : null;
+
+    // 次のバッジまでの残り回数
+    const currentRank = currentBadge ? BADGE_ORDER.indexOf(currentBadge) : -1;
+    const lastMonthRank = lastMonthBadge ? BADGE_ORDER.indexOf(lastMonthBadge) : -1;
+
+    let nextBadgeResult: { badge: string; label: string; remaining: number; isContinuation: boolean } | null = null;
+
+    if (lastMonthRank > currentRank) {
+      // 継続モード: 先月バッジを目標にする
+      const target = BADGE_THRESHOLDS.find((b) => b.badge === lastMonthBadge)!;
+      const remaining = target.min - monthlyCount;
+      if (remaining > 0) {
+        nextBadgeResult = { badge: lastMonthBadge!, label: BADGE_LABEL[lastMonthBadge!], remaining, isContinuation: true };
       }
     }
 
-    // 未通知バッジがあれば返す
-    const newBadge = user.badge_notified === false ? currentBadge : null;
+    if (!nextBadgeResult) {
+      // 通常モード: 現在バッジの次を目標にする
+      for (let i = currentRank + 1; i < BADGE_THRESHOLDS.length; i++) {
+        const info = BADGE_THRESHOLDS[i];
+        const rem = info.min - monthlyCount;
+        if (rem > 0) {
+          nextBadgeResult = { badge: info.badge, label: BADGE_LABEL[info.badge], remaining: rem, isContinuation: false };
+          break;
+        }
+      }
+    }
 
     return NextResponse.json({
       user,
       currentBadge,
+      lastMonthBadge,
       newBadge,
-      totalCount,
       nextBadge: nextBadgeResult,
       attendanceHistory,
       badgeHistory: allBadges ?? [],
