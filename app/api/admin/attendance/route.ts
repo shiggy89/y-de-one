@@ -132,15 +132,18 @@ export async function POST(req: Request) {
         .gte("lesson_date", `${yearMonth}-01`)
         .lt("lesson_date", nextMonthStr)
         .order("lesson_date", { ascending: true })
-        .order("lesson_time", { ascending: true, nullsFirst: false });
+        .order("lesson_time", { ascending: true, nullsFirst: false })
+        .order("id", { ascending: true });
 
+      let standardCountSoFar = 0;
       await Promise.all(
         (monthAll ?? []).map((a, i) => {
-          const newCount = i + 1;
           const newIsFirst = i === 0;
           const newMaintenanceFee = isTeacher ? 0 : (newIsFirst ? 500 : 0);
           const mins = a.lesson_type === "個人" ? parseInt(a.lesson_time ?? "15") : undefined;
-          const newLessonFee = isTeacher ? 0 : calcPrice(newCount, a.lesson_type, mins, a.lesson_title ?? undefined);
+          if (isStandardLesson(a.lesson_type, a.lesson_title)) standardCountSoFar++;
+          const countForFee = isStandardLesson(a.lesson_type, a.lesson_title) ? standardCountSoFar : 0;
+          const newLessonFee = isTeacher ? 0 : calcPrice(countForFee, a.lesson_type, mins, a.lesson_title ?? undefined);
           const newPrice = newLessonFee + newMaintenanceFee;
           return supabaseAdmin.from("attendances").update({ price_paid: newPrice }).eq("id", a.id);
         })
