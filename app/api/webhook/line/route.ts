@@ -98,7 +98,7 @@ export async function POST(req: Request) {
                 `⚠️ お問い合わせ未返信の連絡あり\n\n` +
                 `👤 ${displayName}\n` +
                 `💬 「${text}」\n\n` +
-                `お問い合わせフォームへの返信を確認してください。`,
+                `公式LINEから返信をお願いします。`,
             },
           ]);
         } else {
