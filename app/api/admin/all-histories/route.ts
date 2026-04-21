@@ -7,7 +7,9 @@ export async function GET() {
     const { data, error } = await supabaseAdmin
       .from("attendances")
       .select("id, student_id, lesson_date, lesson_type, lesson_title, lesson_time, lesson_teacher, price_paid")
-      .order("lesson_date", { ascending: true });
+      .order("lesson_date", { ascending: true })
+      .order("lesson_time", { ascending: true, nullsFirst: false })
+      .order("id", { ascending: true });
 
     if (error) return NextResponse.json({ histories: {} }, { status: 500 });
 
