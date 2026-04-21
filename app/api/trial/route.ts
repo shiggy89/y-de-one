@@ -15,6 +15,16 @@ type TrialRequestBody = {
 };
 
 const LINE_ENDPOINT = "https://api.line.me/v2/bot/message/push";
+const LINE_PROFILE_ENDPOINT = "https://api.line.me/v2/bot/profile";
+
+async function getLineProfile(userId: string) {
+  const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  const res = await fetch(`${LINE_PROFILE_ENDPOINT}/${userId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) return null;
+  return res.json() as Promise<{ displayName: string; pictureUrl?: string }>;
+}
 
 export async function POST(req: Request) {
   try {
@@ -47,9 +57,11 @@ export async function POST(req: Request) {
     if (lineUserId && /^U[a-fA-F0-9]{16,64}$/.test(lineUserId)) {
       const { data: existing } = await supabaseAdmin
         .from("users")
-        .select("id, status")
+        .select("id, status, line_display_name, line_picture_url")
         .eq("line_user_id", lineUserId)
         .single();
+
+      const profile = await getLineProfile(lineUserId);
 
       if (!existing) {
         await supabaseAdmin.from("users").insert({
@@ -57,7 +69,15 @@ export async function POST(req: Request) {
           name,
           status: "trial",
           is_admin: false,
+          line_display_name: profile?.displayName ?? null,
+          line_picture_url: profile?.pictureUrl ?? null,
         });
+      } else if (!existing.line_display_name || !existing.line_picture_url) {
+        // プロフィールが未取得の場合は更新
+        await supabaseAdmin.from("users").update({
+          line_display_name: profile?.displayName ?? existing.line_display_name,
+          line_picture_url: profile?.pictureUrl ?? existing.line_picture_url,
+        }).eq("line_user_id", lineUserId);
       }
     }
 
