@@ -25,12 +25,71 @@ async function sendMessage(to: string, text: string) {
   });
 }
 
+// お問い合わせ未返信を示すキーワード
+const ALERT_KEYWORDS = [
+  "返信", "連絡", "届いていない", "届かない", "返ってこない",
+  "来ない", "こない", "問い合わせ", "メール",
+];
+
+function containsAlertKeyword(text: string): boolean {
+  return ALERT_KEYWORDS.some((kw) => text.includes(kw));
+}
+
+async function notifyAdmins(messages: { type: string; text: string }[]) {
+  const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  const adminIds = (process.env.LINE_ADMIN_USER_IDS ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+  await Promise.all(
+    adminIds.map((adminId) =>
+      fetch(LINE_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ to: adminId, messages }),
+      })
+    )
+  );
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const events = body.events ?? [];
 
     for (const event of events) {
+      // テキストメッセージイベント
+      if (event.type === "message" && event.message?.type === "text") {
+        const lineUserId = event.source?.userId;
+        const text: string = event.message.text ?? "";
+        if (!lineUserId) continue;
+
+        // 自動返信
+        await sendMessage(
+          lineUserId,
+          `こちらのトークは返信していません🙇‍♂️\nメニューの「お問い合わせ」からお願いします！\n※返信がない場合のみ、ここで対応します。`
+        );
+
+        // キーワード検知 → 管理者に通知
+        if (containsAlertKeyword(text)) {
+          const profile = await getLineProfile(lineUserId);
+          const displayName = profile?.displayName ?? "不明なユーザー";
+          await notifyAdmins([
+            {
+              type: "text",
+              text:
+                `⚠️ お問い合わせ未返信の連絡あり\n\n` +
+                `👤 ${displayName}\n` +
+                `💬 「${text}」\n\n` +
+                `お問い合わせフォームへの返信を確認してください。`,
+            },
+          ]);
+        }
+      }
+
       // 友達追加イベント
       if (event.type === "follow") {
         const lineUserId = event.source?.userId;
