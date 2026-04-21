@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
-const LINE_ENDPOINT = "https://api.line.me/v2/bot/message/push";
+const LINE_PUSH_ENDPOINT = "https://api.line.me/v2/bot/message/push";
+const LINE_REPLY_ENDPOINT = "https://api.line.me/v2/bot/message/reply";
 const LINE_PROFILE_ENDPOINT = "https://api.line.me/v2/bot/profile";
 
 async function getLineProfile(userId: string) {
@@ -13,9 +14,23 @@ async function getLineProfile(userId: string) {
   return res.json() as Promise<{ displayName: string; pictureUrl?: string }>;
 }
 
-async function sendMessage(to: string, text: string) {
+// 返信API（無料・replyTokenを使う）
+async function replyMessage(replyToken: string, text: string) {
   const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
-  await fetch(LINE_ENDPOINT, {
+  await fetch(LINE_REPLY_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ replyToken, messages: [{ type: "text", text }] }),
+  });
+}
+
+// プッシュAPI（カウントされる・管理者通知や友達追加時に使う）
+async function pushMessage(to: string, text: string) {
+  const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  await fetch(LINE_PUSH_ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -43,7 +58,7 @@ async function notifyAdmins(messages: { type: string; text: string }[]) {
     .filter(Boolean);
   await Promise.all(
     adminIds.map((adminId) =>
-      fetch(LINE_ENDPOINT, {
+      fetch(LINE_PUSH_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -64,13 +79,14 @@ export async function POST(req: Request) {
       // テキストメッセージイベント
       if (event.type === "message" && event.message?.type === "text") {
         const lineUserId = event.source?.userId;
+        const replyToken: string = event.replyToken;
         const text: string = event.message.text ?? "";
         if (!lineUserId) continue;
 
         if (containsAlertKeyword(text)) {
-          // キーワードあり → 別の自動返信 + 管理者に通知
-          await sendMessage(
-            lineUserId,
+          // キーワードあり → 返信API（無料）+ 管理者にプッシュ通知
+          await replyMessage(
+            replyToken,
             `ご不便をおかけして申し訳ありません🙇‍♂️\n担当者に確認して、すぐに返信いたします。\n少しお待ちください。`
           );
           const profile = await getLineProfile(lineUserId);
@@ -86,24 +102,21 @@ export async function POST(req: Request) {
             },
           ]);
         } else {
-          // キーワードなし → 通常の自動返信
-          await sendMessage(
-            lineUserId,
+          // キーワードなし → 返信API（無料）
+          await replyMessage(
+            replyToken,
             `こちらでは返信していません🙇‍♂️\nメニューの「お問い合わせ」からお願いします！\n返信がない場合のみ、ここへメッセージをください。`
           );
         }
       }
 
-      // 友達追加イベント
+      // 友達追加イベント（replyTokenなし → プッシュAPI）
       if (event.type === "follow") {
         const lineUserId = event.source?.userId;
         if (!lineUserId) continue;
 
-        // ref パラメータを取得（既存生徒用リンクは ?ref=member）
-        const ref = event.follow?.referral?.ref ?? "";
-
         const LIFF_URL = "https://liff.line.me/2008551653-JRwQxXrB";
-        await sendMessage(
+        await pushMessage(
           lineUserId,
           `Y-de-ONE（ワイデワン）へようこそ！🩰\n\n` +
           `▼ 体験レッスンをご希望の方はこちら\n${LIFF_URL}/trial\n\n` +
