@@ -14,7 +14,8 @@ export async function GET(req: Request) {
       .select("id, lesson_date, lesson_type, lesson_title, lesson_time, lesson_teacher, price_paid")
       .eq("student_id", userId)
       .order("lesson_date", { ascending: true })
-      .order("lesson_time", { ascending: true, nullsFirst: false });
+      .order("lesson_time", { ascending: true, nullsFirst: false })
+      .order("id", { ascending: true });
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

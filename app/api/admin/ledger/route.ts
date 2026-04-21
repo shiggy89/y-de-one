@@ -19,7 +19,8 @@ export async function GET(req: Request) {
         .gte("lesson_date", `${month}-01`)
         .lt("lesson_date", nextMonthStr)
         .order("lesson_date", { ascending: true })
-        .order("lesson_time", { ascending: true, nullsFirst: false }),
+        .order("lesson_time", { ascending: true, nullsFirst: false })
+        .order("id", { ascending: true }),
       supabaseAdmin.from("users").select("id, name, line_picture_url"),
     ]);
 
