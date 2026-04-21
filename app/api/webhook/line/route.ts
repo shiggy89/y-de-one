@@ -67,14 +67,12 @@ export async function POST(req: Request) {
         const text: string = event.message.text ?? "";
         if (!lineUserId) continue;
 
-        // 自動返信
-        await sendMessage(
-          lineUserId,
-          `こちらでは返信していません🙇‍♂️\nメニューの「お問い合わせ」からお願いします！\n返信がない場合のみ、ここへメッセージをください。`
-        );
-
-        // キーワード検知 → 管理者に通知
         if (containsAlertKeyword(text)) {
+          // キーワードあり → 別の自動返信 + 管理者に通知
+          await sendMessage(
+            lineUserId,
+            `ご不便をおかけして申し訳ありません🙇‍♂️\n担当者に確認して、すぐに返信いたします。\n少しお待ちください。`
+          );
           const profile = await getLineProfile(lineUserId);
           const displayName = profile?.displayName ?? "不明なユーザー";
           await notifyAdmins([
@@ -87,6 +85,12 @@ export async function POST(req: Request) {
                 `お問い合わせフォームへの返信を確認してください。`,
             },
           ]);
+        } else {
+          // キーワードなし → 通常の自動返信
+          await sendMessage(
+            lineUserId,
+            `こちらでは返信していません🙇‍♂️\nメニューの「お問い合わせ」からお願いします！\n返信がない場合のみ、ここへメッセージをください。`
+          );
         }
       }
 
