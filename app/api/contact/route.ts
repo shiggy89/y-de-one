@@ -27,25 +27,49 @@ export async function POST(req: Request) {
       const resend = new Resend(resendApiKey);
       const categoryText = category ? `\nお問い合わせ種別：${category}` : "";
 
+      const categoryRow = category ? `<tr><td style="padding:4px 0;color:#666;">お問い合わせ種別</td><td style="padding:4px 0 4px 16px;">${category}</td></tr>` : "";
+      const userHtml = `<!DOCTYPE html>
+<html lang="ja">
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:'Helvetica Neue',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;max-width:560px;width:100%;">
+        <tr><td style="background:#e05080;padding:24px 32px;">
+          <p style="margin:0;color:#ffffff;font-size:20px;font-weight:bold;">Y-de-ONE バレエ教室</p>
+        </td></tr>
+        <tr><td style="padding:32px;">
+          <p style="margin:0 0 16px;">${name} 様</p>
+          <p style="margin:0 0 24px;line-height:1.8;">この度はY-de-ONEバレエ教室へ<br>お問い合わせいただきありがとうございます。<br>以下の内容でお問い合わせを受け付けました。</p>
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9f9f9;border-radius:6px;padding:20px;margin-bottom:24px;">
+            <tr><td style="padding:4px 0;color:#666;">お名前</td><td style="padding:4px 0 4px 16px;">${name}</td></tr>
+            ${categoryRow}
+            <tr><td style="padding:4px 0;color:#666;vertical-align:top;">内容</td><td style="padding:4px 0 4px 16px;white-space:pre-wrap;">${message}</td></tr>
+          </table>
+          <p style="margin:0 0 8px;line-height:1.8;">担当者より48時間以内にご返信いたします。</p>
+          <p style="margin:0 0 24px;line-height:1.8;">返信がない場合は、お手数ですが下記よりご連絡をお願いいたします。</p>
+          <table cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
+            <tr><td>
+              <a href="https://lin.ee/iz33eCM" style="display:inline-block;background:#06C755;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-weight:bold;font-size:14px;">💬 公式LINEはこちら</a>
+            </td></tr>
+          </table>
+          <p style="margin:8px 0 0;font-size:14px;color:#555;">お電話：<a href="tel:08067400770" style="color:#e05080;text-decoration:none;font-weight:bold;">080-6740-0770</a></p>
+        </td></tr>
+        <tr><td style="background:#f5f5f5;padding:16px 32px;text-align:center;">
+          <p style="margin:0;font-size:12px;color:#999;">Y-de-ONE バレエ教室｜東京都新宿区高田馬場</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
       await Promise.all([
         // ① ユーザーへ確認メール
         resend.emails.send({
           from: FROM_ADDRESS,
           to: email,
           subject: "【Y-de-ONE】お問い合わせありがとうございます",
-          text:
-            `${name} 様\n\n` +
-            `この度はY-de-ONEバレエ教室へ\nお問い合わせいただきありがとうございます。\n\n` +
-            `以下の内容でお問い合わせを受け付けました。\n\n` +
-            `─────────────────────\n` +
-            `お名前：${name}${categoryText}\n` +
-            `内容：\n${message}\n` +
-            `─────────────────────\n\n` +
-            `担当者より48時間以内にご返信いたします。\n` +
-            `返信がない場合は、お手数ですが、\n` +
-            `公式LINEまたはお電話にてご連絡をお願いいたします。\n` +
-            `今しばらくお待ちください。\n\n` +
-            `Y-de-ONEバレエ教室`,
+          html: userHtml,
         }),
         // ② 管理者へ通知メール（Reply-To でユーザーへ直接返信可能）
         resend.emails.send({
