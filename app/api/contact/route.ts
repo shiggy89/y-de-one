@@ -45,17 +45,18 @@ export async function POST(req: Request) {
             ${categoryRow}
             <tr><td style="padding:4px 0;color:#666;vertical-align:top;">内容</td><td style="padding:4px 0 4px 16px;white-space:pre-wrap;">${message}</td></tr>
           </table>
-          <p style="margin:0 0 8px;line-height:1.8;">担当者より48時間以内にご返信いたします。</p>
-          <p style="margin:0 0 24px;line-height:1.8;">返信がない場合は、お手数ですが下記よりご連絡をお願いいたします。</p>
+          <p style="margin:0 0 8px;line-height:1.8;">担当者より<span style="color:#e05080;font-size:18px;font-weight:bold;">48時間以内</span>にご返信いたします。</p>
+          <p style="margin:0 0 24px;line-height:1.8;">返信がない場合は、お手数ですが、<br>下記よりご連絡をお願いいたします。</p>
           <table cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
             <tr><td>
-              <a href="https://lin.ee/iz33eCM" style="display:inline-block;background:#06C755;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-weight:bold;font-size:14px;">💬 公式LINEはこちら</a>
+              <a href="https://lin.ee/iz33eCM" style="display:inline-block;background:#06C755;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-weight:bold;font-size:14px;">公式LINEはこちら</a>
             </td></tr>
           </table>
           <p style="margin:8px 0 0;font-size:14px;color:#555;">お電話：<a href="tel:08067400770" style="color:#e05080;text-decoration:none;font-weight:bold;">080-6740-0770</a></p>
         </td></tr>
         <tr><td style="background:#f5f5f5;padding:16px 32px;text-align:center;">
-          <p style="margin:0;font-size:12px;color:#999;">Y-de-ONE バレエ教室｜東京都新宿区高田馬場</p>
+          <p style="margin:0 0 4px;font-size:12px;color:#999;">Y-de-ONE バレエ教室</p>
+          <p style="margin:0;font-size:12px;color:#999;"><a href="https://maps.app.goo.gl/qfoj5m4KPzcPF5g76" style="color:#999;text-decoration:underline;">東京都新宿区高田馬場3-36-6 兼子ビル2階</a></p>
         </td></tr>
       </table>
     </td></tr>
