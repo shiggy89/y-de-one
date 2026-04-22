@@ -27,15 +27,16 @@ export async function POST(req: Request) {
       const resend = new Resend(resendApiKey);
       const categoryText = category ? `\nお問い合わせ種別：${category}` : "";
 
-      const categoryRow = category ? `<tr><td style="padding:4px 0;color:#666;">お問い合わせ種別</td><td style="padding:4px 0 4px 16px;">${category}</td></tr>` : "";
+      const categoryRow = category ? `<tr><td style="padding:4px 0;color:#666;">種別</td><td style="padding:4px 0 4px 16px;">${category}</td></tr>` : "";
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://y-de-one.vercel.app";
       const userHtml = `<!DOCTYPE html>
 <html lang="ja">
 <body style="margin:0;padding:0;background:#f5f5f5;font-family:'Helvetica Neue',Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 0;">
     <tr><td align="center">
       <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;max-width:560px;width:100%;">
-        <tr><td style="background:#e05080;padding:24px 32px;">
-          <p style="margin:0;color:#ffffff;font-size:20px;font-weight:bold;">Y-de-ONE バレエ教室</p>
+        <tr><td style="background:#e05080;padding:20px 32px;text-align:center;">
+          <img src="${baseUrl}/images/common/ydeone-logo.png" alt="Y-de-ONE バレエ教室" width="200" style="display:block;margin:0 auto;" />
         </td></tr>
         <tr><td style="padding:32px;">
           <p style="margin:0 0 16px;">${name} 様</p>
@@ -52,7 +53,8 @@ export async function POST(req: Request) {
               <a href="https://lin.ee/iz33eCM" style="display:inline-block;background:#06C755;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:6px;font-weight:bold;font-size:14px;">公式LINEはこちら</a>
             </td></tr>
           </table>
-          <p style="margin:8px 0 0;font-size:14px;color:#555;">お電話：<a href="tel:08067400770" style="color:#e05080;text-decoration:none;font-weight:bold;">080-6740-0770</a></p>
+          <p style="margin:8px 0 16px;font-size:14px;color:#555;">お電話：<a href="tel:08067400770" style="color:#e05080;text-decoration:none;font-weight:bold;">080-6740-0770</a></p>
+          <p style="margin:0;font-size:12px;color:#e05080;line-height:1.8;">※ このメールは自動送信のため、返信はお受けできません。<br>返信がない場合は公式LINEまたはお電話にてお願いいたします。</p>
         </td></tr>
         <tr><td style="background:#f5f5f5;padding:16px 32px;text-align:center;">
           <p style="margin:0 0 4px;font-size:12px;color:#999;">Y-de-ONE バレエ教室</p>
