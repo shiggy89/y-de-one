@@ -50,7 +50,7 @@ export async function POST(req: Request) {
           from: FROM_ADDRESS,
           to: ADMIN_EMAIL,
           replyTo: email,
-          subject: `【お問い合わせ】${name} さんより`,
+          subject: `【お問い合わせ】${name} 様より`,
           text:
             `新しいお問い合わせが届きました。\n\n` +
             `▼ お問い合わせ内容\n` +
