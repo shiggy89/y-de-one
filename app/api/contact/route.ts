@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     <tr><td align="center">
       <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;max-width:560px;width:100%;">
         <tr><td style="background:#e05080;padding:20px 32px;text-align:center;">
-          <img src="${baseUrl}/images/common/ydeone-logo.png" alt="Y-de-ONE バレエ教室" width="200" style="display:block;margin:0 auto;" />
+          <img src="${baseUrl}/images/common/ydeone-logo-white.png" alt="Y-de-ONE バレエ教室" width="200" style="display:block;margin:0 auto;" />
         </td></tr>
         <tr><td style="padding:32px;">
           <p style="margin:0 0 16px;">${name} 様</p>
