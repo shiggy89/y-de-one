@@ -236,16 +236,15 @@ export default function MyPage() {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !lineUserId) return;
-    const ext = file.name.split(".").pop();
-    const path = `${lineUserId}-${Date.now()}.${ext}`;
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
-    const { error: uploadError } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-    if (uploadError) { console.error(uploadError); return; }
-    const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("lineUserId", lineUserId);
+
+    const res = await fetch("/api/mypage/upload-avatar", { method: "POST", body: formData });
+    if (!res.ok) { console.error("upload failed"); return; }
+    const { publicUrl } = await res.json();
+
     await fetch("/api/mypage/profile", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
