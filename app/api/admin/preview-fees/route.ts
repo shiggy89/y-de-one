@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { requireAdmin } from "@/lib/adminAuth";
 
 // 維持費500円を除いたレッスン料金累計
 const LESSON_FEES_ONLY = [2800, 5400, 7800, 9600, 11800, 14000, 16200, 17600];
@@ -18,6 +19,7 @@ function calcLessonFee(count: number, lessonType: string, lessonTitle?: string):
 }
 
 export async function POST(req: Request) {
+  if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const { userIds, lessonDate, lessonType, privateMinutes = 15, lessonTitle, lessonTime } = await req.json();
     if (!userIds?.length || !lessonDate) {

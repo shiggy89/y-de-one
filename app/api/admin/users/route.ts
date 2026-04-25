@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { requireAdmin } from "@/lib/adminAuth";
 
-export async function GET() {
+export async function GET(req: Request) {
+  if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { data, error } = await supabaseAdmin
     .from("users")
     .select("id, name, line_user_id, line_display_name, line_picture_url, status, is_admin");
@@ -24,6 +26,7 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
+  if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await req.json();
   const { userId, ...updates } = body;
 

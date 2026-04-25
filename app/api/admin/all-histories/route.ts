@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { requireAdmin } from "@/lib/adminAuth";
 
 // 全生徒の出席履歴を一括返却（会員管理タブ用）
-export async function GET() {
+export async function GET(req: Request) {
+  if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const { data, error } = await supabaseAdmin
       .from("attendances")

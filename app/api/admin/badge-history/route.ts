@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { requireAdmin } from "@/lib/adminAuth";
 
 function calcLessonCount(lessonType: string, lessonTitle: string | null, lessonTime: string | null): number {
   if (lessonType === "個人") {
@@ -24,6 +25,7 @@ function calcBadge(count: number): string | null {
 }
 
 export async function GET(req: Request) {
+  if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");

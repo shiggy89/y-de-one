@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import liff from "@line/liff";
 import styles from "./admin.module.css";
 import { getLessonsForDate, type Lesson } from "@/lib/lessons";
@@ -89,6 +89,12 @@ function calcLessonFee(countThisMonth: number, lessonType: string, privateMinute
 
 export default function AdminPanel() {
   const [lineUserId, setLineUserId] = useState<string | null>(null);
+  const lineUserIdRef = useRef<string | null>(null);
+  const adminFetch = (url: string, options: RequestInit = {}) =>
+    fetch(url, {
+      ...options,
+      headers: { ...(options.headers as Record<string, string> ?? {}), "x-admin-id": lineUserIdRef.current ?? "" },
+    });
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>(() => {
@@ -138,7 +144,7 @@ export default function AdminPanel() {
   const NOTICES_PER_PAGE = 10;
 
   const fetchNotices = async () => {
-    const res = await fetch("/api/admin/notices", { cache: "no-store" });
+    const res = await adminFetch("/api/admin/notices", { cache: "no-store" });
     const data = await res.json();
     setNotices(data.notices ?? []);
   };
@@ -149,7 +155,7 @@ export default function AdminPanel() {
     setNoticeMsg(null);
     const adminUser = users.find((u) => u.line_user_id === lineUserId);
     const author = adminUser?.name ?? adminUser?.line_display_name ?? null;
-    const res = await fetch("/api/admin/notices", {
+    const res = await adminFetch("/api/admin/notices", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: noticeTitle, body: noticeBody, author }),
@@ -168,7 +174,7 @@ export default function AdminPanel() {
   const handleDeleteNotice = async (id: number) => {
     if (!confirm("このお知らせを削除しますか？")) return;
     setNotices((prev) => prev.filter((n) => n.id !== id));
-    await fetch("/api/admin/notices", {
+    await adminFetch("/api/admin/notices", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
@@ -185,7 +191,7 @@ export default function AdminPanel() {
   const [lessonCounts, setLessonCounts] = useState<Record<number, number>>({});
 
   const fetchLessonCounts = async (lessonTimeStart: string, lessonTitle: string) => {
-    const res = await fetch(`/api/admin/lesson-counts?lessonTime=${encodeURIComponent(lessonTimeStart)}&lessonTitle=${encodeURIComponent(lessonTitle)}`);
+    const res = await adminFetch(`/api/admin/lesson-counts?lessonTime=${encodeURIComponent(lessonTimeStart)}&lessonTitle=${encodeURIComponent(lessonTitle)}`);
     const data = await res.json();
     setLessonCounts(data.counts ?? {});
   };
@@ -198,7 +204,7 @@ export default function AdminPanel() {
   const fetchAttendedIds = async (date: string, lessonTime?: string | null, lessonTitle?: string | null) => {
     if (!lessonTime && !lessonTitle) { setAttendedIds([]); return; }
     const ym = date.slice(0, 7);
-    const res = await fetch(`/api/admin/ledger?month=${ym}`);
+    const res = await adminFetch(`/api/admin/ledger?month=${ym}`);
     const data = await res.json();
     const ids = (data.records ?? [])
       .filter((r: LedgerRecord & { student_id?: number }) =>
@@ -220,7 +226,7 @@ export default function AdminPanel() {
   const fetchLedger = async (month: string) => {
     setLedgerLoading(true);
     setLedgerDate(null);
-    const res = await fetch(`/api/admin/ledger?month=${month}`);
+    const res = await adminFetch(`/api/admin/ledger?month=${month}`);
     const data = await res.json();
     setLedgerRecords(data.records ?? []);
     setLedgerLoading(false);
@@ -246,7 +252,7 @@ export default function AdminPanel() {
     if (!editUser) return;
     setEditSaving(true);
     const name = `${editLastName} ${editFirstName}`.trim();
-    await fetch("/api/admin/users", {
+    await adminFetch("/api/admin/users", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId: editUser.id, name }),
@@ -273,7 +279,7 @@ export default function AdminPanel() {
     } else {
       setBadgeData([]);
       setBadgeLoading(true);
-      fetch(`/api/admin/badge-history?userId=${user.id}`)
+      adminFetch(`/api/admin/badge-history?userId=${user.id}`)
         .then(r => r.json())
         .then(d => { setBadgeData(d.badges ?? []); setBadgeLoading(false); });
     }
@@ -304,7 +310,7 @@ export default function AdminPanel() {
     } else {
       setHistoryData([]);
       setHistoryLoading(true);
-      fetch(`/api/admin/attendance-history?userId=${user.id}`)
+      adminFetch(`/api/admin/attendance-history?userId=${user.id}`)
         .then(r => r.json())
         .then(d => { setHistoryData(d.attendances ?? []); setHistoryLoading(false); });
     }
@@ -336,8 +342,9 @@ export default function AdminPanel() {
         if (!liff.isLoggedIn()) { liff.login(); return; }
         const p = await liff.getProfile();
         setLineUserId(p.userId);
+        lineUserIdRef.current = p.userId;
 
-        const res = await fetch(`/api/admin/me?lineUserId=${p.userId}`);
+        const res = await adminFetch(`/api/admin/me?lineUserId=${p.userId}`);
         const data = await res.json();
         setIsAdmin(data.isAdmin ?? false);
       } catch (e) {
@@ -376,8 +383,8 @@ export default function AdminPanel() {
     if (tab === "users" && isAdmin) {
       // 履歴・バッジを全員分まとめて取得
       Promise.all([
-        fetch("/api/admin/all-histories").then(r => r.json()),
-        fetch("/api/admin/all-badges").then(r => r.json()),
+        adminFetch("/api/admin/all-histories").then(r => r.json()),
+        adminFetch("/api/admin/all-badges").then(r => r.json()),
       ]).then(([h, b]) => {
         if (h.histories) setAllHistoriesCache(h.histories);
         if (b.badges) setAllBadgesCache(b.badges);
@@ -387,7 +394,7 @@ export default function AdminPanel() {
   }, [tab, isAdmin]);
 
   const fetchUsers = async () => {
-    const res = await fetch("/api/admin/users");
+    const res = await adminFetch("/api/admin/users");
     const data = await res.json();
     setUsers(data.users ?? []);
     setTrialCount((data.users ?? []).filter((u: User) => u.status === "trial").length);
@@ -395,7 +402,7 @@ export default function AdminPanel() {
 
   const handleStatusChange = async (userId: number, newStatus: string, currentStatus: string) => {
     if (!confirm(`${currentStatus} → ${newStatus} に変更しますか？`)) return;
-    await fetch("/api/admin/users", {
+    await adminFetch("/api/admin/users", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, status: newStatus }),
@@ -413,7 +420,7 @@ export default function AdminPanel() {
         return;
       }
     }
-    await fetch("/api/admin/users", {
+    await adminFetch("/api/admin/users", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, is_admin: !currentIsAdmin }),
@@ -423,7 +430,7 @@ export default function AdminPanel() {
 
   const fetchFeePreviews = async (ids: number[], date: string, type: string, minutes: number, lessonTitle?: string, lessonTime?: string) => {
     if (ids.length === 0) { setFeePreviews([]); return; }
-    const res = await fetch("/api/admin/preview-fees", {
+    const res = await adminFetch("/api/admin/preview-fees", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userIds: ids, lessonDate: date, lessonType: type, privateMinutes: minutes, lessonTitle, lessonTime }),
@@ -434,7 +441,7 @@ export default function AdminPanel() {
 
   // 出席タブ用：当月の出席データを取得（料金計算をクライアント側で行うため）
   const fetchAttendanceMonth = async (month: string) => {
-    const res = await fetch(`/api/admin/ledger?month=${month}`);
+    const res = await adminFetch(`/api/admin/ledger?month=${month}`);
     const data = await res.json();
     const serverRecords: LedgerRecord[] = data.records ?? [];
     setAttendanceMonthData((prev) => {
@@ -456,7 +463,7 @@ export default function AdminPanel() {
 
   // 全期間の出席カウントマップを構築（ソート用・一度だけ取得）
   const fetchAllLessonCounts = async () => {
-    const res = await fetch("/api/admin/lesson-counts-all");
+    const res = await adminFetch("/api/admin/lesson-counts-all");
     const data = await res.json();
     const map: Record<string, Record<number, number>> = {};
     for (const row of data.rows ?? []) {
@@ -515,7 +522,7 @@ export default function AdminPanel() {
     setSubmitting(true);
     const results = await Promise.all(
       selectedUserIds.map((userId) =>
-        fetch("/api/admin/attendance", {
+        adminFetch("/api/admin/attendance", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -595,7 +602,7 @@ export default function AdminPanel() {
 
   const fetchReport = async (from: string, to: string) => {
     setReportLoading(true);
-    const res = await fetch(`/api/admin/report?from=${from}&to=${to}`);
+    const res = await adminFetch(`/api/admin/report?from=${from}&to=${to}`);
     const data = await res.json();
     setReportRecords(data.records ?? []);
     setReportLoading(false);
@@ -620,7 +627,7 @@ export default function AdminPanel() {
     if (!message.trim()) { setSendError("メッセージを入力してください"); return; }
     if (!confirm(`trial会員${trialCount}人にメッセージを送信しますか？`)) return;
 
-    const res = await fetch("/api/admin/broadcast", {
+    const res = await adminFetch("/api/admin/broadcast", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message }),
@@ -972,7 +979,7 @@ export default function AdminPanel() {
                             // attendedIds・attendanceMonthData を即時更新（出席タブのアイコン復活）
                             setAttendedIds((prev) => prev.filter((id) => id !== r.student_id));
                             setAttendanceMonthData((prev) => prev.filter((a) => a.id !== r.id));
-                            await fetch(`/api/admin/attendance/${r.id}`, { method: "DELETE" });
+                            await adminFetch(`/api/admin/attendance/${r.id}`, { method: "DELETE" });
                             fetchLedger(ledgerMonth);
                           }}
                         >削除</button>

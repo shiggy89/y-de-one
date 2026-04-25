@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { requireAdmin } from "@/lib/adminAuth";
 
 const LESSON_FEES_ONLY = [2800, 5400, 7800, 9600, 11800, 14000, 16200, 17600];
 
@@ -26,6 +27,7 @@ function calcPrice(countThisMonth: number, lessonType: string, privateMinutes = 
 // 指定生徒・月の全出席記録の price_paid を再計算・UPDATE する
 // POST body: { userId: string, yearMonth: string } // yearMonth例: "2026-03"
 export async function POST(req: Request) {
+  if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const { userId, yearMonth } = await req.json();
 

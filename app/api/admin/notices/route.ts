@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { requireAdmin } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
 
 // 一覧取得
-export async function GET() {
+export async function GET(req: Request) {
+  if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const { data, error } = await supabaseAdmin
       .from("notices")
@@ -22,6 +24,7 @@ export async function GET() {
 
 // 新規作成
 export async function POST(req: Request) {
+  if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const { title, body, author } = await req.json();
     if (!body) return NextResponse.json({ error: "bodyは必須です" }, { status: 400 });
@@ -40,6 +43,7 @@ export async function POST(req: Request) {
 
 // 削除（is_active = false）
 export async function DELETE(req: Request) {
+  if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const { id } = await req.json();
     const { error } = await supabaseAdmin
