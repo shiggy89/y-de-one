@@ -339,7 +339,7 @@ export default function AdminPanel() {
         if (!liffId) { setLoading(false); return; }
 
         await liff.init({ liffId });
-        if (!liff.isLoggedIn()) { liff.login(); return; }
+        if (!liff.isLoggedIn()) { liff.login({ redirectUri: window.location.href }); return; }
         const p = await liff.getProfile();
         setLineUserId(p.userId);
         lineUserIdRef.current = p.userId;
