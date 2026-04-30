@@ -19,7 +19,7 @@ type User = {
   is_admin: boolean;
 };
 
-type Tab = "attendance" | "ledger" | "users" | "notices" | "message" | "report" | "hp_news" | "blog";
+type Tab = "attendance" | "ledger" | "users" | "message" | "report" | "hp_news" | "blog";
 
 type HpNewsRecord = { id: number; title: string; content: string; category: string | null; published_at: string };
 
@@ -108,7 +108,7 @@ export default function AdminPanel() {
   const [tab, setTab] = useState<Tab>(() => {
     if (typeof window !== "undefined") {
       const hash = window.location.hash.replace("#", "") as Tab;
-      const valid: Tab[] = ["attendance", "ledger", "users", "notices", "message", "report"];
+      const valid: Tab[] = ["attendance", "ledger", "users", "message", "report", "hp_news", "blog"];
       if (valid.includes(hash)) return hash;
     }
     return "attendance";
@@ -207,14 +207,24 @@ export default function AdminPanel() {
     if (!hpNewsTitle.trim()) return;
     setHpNewsSending(true);
     setHpNewsMsg(null);
-    const res = await adminFetch("/api/admin/hp-news", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: hpNewsTitle, content: hpNewsContent, category: hpNewsCategory || null }),
-    });
+    const adminUser = users.find((u) => u.line_user_id === lineUserId);
+    const author = adminUser?.name ?? adminUser?.line_display_name ?? null;
+    // HPお知らせとマイページのお知らせを同時投稿
+    const [res] = await Promise.all([
+      adminFetch("/api/admin/hp-news", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: hpNewsTitle, content: hpNewsContent, category: hpNewsCategory || null }),
+      }),
+      adminFetch("/api/admin/notices", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: hpNewsTitle, body: hpNewsContent || hpNewsTitle, author }),
+      }),
+    ]);
     if (res.ok) {
       setHpNewsTitle(""); setHpNewsContent(""); setHpNewsCategory("");
-      setHpNewsMsg("投稿しました");
+      setHpNewsMsg("投稿しました（HP・マイページ両方）");
       await fetchHpNews();
     } else {
       setHpNewsMsg("投稿に失敗しました");
@@ -523,7 +533,6 @@ export default function AdminPanel() {
   }, [tab, isAdmin, lessonMonth]);
 
   useEffect(() => {
-    if (tab === "notices" && isAdmin) fetchNotices();
     if (tab === "hp_news" && isAdmin) fetchHpNews();
     if (tab === "blog" && isAdmin) { fetchBlogList(); fetchCategories(); setBlogView("list"); }
   }, [tab, isAdmin]);
@@ -809,9 +818,8 @@ export default function AdminPanel() {
           <button className={`${styles.tab} ${tab === "ledger" ? styles.active : ""}`} onClick={() => changeTab("ledger")}>出席簿</button>
           <button className={`${styles.tab} ${tab === "users" ? styles.active : ""}`} onClick={() => changeTab("users")}>会員管理</button>
           <button className={`${styles.tab} ${tab === "report" ? styles.active : ""}`} onClick={() => changeTab("report")}>レポート</button>
-          <button className={`${styles.tab} ${tab === "notices" ? styles.active : ""}`} onClick={() => changeTab("notices")}>お知らせ</button>
           <button className={`${styles.tab} ${tab === "message" ? styles.active : ""}`} onClick={() => changeTab("message")}>メッセージ</button>
-          <button className={`${styles.tab} ${tab === "hp_news" ? styles.active : ""}`} onClick={() => changeTab("hp_news")}>HPお知らせ</button>
+          <button className={`${styles.tab} ${tab === "hp_news" ? styles.active : ""}`} onClick={() => changeTab("hp_news")}>お知らせ</button>
           <button className={`${styles.tab} ${tab === "blog" ? styles.active : ""}`} onClick={() => changeTab("blog")}>ブログ</button>
         </div>
       </div>
@@ -1568,80 +1576,6 @@ export default function AdminPanel() {
           </div>
         );
       })()}
-
-      {/* ━━━ お知らせ管理 ━━━ */}
-      {tab === "notices" && (
-        <div className={styles.section}>
-          <p className={styles.sectionTitle}>お知らせを投稿する</p>
-          <div className={styles.noticeForm}>
-            <input
-              type="text"
-              className={styles.noticeInput}
-              placeholder="タイトルを入力してください"
-              value={noticeTitle}
-              onChange={(e) => setNoticeTitle(e.target.value)}
-            />
-            <textarea
-              className={styles.noticeTextarea}
-              placeholder="本文を入力してください"
-              value={noticeBody}
-              onChange={(e) => setNoticeBody(e.target.value)}
-              rows={8}
-            />
-            <button
-              className={styles.noticePostBtn}
-              onClick={handlePostNotice}
-              disabled={noticeSending || !noticeBody.trim()}
-            >
-              {noticeSending ? "投稿中..." : "投稿する"}
-            </button>
-            {noticeMsg && <p className={styles.noticeMsg}>{noticeMsg}</p>}
-          </div>
-
-          <p className={styles.sectionTitle} style={{ marginTop: 24 }}>投稿済みのお知らせ</p>
-          <input
-            type="text"
-            className={styles.noticeSearchInput}
-            placeholder="タイトル・本文で検索"
-            value={noticeSearch}
-            onChange={(e) => { setNoticeSearch(e.target.value); setNoticePage(1); }}
-          />
-          {(() => {
-            const filtered = notices.filter((n) =>
-              n.body.includes(noticeSearch)
-            );
-            const totalPages = Math.ceil(filtered.length / NOTICES_PER_PAGE);
-            const paged = filtered.slice((noticePage - 1) * NOTICES_PER_PAGE, noticePage * NOTICES_PER_PAGE);
-            return filtered.length === 0 ? (
-              <p className={styles.empty}>お知らせはありません</p>
-            ) : (
-              <>
-                {paged.map((n) => (
-                  <div key={n.id} className={styles.noticeItem}>
-                    <div className={styles.noticeItemHeader}>
-                      <div>
-                          <p className={styles.noticeItemMeta}>
-                          {n.author && <span>{n.author}　</span>}
-                          {new Date(n.created_at).toLocaleString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}
-                        </p>
-                      </div>
-                      <button className={styles.noticeDeleteBtn} onClick={() => handleDeleteNotice(n.id)}>削除</button>
-                    </div>
-                    <p className={styles.noticeItemBody}>{n.body}</p>
-                  </div>
-                ))}
-                {totalPages > 1 && (
-                  <div className={styles.noticePager}>
-                    <button className={styles.noticePagerBtn} onClick={() => setNoticePage((p) => p - 1)} disabled={noticePage <= 1}>‹</button>
-                    <span className={styles.noticePagerLabel}>{noticePage} / {totalPages}</span>
-                    <button className={styles.noticePagerBtn} onClick={() => setNoticePage((p) => p + 1)} disabled={noticePage >= totalPages}>›</button>
-                  </div>
-                )}
-              </>
-            );
-          })()}
-        </div>
-      )}
 
       {/* ━━━ メッセージ送信 ━━━ */}
       {tab === "message" && (
