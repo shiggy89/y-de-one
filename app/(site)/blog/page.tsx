@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default async function BlogPage() {
   const { data } = await supabaseAdmin
     .from("posts")
-    .select("id, title, thumbnail_url, published_at, type")
+    .select("id, title, slug, thumbnail_url, published_at, type")
     .eq("status", "published")
     .order("published_at", { ascending: false });
 
@@ -34,7 +34,7 @@ export default async function BlogPage() {
           <ul className={styles.blogList}>
             {items.map((item) => (
               <li key={item.id} className={styles.blogCard}>
-                <Link href={`/blog/${item.id}`} className={styles.blogLink}>
+                <Link href={`/blog/${item.slug ?? item.id}`} className={styles.blogLink}>
                   <div className={styles.blogThumb}>
                     {item.thumbnail_url ? (
                       <Image

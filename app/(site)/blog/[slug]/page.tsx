@@ -8,23 +8,22 @@ import styles from "../blog.module.css";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const { id } = await params;
-  const { data } = await supabaseAdmin.from("posts").select("title, meta_description").eq("id", id).single();
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const numId = Number(slug);
+  const query = supabaseAdmin.from("posts").select("title, meta_description").eq("status", "published");
+  const { data } = await (numId ? query.eq("id", numId) : query.eq("slug", slug)).single();
   return {
     title: `${data?.title ?? "ブログ"} | 大人バレエ教室 Y-de-ONE`,
     description: data?.meta_description ?? "大人バレエ教室 Y-de-ONE（ワイデワン）のブログ記事です。",
   };
 }
 
-export default async function BlogDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const { data } = await supabaseAdmin
-    .from("posts")
-    .select("*")
-    .eq("id", id)
-    .eq("status", "published")
-    .single();
+export default async function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const numId = Number(slug);
+  const query = supabaseAdmin.from("posts").select("*").eq("status", "published");
+  const { data } = await (numId ? query.eq("id", numId) : query.eq("slug", slug)).single();
   if (!data) notFound();
 
   return (

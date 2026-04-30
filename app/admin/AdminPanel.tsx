@@ -23,7 +23,7 @@ type Tab = "attendance" | "ledger" | "users" | "notices" | "message" | "report" 
 
 type HpNewsRecord = { id: number; title: string; content: string; category: string | null; published_at: string };
 
-type PostListItem = { id: number; title: string; type: string; status: string; thumbnail_url: string | null; published_at: string | null; created_at: string };
+type PostListItem = { id: number; title: string; slug: string | null; type: string; status: string; thumbnail_url: string | null; published_at: string | null; created_at: string; category_id: number | null };
 type PostDetail = PostListItem & { content: string; meta_description: string | null };
 
 type NoticeRecord = { id: number; title: string; body: string; author: string | null; created_at: string; is_active: boolean };
@@ -232,16 +232,44 @@ export default function AdminPanel() {
     });
   };
 
+  // カテゴリ管理
+  type Category = { id: number; name: string; slug: string };
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [catName, setCatName] = useState("");
+  const [catSlug, setCatSlug] = useState("");
+  const [catMsg, setCatMsg] = useState<string | null>(null);
+
+  const fetchCategories = async () => {
+    const res = await adminFetch("/api/admin/categories", { cache: "no-store" });
+    const data = await res.json();
+    setCategories(data.items ?? []);
+  };
+
+  const handleAddCategory = async () => {
+    if (!catName.trim() || !catSlug.trim()) { setCatMsg("名前とスラッグを入力してください"); return; }
+    const res = await adminFetch("/api/admin/categories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: catName, slug: catSlug }) });
+    if (res.ok) { setCatName(""); setCatSlug(""); setCatMsg("追加しました"); await fetchCategories(); }
+    else { const d = await res.json(); setCatMsg(d.error ?? "失敗しました"); }
+  };
+
+  const handleDeleteCategory = async (id: number) => {
+    if (!confirm("このカテゴリを削除しますか？")) return;
+    await adminFetch("/api/admin/categories", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
+    await fetchCategories();
+  };
+
   // ブログ管理
   const [blogList, setBlogList] = useState<PostListItem[]>([]);
   const [blogView, setBlogView] = useState<"list" | "new" | "edit">("list");
   const [blogEditId, setBlogEditId] = useState<number | null>(null);
   const [blogTitle, setBlogTitle] = useState("");
+  const [blogSlug, setBlogSlug] = useState("");
   const [blogContent, setBlogContent] = useState("");
   const [blogType, setBlogType] = useState<"diary" | "seo">("diary");
   const [blogStatus, setBlogStatus] = useState<"draft" | "published">("draft");
   const [blogThumbnailUrl, setBlogThumbnailUrl] = useState("");
   const [blogMetaDesc, setBlogMetaDesc] = useState("");
+  const [blogCategoryId, setBlogCategoryId] = useState<number | null>(null);
   const [blogSaving, setBlogSaving] = useState(false);
   const [blogMsg, setBlogMsg] = useState<string | null>(null);
   const blogThumbInputRef = useRef<HTMLInputElement>(null);
@@ -253,8 +281,8 @@ export default function AdminPanel() {
   };
 
   const openBlogNew = () => {
-    setBlogEditId(null); setBlogTitle(""); setBlogContent(""); setBlogType("diary");
-    setBlogStatus("draft"); setBlogThumbnailUrl(""); setBlogMetaDesc(""); setBlogMsg(null);
+    setBlogEditId(null); setBlogTitle(""); setBlogSlug(""); setBlogContent(""); setBlogType("diary");
+    setBlogStatus("draft"); setBlogThumbnailUrl(""); setBlogMetaDesc(""); setBlogCategoryId(null); setBlogMsg(null);
     setBlogView("new");
   };
 
@@ -262,24 +290,26 @@ export default function AdminPanel() {
     const res = await adminFetch(`/api/admin/posts/${id}`);
     const data = await res.json();
     const p: PostDetail = data.item;
-    setBlogEditId(id); setBlogTitle(p.title); setBlogContent(p.content ?? "");
+    setBlogEditId(id); setBlogTitle(p.title); setBlogSlug(p.slug ?? ""); setBlogContent(p.content ?? "");
     setBlogType(p.type as "diary" | "seo"); setBlogStatus(p.status as "draft" | "published");
     setBlogThumbnailUrl(p.thumbnail_url ?? ""); setBlogMetaDesc(p.meta_description ?? "");
+    setBlogCategoryId((p as PostDetail & { category_id?: number }).category_id ?? null);
     setBlogMsg(null); setBlogView("edit");
   };
 
   const handleSaveBlog = async () => {
     if (!blogTitle.trim()) { setBlogMsg("タイトルを入力してください"); return; }
     setBlogSaving(true); setBlogMsg(null);
-    const body = { title: blogTitle, content: blogContent, type: blogType, status: blogStatus, thumbnail_url: blogThumbnailUrl || null, meta_description: blogMetaDesc || null };
+    const body = { title: blogTitle, slug: blogSlug || null, content: blogContent, type: blogType, status: blogStatus, thumbnail_url: blogThumbnailUrl || null, meta_description: blogMetaDesc || null, category_id: blogCategoryId };
     const res = blogEditId
       ? await adminFetch(`/api/admin/posts/${blogEditId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
       : await adminFetch("/api/admin/posts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
     if (res.ok) {
-      setBlogMsg("保存しました");
       await fetchBlogList();
+      setBlogView("list");
     } else {
       setBlogMsg("保存に失敗しました");
+      setBlogSaving(false);
     }
     setBlogSaving(false);
   };
@@ -495,7 +525,7 @@ export default function AdminPanel() {
   useEffect(() => {
     if (tab === "notices" && isAdmin) fetchNotices();
     if (tab === "hp_news" && isAdmin) fetchHpNews();
-    if (tab === "blog" && isAdmin) { fetchBlogList(); setBlogView("list"); }
+    if (tab === "blog" && isAdmin) { fetchBlogList(); fetchCategories(); setBlogView("list"); }
   }, [tab, isAdmin]);
 
   useEffect(() => {
@@ -1703,6 +1733,7 @@ export default function AdminPanel() {
                           {p.published_at ? new Date(p.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" }) : ""}
                         </p>
                         <p style={{ fontWeight: 600, margin: "4px 0" }}>{p.title}</p>
+                        {p.slug && <p style={{ fontSize: 12, color: "#999", margin: 0 }}>/blog/{p.slug}</p>}
                       </div>
                       <div style={{ display: "flex", gap: 8 }}>
                         <button className={styles.noticePostBtn} style={{ padding: "4px 12px", fontSize: 13 }} onClick={() => openBlogEdit(p.id)}>編集</button>
@@ -1712,15 +1743,29 @@ export default function AdminPanel() {
                   </div>
                 ))
               )}
+
+              {/* カテゴリ管理 */}
+              <p className={styles.sectionTitle} style={{ marginTop: 32 }}>カテゴリ管理</p>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+                <input type="text" className={styles.noticeInput} style={{ flex: 1, minWidth: 120 }} placeholder="カテゴリ名（例：バレエ初心者ガイド）" value={catName} onChange={(e) => setCatName(e.target.value)} />
+                <input type="text" className={styles.noticeInput} style={{ flex: 1, minWidth: 120 }} placeholder="スラッグ（例：ballet-beginner）" value={catSlug} onChange={(e) => setCatSlug(e.target.value)} />
+                <button className={styles.noticePostBtn} style={{ whiteSpace: "nowrap" }} onClick={handleAddCategory}>追加</button>
+              </div>
+              {catMsg && <p className={styles.noticeMsg}>{catMsg}</p>}
+              {categories.map((c) => (
+                <div key={c.id} className={styles.noticeItem} style={{ padding: "8px 12px" }}>
+                  <div className={styles.noticeItemHeader}>
+                    <span>{c.name} <span style={{ fontSize: 12, color: "#999" }}>/blog/category/{c.slug}</span></span>
+                    <button className={styles.noticeDeleteBtn} onClick={() => handleDeleteCategory(c.id)}>削除</button>
+                  </div>
+                </div>
+              ))}
             </>
           )}
 
           {(blogView === "new" || blogView === "edit") && (
             <>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                <button onClick={() => setBlogView("list")} style={{ background: "none", border: "none", color: "#0090e8", cursor: "pointer", fontSize: 14 }}>← 一覧に戻る</button>
-                <p className={styles.sectionTitle} style={{ margin: 0 }}>{blogView === "new" ? "新規投稿" : "記事を編集"}</p>
-              </div>
+              <button onClick={() => setBlogView("list")} style={{ background: "none", border: "none", color: "#0090e8", cursor: "pointer", fontSize: 14, marginBottom: 16, padding: 0 }}>← 一覧に戻る</button>
 
               <div className={styles.noticeForm}>
                 <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
@@ -1735,8 +1780,16 @@ export default function AdminPanel() {
                 <input type="text" className={styles.noticeInput} placeholder="タイトル（必須）" value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} />
 
                 {blogType === "seo" && (
-                  <input type="text" className={styles.noticeInput} placeholder="メタディスクリプション（検索結果に表示される説明文）" value={blogMetaDesc} onChange={(e) => setBlogMetaDesc(e.target.value)} />
+                  <>
+                    <input type="text" className={styles.noticeInput} placeholder="メタディスクリプション（検索結果に表示される説明文）" value={blogMetaDesc} onChange={(e) => setBlogMetaDesc(e.target.value)} />
+                    <input type="text" className={styles.noticeInput} placeholder="パーマリンク（例：adult-ballet-beginner-guide）" value={blogSlug} onChange={(e) => setBlogSlug(e.target.value)} />
+                  </>
                 )}
+
+                <select className={styles.noticeInput} value={blogCategoryId ?? ""} onChange={(e) => setBlogCategoryId(e.target.value ? Number(e.target.value) : null)}>
+                  <option value="">カテゴリなし</option>
+                  {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
 
                 <div style={{ marginBottom: 8 }}>
                   <p style={{ fontSize: 13, color: "#666", marginBottom: 4 }}>サムネイル画像</p>
@@ -1748,10 +1801,10 @@ export default function AdminPanel() {
                 </div>
 
                 {blogType === "diary" ? (
-                  <textarea className={styles.noticeTextarea} placeholder="本文を入力してください" value={blogContent} onChange={(e) => setBlogContent(e.target.value)} rows={12} />
+                  <TipTapEditor content={blogContent} onChange={setBlogContent} adminFetch={adminFetch} mode="diary" />
                 ) : (
                   <div className={styles.pcOnly}>
-                    <TipTapEditor content={blogContent} onChange={setBlogContent} adminFetch={adminFetch} />
+                    <TipTapEditor content={blogContent} onChange={setBlogContent} adminFetch={adminFetch} mode="seo" />
                   </div>
                 )}
 

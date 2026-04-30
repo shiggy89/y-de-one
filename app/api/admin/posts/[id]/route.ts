@@ -15,7 +15,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
-  const { title, content, type, status, thumbnail_url, meta_description } = await req.json();
+  const { title, slug, content, type, status, thumbnail_url, meta_description, category_id } = await req.json();
   const now = new Date().toISOString();
 
   const { data: existing } = await supabaseAdmin.from("posts").select("status, published_at").eq("id", id).single();
@@ -26,11 +26,13 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     .from("posts")
     .update({
       title,
+      slug: slug || null,
       content: content ?? "",
       type,
       status,
       thumbnail_url: thumbnail_url ?? null,
       meta_description: meta_description ?? null,
+      category_id: category_id ?? null,
       published_at: isPublishing && !wasPublished ? now : existing?.published_at ?? null,
       updated_at: now,
     })

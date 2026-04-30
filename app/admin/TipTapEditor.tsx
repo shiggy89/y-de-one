@@ -11,9 +11,10 @@ type Props = {
   content: string;
   onChange: (html: string) => void;
   adminFetch: (url: string, options?: RequestInit) => Promise<Response>;
+  mode?: "diary" | "seo";
 };
 
-export default function TipTapEditor({ content, onChange, adminFetch }: Props) {
+export default function TipTapEditor({ content, onChange, adminFetch, mode = "seo" }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const editor = useEditor({
@@ -34,9 +35,7 @@ export default function TipTapEditor({ content, onChange, adminFetch }: Props) {
     formData.append("file", file);
     const res = await adminFetch("/api/admin/upload-post-image", { method: "POST", body: formData });
     const data = await res.json();
-    if (data.url) {
-      editor.chain().focus().setImage({ src: data.url }).run();
-    }
+    if (data.url) editor.chain().focus().setImage({ src: data.url }).run();
   };
 
   const setLink = () => {
@@ -50,12 +49,16 @@ export default function TipTapEditor({ content, onChange, adminFetch }: Props) {
       <div className={styles.toolbar}>
         <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive("bold") ? styles.active : ""}>B</button>
         <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive("italic") ? styles.active : ""}>I</button>
-        <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive("heading", { level: 2 }) ? styles.active : ""}>H2</button>
-        <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={editor.isActive("heading", { level: 3 }) ? styles.active : ""}>H3</button>
-        <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive("bulletList") ? styles.active : ""}>• リスト</button>
-        <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive("orderedList") ? styles.active : ""}>1. リスト</button>
-        <button type="button" onClick={setLink}>リンク</button>
-        <button type="button" onClick={() => fileInputRef.current?.click()}>画像</button>
+        {mode === "seo" && (
+          <>
+            <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive("heading", { level: 2 }) ? styles.active : ""}>H2</button>
+            <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={editor.isActive("heading", { level: 3 }) ? styles.active : ""}>H3</button>
+            <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive("bulletList") ? styles.active : ""}>• リスト</button>
+            <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive("orderedList") ? styles.active : ""}>1. リスト</button>
+            <button type="button" onClick={setLink}>リンク</button>
+          </>
+        )}
+        <button type="button" onClick={() => fileInputRef.current?.click()}>📷 画像</button>
         <input
           ref={fileInputRef}
           type="file"
