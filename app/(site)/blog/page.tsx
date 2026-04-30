@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { client } from "../../../lib/microcms";
-import type { Blog } from "../../../lib/microcms";
+import { supabaseAdmin } from "../../../lib/supabase";
 import Heading2 from "../../_components/sections/common/Heading2";
 import styles from "./blog.module.css";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "ブログ | 大人バレエ教室 Y-de-ONE",
@@ -14,58 +13,61 @@ export const metadata: Metadata = {
 };
 
 export default async function BlogPage() {
-  const data = await client.getList<Blog>({
-    endpoint: "blog",
-    queries: { limit: 100, orders: "-publishedAt" },
-  });
+  const { data } = await supabaseAdmin
+    .from("posts")
+    .select("id, title, thumbnail_url, published_at, type")
+    .eq("status", "published")
+    .order("published_at", { ascending: false });
+
+  const items = data ?? [];
 
   return (
-    <>
-      <main>
-        <div className={`inner ${styles.blogPage}`}>
-          <Heading2
-            title="ブログ"
-            lead={<>Y-de-ONEのレッスンや<br className={styles.mobileBreak} />日々の出来事をお届けします。</>}
-          />
-          {data.contents.length === 0 ? (
-            <p className={styles.empty}>まだ記事がありません。</p>
-          ) : (
-            <ul className={styles.blogList}>
-              {data.contents.map((item) => (
-                <li key={item.id} className={styles.blogCard}>
-                  <Link href={`/blog/${item.id}`} className={styles.blogLink}>
-                    <div className={styles.blogThumb}>
-                      {item.eyecatch ? (
-                        <Image
-                          src={item.eyecatch.url}
-                          alt={item.title}
-                          width={item.eyecatch.width}
-                          height={item.eyecatch.height}
-                          className={styles.thumbImg}
-                        />
-                      ) : (
-                        <div className={styles.thumbPlaceholder}>
-                          <i className="fa-solid fa-image"></i>
-                        </div>
-                      )}
-                    </div>
-                    <div className={styles.blogInfo}>
-                      <time className={styles.blogDate}>
-                        {new Date(item.publishedAt).toLocaleDateString("ja-JP", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
-                      </time>
-                      <p className={styles.blogTitle}>{item.title}</p>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </main>
-    </>
+    <main>
+      <div className={`inner ${styles.blogPage}`}>
+        <Heading2
+          title="ブログ"
+          lead={<>Y-de-ONEのレッスンや<br className={styles.mobileBreak} />日々の出来事をお届けします。</>}
+        />
+        {items.length === 0 ? (
+          <p className={styles.empty}>まだ記事がありません。</p>
+        ) : (
+          <ul className={styles.blogList}>
+            {items.map((item) => (
+              <li key={item.id} className={styles.blogCard}>
+                <Link href={`/blog/${item.id}`} className={styles.blogLink}>
+                  <div className={styles.blogThumb}>
+                    {item.thumbnail_url ? (
+                      <Image
+                        src={item.thumbnail_url}
+                        alt={item.title}
+                        width={400}
+                        height={300}
+                        className={styles.thumbImg}
+                      />
+                    ) : (
+                      <div className={styles.thumbPlaceholder}>
+                        <i className="fa-solid fa-image"></i>
+                      </div>
+                    )}
+                  </div>
+                  <div className={styles.blogInfo}>
+                    <time className={styles.blogDate}>
+                      {item.published_at
+                        ? new Date(item.published_at).toLocaleDateString("ja-JP", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
+                        : ""}
+                    </time>
+                    <p className={styles.blogTitle}>{item.title}</p>
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </main>
   );
 }

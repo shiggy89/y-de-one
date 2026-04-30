@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import liff from "@line/liff";
 import styles from "./admin.module.css";
 import { getLessonsForDate, type Lesson } from "@/lib/lessons";
 import * as Holiday from "@holiday-jp/holiday_jp";
+
+const TipTapEditor = dynamic(() => import("./TipTapEditor"), { ssr: false });
 
 type User = {
   id: number;
@@ -16,7 +19,12 @@ type User = {
   is_admin: boolean;
 };
 
-type Tab = "attendance" | "ledger" | "users" | "notices" | "message" | "report";
+type Tab = "attendance" | "ledger" | "users" | "notices" | "message" | "report" | "hp_news" | "blog";
+
+type HpNewsRecord = { id: number; title: string; content: string; category: string | null; published_at: string };
+
+type PostListItem = { id: number; title: string; type: string; status: string; thumbnail_url: string | null; published_at: string | null; created_at: string };
+type PostDetail = PostListItem & { content: string; meta_description: string | null };
 
 type NoticeRecord = { id: number; title: string; body: string; author: string | null; created_at: string; is_active: boolean };
 
@@ -179,6 +187,115 @@ export default function AdminPanel() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
+  };
+
+  // HP お知らせ管理
+  const [hpNewsList, setHpNewsList] = useState<HpNewsRecord[]>([]);
+  const [hpNewsTitle, setHpNewsTitle] = useState("");
+  const [hpNewsContent, setHpNewsContent] = useState("");
+  const [hpNewsCategory, setHpNewsCategory] = useState("");
+  const [hpNewsSending, setHpNewsSending] = useState(false);
+  const [hpNewsMsg, setHpNewsMsg] = useState<string | null>(null);
+
+  const fetchHpNews = async () => {
+    const res = await adminFetch("/api/admin/hp-news", { cache: "no-store" });
+    const data = await res.json();
+    setHpNewsList(data.items ?? []);
+  };
+
+  const handlePostHpNews = async () => {
+    if (!hpNewsTitle.trim()) return;
+    setHpNewsSending(true);
+    setHpNewsMsg(null);
+    const res = await adminFetch("/api/admin/hp-news", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: hpNewsTitle, content: hpNewsContent, category: hpNewsCategory || null }),
+    });
+    if (res.ok) {
+      setHpNewsTitle(""); setHpNewsContent(""); setHpNewsCategory("");
+      setHpNewsMsg("投稿しました");
+      await fetchHpNews();
+    } else {
+      setHpNewsMsg("投稿に失敗しました");
+    }
+    setHpNewsSending(false);
+  };
+
+  const handleDeleteHpNews = async (id: number) => {
+    if (!confirm("このお知らせを削除しますか？")) return;
+    setHpNewsList((prev) => prev.filter((n) => n.id !== id));
+    await adminFetch("/api/admin/hp-news", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+  };
+
+  // ブログ管理
+  const [blogList, setBlogList] = useState<PostListItem[]>([]);
+  const [blogView, setBlogView] = useState<"list" | "new" | "edit">("list");
+  const [blogEditId, setBlogEditId] = useState<number | null>(null);
+  const [blogTitle, setBlogTitle] = useState("");
+  const [blogContent, setBlogContent] = useState("");
+  const [blogType, setBlogType] = useState<"diary" | "seo">("diary");
+  const [blogStatus, setBlogStatus] = useState<"draft" | "published">("draft");
+  const [blogThumbnailUrl, setBlogThumbnailUrl] = useState("");
+  const [blogMetaDesc, setBlogMetaDesc] = useState("");
+  const [blogSaving, setBlogSaving] = useState(false);
+  const [blogMsg, setBlogMsg] = useState<string | null>(null);
+  const blogThumbInputRef = useRef<HTMLInputElement>(null);
+
+  const fetchBlogList = async () => {
+    const res = await adminFetch("/api/admin/posts", { cache: "no-store" });
+    const data = await res.json();
+    setBlogList(data.items ?? []);
+  };
+
+  const openBlogNew = () => {
+    setBlogEditId(null); setBlogTitle(""); setBlogContent(""); setBlogType("diary");
+    setBlogStatus("draft"); setBlogThumbnailUrl(""); setBlogMetaDesc(""); setBlogMsg(null);
+    setBlogView("new");
+  };
+
+  const openBlogEdit = async (id: number) => {
+    const res = await adminFetch(`/api/admin/posts/${id}`);
+    const data = await res.json();
+    const p: PostDetail = data.item;
+    setBlogEditId(id); setBlogTitle(p.title); setBlogContent(p.content ?? "");
+    setBlogType(p.type as "diary" | "seo"); setBlogStatus(p.status as "draft" | "published");
+    setBlogThumbnailUrl(p.thumbnail_url ?? ""); setBlogMetaDesc(p.meta_description ?? "");
+    setBlogMsg(null); setBlogView("edit");
+  };
+
+  const handleSaveBlog = async () => {
+    if (!blogTitle.trim()) { setBlogMsg("タイトルを入力してください"); return; }
+    setBlogSaving(true); setBlogMsg(null);
+    const body = { title: blogTitle, content: blogContent, type: blogType, status: blogStatus, thumbnail_url: blogThumbnailUrl || null, meta_description: blogMetaDesc || null };
+    const res = blogEditId
+      ? await adminFetch(`/api/admin/posts/${blogEditId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      : await adminFetch("/api/admin/posts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    if (res.ok) {
+      setBlogMsg("保存しました");
+      await fetchBlogList();
+    } else {
+      setBlogMsg("保存に失敗しました");
+    }
+    setBlogSaving(false);
+  };
+
+  const handleDeleteBlog = async (id: number) => {
+    if (!confirm("この記事を削除しますか？")) return;
+    setBlogList((prev) => prev.filter((p) => p.id !== id));
+    await adminFetch(`/api/admin/posts/${id}`, { method: "DELETE" });
+  };
+
+  const handleBlogThumbnailUpload = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await adminFetch("/api/admin/upload-post-image", { method: "POST", body: formData });
+    const data = await res.json();
+    if (data.url) setBlogThumbnailUrl(data.url);
   };
 
   // メッセージ送信
@@ -377,6 +494,8 @@ export default function AdminPanel() {
 
   useEffect(() => {
     if (tab === "notices" && isAdmin) fetchNotices();
+    if (tab === "hp_news" && isAdmin) fetchHpNews();
+    if (tab === "blog" && isAdmin) { fetchBlogList(); setBlogView("list"); }
   }, [tab, isAdmin]);
 
   useEffect(() => {
@@ -662,6 +781,8 @@ export default function AdminPanel() {
           <button className={`${styles.tab} ${tab === "report" ? styles.active : ""}`} onClick={() => changeTab("report")}>レポート</button>
           <button className={`${styles.tab} ${tab === "notices" ? styles.active : ""}`} onClick={() => changeTab("notices")}>お知らせ</button>
           <button className={`${styles.tab} ${tab === "message" ? styles.active : ""}`} onClick={() => changeTab("message")}>メッセージ</button>
+          <button className={`${styles.tab} ${tab === "hp_news" ? styles.active : ""}`} onClick={() => changeTab("hp_news")}>HPお知らせ</button>
+          <button className={`${styles.tab} ${tab === "blog" ? styles.active : ""}`} onClick={() => changeTab("blog")}>ブログ</button>
         </div>
       </div>
 
@@ -1511,6 +1632,145 @@ export default function AdminPanel() {
               {trialCount}人に送信する
             </button>
           </div>
+        </div>
+      )}
+
+      {/* ━━━ HP お知らせ管理 ━━━ */}
+      {tab === "hp_news" && (
+        <div className={styles.section}>
+          <p className={styles.sectionTitle}>HPお知らせを投稿する</p>
+          <div className={styles.noticeForm}>
+            <input type="text" className={styles.noticeInput} placeholder="タイトル（必須）" value={hpNewsTitle} onChange={(e) => setHpNewsTitle(e.target.value)} />
+            <select className={styles.noticeInput} value={hpNewsCategory} onChange={(e) => setHpNewsCategory(e.target.value)}>
+              <option value="">カテゴリなし</option>
+              <option value="休講・振替">休講・振替</option>
+              <option value="祝日レッスン">祝日レッスン</option>
+              <option value="イベント">イベント</option>
+              <option value="お知らせ">お知らせ</option>
+            </select>
+            <textarea className={styles.noticeTextarea} placeholder="本文（省略可）" value={hpNewsContent} onChange={(e) => setHpNewsContent(e.target.value)} rows={6} />
+            <button className={styles.noticePostBtn} onClick={handlePostHpNews} disabled={hpNewsSending || !hpNewsTitle.trim()}>
+              {hpNewsSending ? "投稿中..." : "投稿する"}
+            </button>
+            {hpNewsMsg && <p className={styles.noticeMsg}>{hpNewsMsg}</p>}
+          </div>
+          <p className={styles.sectionTitle} style={{ marginTop: 24 }}>投稿済みのお知らせ</p>
+          {hpNewsList.length === 0 ? (
+            <p className={styles.empty}>お知らせはありません</p>
+          ) : (
+            hpNewsList.map((n) => (
+              <div key={n.id} className={styles.noticeItem}>
+                <div className={styles.noticeItemHeader}>
+                  <div>
+                    <p className={styles.noticeItemMeta}>
+                      {n.category && <span style={{ background: "#e05080", color: "#fff", borderRadius: 4, padding: "1px 8px", marginRight: 8, fontSize: 12 }}>{n.category}</span>}
+                      {new Date(n.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" })}
+                    </p>
+                    <p style={{ fontWeight: 600, margin: "4px 0" }}>{n.title}</p>
+                  </div>
+                  <button className={styles.noticeDeleteBtn} onClick={() => handleDeleteHpNews(n.id)}>削除</button>
+                </div>
+                {n.content && <p className={styles.noticeItemBody}>{n.content}</p>}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* ━━━ ブログ管理 ━━━ */}
+      {tab === "blog" && (
+        <div className={styles.section}>
+          {blogView === "list" && (
+            <>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                <p className={styles.sectionTitle} style={{ margin: 0 }}>ブログ記事一覧</p>
+                <button className={styles.noticePostBtn} onClick={openBlogNew}>＋ 新規投稿</button>
+              </div>
+              {blogList.length === 0 ? (
+                <p className={styles.empty}>記事がありません</p>
+              ) : (
+                blogList.map((p) => (
+                  <div key={p.id} className={styles.noticeItem}>
+                    <div className={styles.noticeItemHeader}>
+                      <div style={{ flex: 1 }}>
+                        <p className={styles.noticeItemMeta}>
+                          <span style={{ background: p.type === "seo" ? "#0090e8" : "#e05080", color: "#fff", borderRadius: 4, padding: "1px 8px", marginRight: 8, fontSize: 12 }}>
+                            {p.type === "seo" ? "SEO記事" : "日記"}
+                          </span>
+                          <span style={{ background: p.status === "published" ? "#4caf50" : "#999", color: "#fff", borderRadius: 4, padding: "1px 8px", marginRight: 8, fontSize: 12 }}>
+                            {p.status === "published" ? "公開中" : "下書き"}
+                          </span>
+                          {p.published_at ? new Date(p.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" }) : ""}
+                        </p>
+                        <p style={{ fontWeight: 600, margin: "4px 0" }}>{p.title}</p>
+                      </div>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button className={styles.noticePostBtn} style={{ padding: "4px 12px", fontSize: 13 }} onClick={() => openBlogEdit(p.id)}>編集</button>
+                        <button className={styles.noticeDeleteBtn} onClick={() => handleDeleteBlog(p.id)}>削除</button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </>
+          )}
+
+          {(blogView === "new" || blogView === "edit") && (
+            <>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                <button onClick={() => setBlogView("list")} style={{ background: "none", border: "none", color: "#0090e8", cursor: "pointer", fontSize: 14 }}>← 一覧に戻る</button>
+                <p className={styles.sectionTitle} style={{ margin: 0 }}>{blogView === "new" ? "新規投稿" : "記事を編集"}</p>
+              </div>
+
+              <div className={styles.noticeForm}>
+                <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
+                    <input type="radio" value="diary" checked={blogType === "diary"} onChange={() => setBlogType("diary")} /> 日記
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
+                    <input type="radio" value="seo" checked={blogType === "seo"} onChange={() => setBlogType("seo")} /> SEO記事
+                  </label>
+                </div>
+
+                <input type="text" className={styles.noticeInput} placeholder="タイトル（必須）" value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} />
+
+                {blogType === "seo" && (
+                  <input type="text" className={styles.noticeInput} placeholder="メタディスクリプション（検索結果に表示される説明文）" value={blogMetaDesc} onChange={(e) => setBlogMetaDesc(e.target.value)} />
+                )}
+
+                <div style={{ marginBottom: 8 }}>
+                  <p style={{ fontSize: 13, color: "#666", marginBottom: 4 }}>サムネイル画像</p>
+                  <input ref={blogThumbInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handleBlogThumbnailUpload(f); e.target.value = ""; }} />
+                  <button type="button" className={styles.noticePostBtn} style={{ padding: "6px 16px", fontSize: 13 }} onClick={() => blogThumbInputRef.current?.click()}>
+                    画像を選択
+                  </button>
+                  {blogThumbnailUrl && <p style={{ fontSize: 12, color: "#0090e8", marginTop: 4, wordBreak: "break-all" }}>{blogThumbnailUrl}</p>}
+                </div>
+
+                {blogType === "diary" ? (
+                  <textarea className={styles.noticeTextarea} placeholder="本文を入力してください" value={blogContent} onChange={(e) => setBlogContent(e.target.value)} rows={12} />
+                ) : (
+                  <div className={styles.pcOnly}>
+                    <TipTapEditor content={blogContent} onChange={setBlogContent} adminFetch={adminFetch} />
+                  </div>
+                )}
+
+                <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
+                    <input type="radio" value="draft" checked={blogStatus === "draft"} onChange={() => setBlogStatus("draft")} /> 下書き
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
+                    <input type="radio" value="published" checked={blogStatus === "published"} onChange={() => setBlogStatus("published")} /> 公開する
+                  </label>
+                </div>
+
+                <button className={styles.noticePostBtn} onClick={handleSaveBlog} disabled={blogSaving}>
+                  {blogSaving ? "保存中..." : "保存する"}
+                </button>
+                {blogMsg && <p className={styles.noticeMsg}>{blogMsg}</p>}
+              </div>
+            </>
+          )}
         </div>
       )}
       </div>

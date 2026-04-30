@@ -1709,3 +1709,13 @@
 .sendBtn:hover {
   background: #c03060;
 }
+
+.pcOnly {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .pcOnly {
+    display: block;
+  }
+}
