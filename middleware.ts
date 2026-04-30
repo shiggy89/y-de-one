@@ -5,6 +5,10 @@ export function middleware(request: NextRequest) {
   // LIFFの外部ブラウザ認証後、ルートに戻ってきた際のリダイレクト処理
   // liff.state には本来のサブパス（例: /trial）が入っている
   const liffState = request.nextUrl.searchParams.get("liff.state");
+  const code = request.nextUrl.searchParams.get("code");
+
+  // codeがある場合はLINE認証コールバック。LIFFに処理させるためリダイレクトしない。
+  if (code) return NextResponse.next();
 
   if (liffState && request.nextUrl.pathname === "/") {
     try {
