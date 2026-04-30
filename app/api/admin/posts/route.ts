@@ -8,8 +8,8 @@ export async function GET(req: Request) {
   if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { data, error } = await supabaseAdmin
     .from("posts")
-    .select("id, title, slug, type, status, thumbnail_url, published_at, created_at, category_id, categories(name)")
-    .order("created_at", { ascending: false });
+    .select("id, title, slug, type, status, thumbnail_url, published_at, category_id")
+    .order("published_at", { ascending: false, nullsFirst: false });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ items: data ?? [] });
 }

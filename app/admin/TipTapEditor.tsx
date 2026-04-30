@@ -47,15 +47,15 @@ export default function TipTapEditor({ content, onChange, adminFetch, mode = "se
   return (
     <div className={styles.editor}>
       <div className={styles.toolbar}>
-        <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={editor.isActive("bold") ? styles.active : ""}>B</button>
-        <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={editor.isActive("italic") ? styles.active : ""}>I</button>
+        <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBold().run(); }} className={editor.isActive("bold") ? styles.active : ""}>B</button>
+        <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleItalic().run(); }} className={editor.isActive("italic") ? styles.active : ""}>I</button>
         {mode === "seo" && (
           <>
-            <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={editor.isActive("heading", { level: 2 }) ? styles.active : ""}>H2</button>
-            <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={editor.isActive("heading", { level: 3 }) ? styles.active : ""}>H3</button>
-            <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={editor.isActive("bulletList") ? styles.active : ""}>• リスト</button>
-            <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={editor.isActive("orderedList") ? styles.active : ""}>1. リスト</button>
-            <button type="button" onClick={setLink}>リンク</button>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 2 }).run(); }} className={editor.isActive("heading", { level: 2 }) ? styles.active : ""}>H2</button>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 3 }).run(); }} className={editor.isActive("heading", { level: 3 }) ? styles.active : ""}>H3</button>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBulletList().run(); }} className={editor.isActive("bulletList") ? styles.active : ""}>• リスト</button>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleOrderedList().run(); }} className={editor.isActive("orderedList") ? styles.active : ""}>1. リスト</button>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); setLink(); }}>リンク</button>
           </>
         )}
         <button type="button" onClick={() => fileInputRef.current?.click()}>📷 画像</button>

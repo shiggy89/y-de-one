@@ -105,6 +105,13 @@ export default function AdminPanel() {
     });
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
   const [tab, setTab] = useState<Tab>(() => {
     if (typeof window !== "undefined") {
       const hash = window.location.hash.replace("#", "") as Tab;
@@ -282,11 +289,14 @@ export default function AdminPanel() {
   const [blogCategoryId, setBlogCategoryId] = useState<number | null>(null);
   const [blogSaving, setBlogSaving] = useState(false);
   const [blogMsg, setBlogMsg] = useState<string | null>(null);
+  const [blogListError, setBlogListError] = useState<string | null>(null);
   const blogThumbInputRef = useRef<HTMLInputElement>(null);
 
   const fetchBlogList = async () => {
+    setBlogListError(null);
     const res = await adminFetch("/api/admin/posts", { cache: "no-store" });
     const data = await res.json();
+    if (data.error) { console.error("[fetchBlogList] error:", data.error); setBlogListError(data.error); }
     setBlogList(data.items ?? []);
   };
 
@@ -309,6 +319,7 @@ export default function AdminPanel() {
 
   const handleSaveBlog = async () => {
     if (!blogTitle.trim()) { setBlogMsg("タイトルを入力してください"); return; }
+    if (blogMetaDesc.length > 120) { setBlogMsg("メタディスクリプションは120字以内にしてください"); return; }
     setBlogSaving(true); setBlogMsg(null);
     const body = { title: blogTitle, slug: blogSlug || null, content: blogContent, type: blogType, status: blogStatus, thumbnail_url: blogThumbnailUrl || null, meta_description: blogMetaDesc || null, category_id: blogCategoryId };
     const res = blogEditId
@@ -1602,7 +1613,7 @@ export default function AdminPanel() {
       {/* ━━━ HP お知らせ管理 ━━━ */}
       {tab === "hp_news" && (
         <div className={styles.section}>
-          <p className={styles.sectionTitle}>HPお知らせを投稿する</p>
+          <p className={styles.sectionTitle}>お知らせを投稿する</p>
           <div className={styles.noticeForm}>
             <input type="text" className={styles.noticeInput} placeholder="タイトル（必須）" value={hpNewsTitle} onChange={(e) => setHpNewsTitle(e.target.value)} />
             <select className={styles.noticeInput} value={hpNewsCategory} onChange={(e) => setHpNewsCategory(e.target.value)}>
@@ -1650,11 +1661,12 @@ export default function AdminPanel() {
                 <p className={styles.sectionTitle} style={{ margin: 0 }}>ブログ記事一覧</p>
                 <button className={styles.noticePostBtn} onClick={openBlogNew}>＋ 新規投稿</button>
               </div>
+              {blogListError && <p style={{ color: "#e05080", fontSize: 13, marginBottom: 8 }}>エラー: {blogListError}</p>}
               {blogList.length === 0 ? (
                 <p className={styles.empty}>記事がありません</p>
               ) : (
                 blogList.map((p) => (
-                  <div key={p.id} className={styles.noticeItem}>
+                  <div key={p.id} className={styles.noticeItem} style={{ cursor: "pointer" }} onClick={() => openBlogEdit(p.id)}>
                     <div className={styles.noticeItemHeader}>
                       <div style={{ flex: 1 }}>
                         <p className={styles.noticeItemMeta}>
@@ -1669,8 +1681,7 @@ export default function AdminPanel() {
                         <p style={{ fontWeight: 600, margin: "4px 0" }}>{p.title}</p>
                         {p.slug && <p style={{ fontSize: 12, color: "#999", margin: 0 }}>/blog/{p.slug}</p>}
                       </div>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button className={styles.noticePostBtn} style={{ padding: "4px 12px", fontSize: 13 }} onClick={() => openBlogEdit(p.id)}>編集</button>
+                      <div style={{ display: "flex", gap: 8 }} onClick={(e) => e.stopPropagation()}>
                         <button className={styles.noticeDeleteBtn} onClick={() => handleDeleteBlog(p.id)}>削除</button>
                       </div>
                     </div>
@@ -1678,8 +1689,8 @@ export default function AdminPanel() {
                 ))
               )}
 
-              {/* カテゴリ管理 */}
-              <p className={styles.sectionTitle} style={{ marginTop: 32 }}>カテゴリ管理</p>
+              {/* カテゴリ管理 - PC のみ */}
+              {!isMobile && <><p className={styles.sectionTitle} style={{ marginTop: 32 }}>カテゴリ管理</p>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
                 <input type="text" className={styles.noticeInput} style={{ flex: 1, minWidth: 120 }} placeholder="カテゴリ名（例：バレエ初心者ガイド）" value={catName} onChange={(e) => setCatName(e.target.value)} />
                 <input type="text" className={styles.noticeInput} style={{ flex: 1, minWidth: 120 }} placeholder="スラッグ（例：ballet-beginner）" value={catSlug} onChange={(e) => setCatSlug(e.target.value)} />
@@ -1694,6 +1705,7 @@ export default function AdminPanel() {
                   </div>
                 </div>
               ))}
+            </>}
             </>
           )}
 
@@ -1704,26 +1716,40 @@ export default function AdminPanel() {
               <div className={styles.noticeForm}>
                 <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
                   <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
-                    <input type="radio" value="diary" checked={blogType === "diary"} onChange={() => setBlogType("diary")} /> 日記
+                    <input type="radio" value="diary" checked={isMobile || blogType === "diary"} onChange={() => setBlogType("diary")} /> 日記
                   </label>
-                  <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
-                    <input type="radio" value="seo" checked={blogType === "seo"} onChange={() => setBlogType("seo")} /> SEO記事
-                  </label>
+                  {!isMobile && (
+                    <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
+                      <input type="radio" value="seo" checked={blogType === "seo"} onChange={() => setBlogType("seo")} /> SEO記事
+                    </label>
+                  )}
                 </div>
 
                 <input type="text" className={styles.noticeInput} placeholder="タイトル（必須）" value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} />
 
                 {blogType === "seo" && (
                   <>
-                    <input type="text" className={styles.noticeInput} placeholder="メタディスクリプション（検索結果に表示される説明文）" value={blogMetaDesc} onChange={(e) => setBlogMetaDesc(e.target.value)} />
                     <input type="text" className={styles.noticeInput} placeholder="パーマリンク（例：adult-ballet-beginner-guide）" value={blogSlug} onChange={(e) => setBlogSlug(e.target.value)} />
+                    <div>
+                      <textarea
+                        className={styles.noticeTextarea}
+                        placeholder="メタディスクリプション（検索結果に表示される説明文・120字以内）"
+                        value={blogMetaDesc}
+                        onChange={(e) => setBlogMetaDesc(e.target.value)}
+                        rows={3}
+                        style={{ resize: "vertical" }}
+                        maxLength={120}
+                      />
+                      <p style={{ fontSize: 12, textAlign: "right", margin: "2px 0 0", color: blogMetaDesc.length > 120 ? "#e05080" : "#999" }}>
+                        {blogMetaDesc.length} / 120字
+                      </p>
+                    </div>
+                    <select className={styles.noticeInput} value={blogCategoryId ?? ""} onChange={(e) => setBlogCategoryId(e.target.value ? Number(e.target.value) : null)}>
+                      <option value="">カテゴリなし</option>
+                      {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
                   </>
                 )}
-
-                <select className={styles.noticeInput} value={blogCategoryId ?? ""} onChange={(e) => setBlogCategoryId(e.target.value ? Number(e.target.value) : null)}>
-                  <option value="">カテゴリなし</option>
-                  {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                </select>
 
                 <div style={{ marginBottom: 8 }}>
                   <p style={{ fontSize: 13, color: "#666", marginBottom: 4 }}>サムネイル画像</p>
