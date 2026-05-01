@@ -1662,7 +1662,7 @@ export default function AdminPanel() {
           {blogView === "list" && (
             <>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                <p className={styles.sectionTitle} style={{ margin: 0 }}>ブログ記事一覧</p>
+                <p className={styles.sectionTitle} style={{ margin: 0 }}>記事一覧</p>
                 <button className={styles.noticePostBtn} onClick={openBlogNew}>＋ 新規投稿</button>
               </div>
               {blogListError && <p style={{ color: "#e05080", fontSize: 13, marginBottom: 8 }}>エラー: {blogListError}</p>}

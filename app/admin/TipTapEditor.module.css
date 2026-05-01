@@ -11,6 +11,9 @@
   padding: 8px;
   background: #f5f5f5;
   border-bottom: 1px solid #ddd;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .toolbar button {
@@ -81,4 +84,26 @@
 .content :global(.ProseMirror a) {
   color: #0090e8;
   text-decoration: underline;
+}
+
+.imageFloatBar {
+  padding: 8px;
+  border-top: 1px solid #eee;
+  background: #fafafa;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.imageFloatBtn {
+  padding: 10px 20px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.imageFloatBtn:active {
+  background: #e8f4fd;
 }

@@ -4,7 +4,7 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import styles from "./TipTapEditor.module.css";
 
 type Props = {
@@ -16,6 +16,7 @@ type Props = {
 
 export default function TipTapEditor({ content, onChange, adminFetch, mode = "seo" }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -24,9 +25,14 @@ export default function TipTapEditor({ content, onChange, adminFetch, mode = "se
       Link.configure({ openOnClick: false }),
     ],
     content,
-    onUpdate: ({ editor }) => onChange(editor.getHTML()),
+    onUpdate: ({ editor }) => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => onChange(editor.getHTML()), 300);
+    },
     immediatelyRender: false,
   });
+
+  useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
 
   if (!editor) return null;
 
@@ -37,6 +43,8 @@ export default function TipTapEditor({ content, onChange, adminFetch, mode = "se
     const data = await res.json();
     if (data.url) editor.chain().focus().setImage({ src: data.url }).run();
   };
+
+  const triggerImageUpload = () => fileInputRef.current?.click();
 
   const setLink = () => {
     const url = window.prompt("URLを入力してください");
@@ -58,7 +66,7 @@ export default function TipTapEditor({ content, onChange, adminFetch, mode = "se
             <button type="button" onMouseDown={(e) => { e.preventDefault(); setLink(); }}>リンク</button>
           </>
         )}
-        <button type="button" onClick={() => fileInputRef.current?.click()}>📷 画像</button>
+        <button type="button" onClick={triggerImageUpload}>📷 画像</button>
         <input
           ref={fileInputRef}
           type="file"
@@ -72,6 +80,11 @@ export default function TipTapEditor({ content, onChange, adminFetch, mode = "se
         />
       </div>
       <EditorContent editor={editor} className={styles.content} />
+      {mode === "diary" && (
+        <div className={styles.imageFloatBar}>
+          <button type="button" className={styles.imageFloatBtn} onClick={triggerImageUpload}>📷 画像を挿入</button>
+        </div>
+      )}
     </div>
   );
 }
