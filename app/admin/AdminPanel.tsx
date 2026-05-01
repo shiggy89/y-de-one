@@ -549,6 +549,10 @@ export default function AdminPanel() {
   }, [tab, isAdmin]);
 
   useEffect(() => {
+    if (tab === "blog" && isAdmin && blogView === "list") fetchBlogList();
+  }, [blogView]);
+
+  useEffect(() => {
     if (tab === "users" && isAdmin) {
       // 履歴・バッジを全員分まとめて取得
       Promise.all([
@@ -1711,7 +1715,7 @@ export default function AdminPanel() {
 
           {(blogView === "new" || blogView === "edit") && (
             <>
-              <button onClick={() => setBlogView("list")} style={{ background: "none", border: "none", color: "#0090e8", cursor: "pointer", fontSize: 14, marginBottom: 16, padding: 0 }}>← 一覧に戻る</button>
+              <button onClick={() => { setBlogView("list"); fetchBlogList(); }} style={{ background: "none", border: "none", color: "#0090e8", cursor: "pointer", fontSize: 14, marginBottom: 16, padding: 0 }}>← 一覧に戻る</button>
 
               <div className={styles.noticeForm}>
                 <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
