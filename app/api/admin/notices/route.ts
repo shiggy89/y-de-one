@@ -41,15 +41,15 @@ export async function POST(req: Request) {
   }
 }
 
-// 削除（is_active = false）
+// 削除（is_active = false）— id 指定または title 指定に対応
 export async function DELETE(req: Request) {
   if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const { id } = await req.json();
-    const { error } = await supabaseAdmin
-      .from("notices")
-      .update({ is_active: false })
-      .eq("id", id);
+    const { id, title } = await req.json();
+    const query = supabaseAdmin.from("notices").update({ is_active: false });
+    const { error } = await (title
+      ? query.eq("title", title).eq("is_active", true)
+      : query.eq("id", id));
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ ok: true });

@@ -241,12 +241,20 @@ export default function AdminPanel() {
 
   const handleDeleteHpNews = async (id: number) => {
     if (!confirm("このお知らせを削除しますか？")) return;
+    const item = hpNewsList.find((n) => n.id === id);
     setHpNewsList((prev) => prev.filter((n) => n.id !== id));
-    await adminFetch("/api/admin/hp-news", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
+    await Promise.all([
+      adminFetch("/api/admin/hp-news", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      }),
+      item && adminFetch("/api/admin/notices", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: item.title }),
+      }),
+    ]);
   };
 
   // カテゴリ管理
