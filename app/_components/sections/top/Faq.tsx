@@ -132,7 +132,7 @@ export default function Faq() {
             <i className="fa-brands fa-line"></i>
             LINEから簡単に予約できます
           </span>
-          <span className={ctaStyles.lineSubText}>レッスン見学（無料）もお申込みいただけます</span>
+          <span className={ctaStyles.lineSubText}>見学（無料）もお申込みいただけます</span>
         </div>
       </div>
     </section>

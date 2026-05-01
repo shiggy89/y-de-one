@@ -25,7 +25,7 @@ export default function SectionCtaButton({
         <i className="fa-brands fa-line"></i>
         {note}
       </span>
-      <span className={styles.lineSubText}>レッスン見学（無料）もお申込みいただけます</span>
+      <span className={styles.lineSubText}>見学（無料）もお申込みいただけます</span>
     </div>
   );
 }
