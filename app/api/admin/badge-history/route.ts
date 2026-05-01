@@ -36,9 +36,12 @@ export async function GET(req: Request) {
     const monthStart = `${yearMonth}-01`;
     const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     const monthEnd = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, "0")}-01`;
+    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastYearMonth = `${lastMonthDate.getFullYear()}-${String(lastMonthDate.getMonth() + 1).padStart(2, "0")}`;
+    const lastMonthStart = `${lastYearMonth}-01`;
 
-    // 過去月バッジ + 今月の出席データを並列取得
-    const [{ data, error }, { data: currentAttendances }] = await Promise.all([
+    // 過去月バッジ + 今月・前月の出席データを並列取得
+    const [{ data, error }, { data: currentAttendances }, { data: lastMonthAttendances }] = await Promise.all([
       supabaseAdmin
         .from("badges")
         .select("year_month, badge")
@@ -50,11 +53,31 @@ export async function GET(req: Request) {
         .eq("student_id", userId)
         .gte("lesson_date", monthStart)
         .lt("lesson_date", monthEnd),
+      supabaseAdmin
+        .from("attendances")
+        .select("lesson_type, lesson_title, lesson_time")
+        .eq("student_id", userId)
+        .gte("lesson_date", lastMonthStart)
+        .lt("lesson_date", monthStart),
     ]);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     const badges = data ?? [];
+
+    // 前月バッジが badges テーブルにない場合は出席から計算して補完（cron未実行対応）
+    const hasLastMonth = badges.some((b) => b.year_month === lastYearMonth);
+    if (!hasLastMonth) {
+      const lastMonthCount = (lastMonthAttendances ?? []).reduce(
+        (sum, a) => sum + calcLessonCount(a.lesson_type, a.lesson_title, a.lesson_time),
+        0
+      );
+      const lastMonthBadge = calcBadge(lastMonthCount);
+      if (lastMonthBadge) {
+        badges.push({ year_month: lastYearMonth, badge: lastMonthBadge });
+        badges.sort((a, b) => a.year_month.localeCompare(b.year_month));
+      }
+    }
 
     // 今月バッジをリアルタイム計算して追加
     const monthlyCount = (currentAttendances ?? []).reduce(

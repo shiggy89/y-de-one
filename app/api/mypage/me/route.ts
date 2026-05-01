@@ -98,8 +98,19 @@ export async function GET(req: Request) {
     );
     const currentBadge = calcBadge(monthlyCount);
 
-    // 先月のバッジ（badges テーブルから）
-    const lastMonthBadge = (allBadges ?? []).find((b) => b.year_month === lastYearMonth)?.badge ?? null;
+    // 前月の出席からバッジをリアルタイム計算（cronが未実行の場合のフォールバック）
+    const lastMonthAttendances = (allAttendances ?? []).filter(
+      (a) => a.lesson_date >= `${lastYearMonth}-01` && a.lesson_date < `${yearMonth}-01`
+    );
+    const lastMonthCount = lastMonthAttendances.reduce(
+      (sum, a) => sum + calcLessonCount(a.lesson_type, a.lesson_title, a.lesson_time),
+      0
+    );
+    const lastMonthBadgeFromAttendance = calcBadge(lastMonthCount);
+
+    // badges テーブルを優先、なければ出席計算値を使う
+    const lastMonthBadge = (allBadges ?? []).find((b) => b.year_month === lastYearMonth)?.badge
+      ?? lastMonthBadgeFromAttendance;
 
     // 未通知バッジがあれば返す（users.current_badge はポップアップ用）
     const newBadge = user.badge_notified === false ? (user.current_badge ?? null) : null;
@@ -131,6 +142,14 @@ export async function GET(req: Request) {
       }
     }
 
+    // badges テーブルに前月エントリがなければ attendance 計算値で補完
+    const badgesFromTable = allBadges ?? [];
+    const hasLastMonthInTable = badgesFromTable.some((b) => b.year_month === lastYearMonth);
+    const badgeHistory = (!hasLastMonthInTable && lastMonthBadgeFromAttendance)
+      ? [...badgesFromTable, { year_month: lastYearMonth, badge: lastMonthBadgeFromAttendance }]
+          .sort((a, b) => a.year_month.localeCompare(b.year_month))
+      : badgesFromTable;
+
     return NextResponse.json({
       user,
       currentBadge,
@@ -138,7 +157,7 @@ export async function GET(req: Request) {
       newBadge,
       nextBadge: nextBadgeResult,
       attendanceHistory,
-      badgeHistory: allBadges ?? [],
+      badgeHistory,
     });
   } catch (e) {
     console.error(e);

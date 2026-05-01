@@ -72,6 +72,15 @@ export async function GET(req: Request) {
     );
 
     const assigned = results.filter((r) => r?.ok).length;
+
+    // 月次バッジを獲得したユーザーの badge_notified をリセット → 翌月初ログイン時にポップアップを表示
+    const badgeUserIds = Object.entries(countMap)
+      .filter(([, count]) => calcBadge(count) !== null)
+      .map(([id]) => Number(id));
+    if (badgeUserIds.length > 0) {
+      await supabaseAdmin.from("users").update({ badge_notified: false }).in("id", badgeUserIds);
+    }
+
     console.log(`[assign-badges] ${yearMonth}: ${assigned}件のバッジを付与`);
     return NextResponse.json({ ok: true, yearMonth, assigned });
   } catch (e) {
