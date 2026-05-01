@@ -829,9 +829,9 @@ export default function AdminPanel() {
           <button className={`${styles.tab} ${tab === "ledger" ? styles.active : ""}`} onClick={() => changeTab("ledger")}>出席簿</button>
           <button className={`${styles.tab} ${tab === "users" ? styles.active : ""}`} onClick={() => changeTab("users")}>会員管理</button>
           <button className={`${styles.tab} ${tab === "report" ? styles.active : ""}`} onClick={() => changeTab("report")}>レポート</button>
-          <button className={`${styles.tab} ${tab === "message" ? styles.active : ""}`} onClick={() => changeTab("message")}>メッセージ</button>
           <button className={`${styles.tab} ${tab === "hp_news" ? styles.active : ""}`} onClick={() => changeTab("hp_news")}>お知らせ</button>
           <button className={`${styles.tab} ${tab === "blog" ? styles.active : ""}`} onClick={() => changeTab("blog")}>ブログ</button>
+          <button className={`${styles.tab} ${tab === "message" ? styles.active : ""}`} onClick={() => changeTab("message")}>メッセージ</button>
         </div>
       </div>
 
@@ -1665,7 +1665,7 @@ export default function AdminPanel() {
               {blogList.length === 0 ? (
                 <p className={styles.empty}>記事がありません</p>
               ) : (
-                blogList.map((p) => (
+                blogList.filter((p) => !isMobile || p.type !== "seo").map((p) => (
                   <div key={p.id} className={styles.noticeItem} style={{ cursor: "pointer" }} onClick={() => openBlogEdit(p.id)}>
                     <div className={styles.noticeItemHeader}>
                       <div style={{ flex: 1 }}>
@@ -1736,8 +1736,8 @@ export default function AdminPanel() {
                         placeholder="メタディスクリプション（検索結果に表示される説明文・120字以内）"
                         value={blogMetaDesc}
                         onChange={(e) => setBlogMetaDesc(e.target.value)}
-                        rows={3}
-                        style={{ resize: "vertical" }}
+                        rows={1}
+                        style={{ resize: "vertical", width: "100%", boxSizing: "border-box" }}
                         maxLength={120}
                       />
                       <p style={{ fontSize: 12, textAlign: "right", margin: "2px 0 0", color: blogMetaDesc.length > 120 ? "#e05080" : "#999" }}>
