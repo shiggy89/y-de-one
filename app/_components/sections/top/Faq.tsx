@@ -130,7 +130,7 @@ export default function Faq() {
           <a href="https://lin.ee/iz33eCM" className={styles.lastBtn}>体験レッスンはこちら <i className="fa-solid fa-arrow-up-right-from-square"></i></a>
           <span className={ctaStyles.lineAddText}>
             <i className="fa-brands fa-line"></i>
-            友だち追加をして体験レッスンにお申込み下さい
+            LINEから簡単に予約できます
           </span>
           <span className={ctaStyles.lineSubText}>レッスン見学（無料）もお申込みいただけます</span>
         </div>
