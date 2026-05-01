@@ -11,7 +11,7 @@ type Props = {
 export default function SectionCtaButton({
   href = "https://lin.ee/iz33eCM",
   label = "体験レッスンはこちら",
-  note = "友だち追加をして体験レッスンにお申込み下さい",
+  note = "から簡単に予約できます",
   className,
 }: Props) {
   return (

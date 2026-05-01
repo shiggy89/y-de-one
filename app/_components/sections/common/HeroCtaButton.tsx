@@ -23,7 +23,7 @@ export default function HeroCtaButton({
         <>
           <span className={styles.lineAddText}>
             <i className="fa-brands fa-line"></i>
-            友だち追加をして体験レッスンにお申込み下さい
+            から簡単に予約できます
           </span>
           <span className={styles.lineSubText}>レッスン見学（無料）もお申込みいただけます</span>
         </>
