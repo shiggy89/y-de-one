@@ -110,6 +110,13 @@ export default function TrialPage() {
 
         const p = await liff.getProfile();
         setProfile({ userId: p.userId, displayName: p.displayName });
+        if (p.pictureUrl) {
+          fetch("/api/mypage/me", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ lineUserId: p.userId, line_picture_url: p.pictureUrl }),
+          }).catch(console.error);
+        }
       } catch (e) {
         console.error(e);
         setError("LINEログインに失敗しました。時間をおいて再度お試しください。");
