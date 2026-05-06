@@ -1,12 +1,13 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import Heading2 from "../common/Heading2";
 import SectionCtaButton from "../common/SectionCtaButton";
 import styles from "./Flow.module.css";
 
-export default function Flow() {
+export default function Flow({ hideIcons = false, variant }: { hideIcons?: boolean; variant?: "modern-ballet" }) {
   const balletWomanStyle = {
     "--heading-icon-width": "172px",
   } as CSSProperties;
@@ -17,11 +18,19 @@ export default function Flow() {
         <Heading2
           className={styles.flowHeading}
           title={
-            <>
-              初心者歓迎！バレエ体験
-              <br className={styles.mobileOnlyBreak} />
-              レッスンの流れと予約方法
-            </>
+            variant === "modern-ballet" ? (
+              <>
+                初心者歓迎！モダンバレエ体験
+                <br className={styles.mobileOnlyBreak} />
+                レッスンの流れと予約方法
+              </>
+            ) : (
+              <>
+                初心者歓迎！バレエ体験
+                <br className={styles.mobileOnlyBreak} />
+                レッスンの流れと予約方法
+              </>
+            )
           }
           lead={
             <>
@@ -29,14 +38,22 @@ export default function Flow() {
               まずは体験レッスンから始めましょう。
             </>
           }
-          leftSrc="ballet-woman2-icon.png"
-          leftAlt="女性バレリーナ2のアイコン"
-          leftStyle={balletWomanStyle}
-          rightSrc="ballet-woman3-icon.png"
-          rightAlt="女性バレリーナ3のアイコン"
-          rightStyle={balletWomanStyle}
-          width={532}
-          height={469}
+          {...(variant === "modern-ballet" && {
+            leftSrc: "/images/modern-ballet/dog-jump-icon.png",
+            leftStyle: { "--heading-left-left": "5%", "--heading-left-left-mobile": "50%" } as CSSProperties,
+            width: 400,
+            height: 400,
+          })}
+          {...(!hideIcons && {
+            leftSrc: "ballet-woman2-icon.png",
+            leftAlt: "女性バレリーナ2のアイコン",
+            leftStyle: balletWomanStyle,
+            rightSrc: "ballet-woman3-icon.png",
+            rightAlt: "女性バレリーナ3のアイコン",
+            rightStyle: balletWomanStyle,
+            width: 532,
+            height: 469,
+          })}
         />
         <div className={styles.flowList}>
           <div className={styles.flowItem}>
@@ -135,6 +152,11 @@ export default function Flow() {
             友だち追加をして体験レッスンにお申込み下さい
           </span>
         </div> */}
+        {variant === "modern-ballet" && (
+          <div className={styles.priceLink}>
+            <Link href="/price">レッスン料金はこちら →</Link>
+          </div>
+        )}
         <SectionCtaButton />
       </div>
     </section>

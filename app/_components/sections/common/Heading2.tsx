@@ -18,6 +18,8 @@ type Heading2Props = {
   rightStyle?: CSSProperties,
   width?: number,
   height?: number,
+  rightWidth?: number,
+  rightHeight?: number,
 };
 
 export default function Heading2({
@@ -32,6 +34,8 @@ export default function Heading2({
   rightStyle,
   width=1024,
   height=1024,
+  rightWidth,
+  rightHeight,
 }: Heading2Props) {
   const leftIconClassName = [styles.headingIcon, styles.heading2IconLeft, leftClassName]
     .filter(Boolean)
@@ -50,7 +54,7 @@ export default function Heading2({
             <Image
               className={leftIconClassName}
               style={leftStyle}
-              src={`/images/home/${leftSrc}`}
+              src={leftSrc.startsWith("/") ? leftSrc : `/images/home/${leftSrc}`}
               alt=""
               width={width}
               height={height}
@@ -60,10 +64,10 @@ export default function Heading2({
             <Image
               className={rightIconClassName}
               style={rightStyle}
-              src={`/images/home/${rightSrc}`}
+              src={rightSrc.startsWith("/") ? rightSrc : `/images/home/${rightSrc}`}
               alt=""
-              width={width}
-              height={height}
+              width={rightWidth ?? width}
+              height={rightHeight ?? height}
             />
           )}
         </div>

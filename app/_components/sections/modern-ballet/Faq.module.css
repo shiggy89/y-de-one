@@ -1,0 +1,13 @@
+.mobileOnlyBreak {
+  display: none;
+}
+
+@media (max-width: 576px) {
+  .section {
+    padding-top: 20px;
+  }
+
+  .mobileOnlyBreak {
+    display: block;
+  }
+}

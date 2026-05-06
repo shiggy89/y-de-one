@@ -1,0 +1,91 @@
+.mobileOnlyBreak {
+  display: none;
+}
+
+.classSection {
+  padding: 16px 0;
+}
+
+.classGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 280px));
+  justify-content: center;
+  gap: 28px;
+  margin-bottom: 32px;
+}
+
+.classCard {
+  border-radius: 14px;
+  padding: 20px 16px 18px;
+  text-align: center;
+  background: #dcecf7;
+}
+
+.classIcon {
+  width: 124px;
+  height: auto;
+  margin: 0 auto 10px;
+}
+
+.classCard h3 {
+  color: #0090e8;
+  font-size: 32px;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+.level {
+  color: #0090e8;
+  font-weight: 700;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+
+.description {
+  width: 80%;
+  margin: 0 auto;
+  font-size: 16px;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.scheduleLink {
+  text-align: center;
+  margin-top: 8px;
+}
+
+.scheduleLink a {
+  font-size: 16px;
+  font-weight: 700;
+  color: #de4e8c;
+  text-decoration: none;
+}
+
+.scheduleLink a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 576px) {
+  .mobileOnlyBreak {
+    display: block;
+  }
+
+  .classGrid {
+    grid-template-columns: 1fr;
+    padding: 0 12px;
+  }
+
+  .classCard {
+    width: 80%;
+    margin: 0 auto;
+    padding: 18px 14px 16px;
+  }
+
+  .classIcon {
+    width: 110px;
+  }
+
+  .classCard h3 {
+    font-size: 28px;
+  }
+}

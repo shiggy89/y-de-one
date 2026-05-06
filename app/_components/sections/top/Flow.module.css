@@ -132,6 +132,17 @@
   background-color: #16a34a;
 }
 
+.priceLink {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.priceLink a {
+  color: #de4e8c;
+}
+
 @media (max-width: 576px) {
   .mobileOnlyBreak {
     display: block;
