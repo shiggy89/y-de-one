@@ -53,7 +53,7 @@ export default function Footer() {
               <span>
                 <i className="fa-regular fa-envelope"></i>
               </span>
-              <span>ballet.ydeone@gmail.com</span>
+              <span>ydeone.danceschool@gmail.com</span>
             </p>
           </div>
           <div className={styles.footerBlock}>

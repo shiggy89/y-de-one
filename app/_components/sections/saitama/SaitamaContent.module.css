@@ -18,7 +18,7 @@
 
 .cardHeader {
   background: #0090e8;
-  padding: 20px 24px;
+  padding: 16px 24px;
   color: #fff;
 }
 
@@ -60,6 +60,12 @@
   width: 16px;
   text-align: center;
   flex-shrink: 0;
+}
+
+.infoRowIndented {
+  padding-left: 24px;
+  font-size: 14px;
+  color: #555;
 }
 
 .subSection {
@@ -133,7 +139,7 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  background: #fff9e3;
+  background: #fff0f5;
   border-radius: 10px;
   padding: 14px 18px;
   margin-bottom: 40px;
@@ -142,7 +148,7 @@
 }
 
 .note i {
-  color: #f5a623;
+  color: #e05080;
   margin-top: 2px;
   flex-shrink: 0;
 }
@@ -152,13 +158,127 @@
   line-height: 1.6;
 }
 
+/* ━━━ 担当講師 ━━━ */
+.instructorSection {
+  padding: 0 0 64px;
+}
+
+.instructorRow {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  margin-bottom: 40px;
+}
+
+.instructorPhotoWrap {
+  flex-shrink: 0;
+  width: 220px;
+}
+
+.instructorPhoto {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.instructorInfo {
+  flex: 1;
+  padding-top: 8px;
+}
+
+.instructorName {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.instructorKana {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 20px;
+}
+
+.instructorMessage {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.9;
+  border-left: 3px solid #0090e8;
+  padding-left: 16px;
+  margin: 0;
+}
+
+.studioPhotos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.studioPhoto {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.mobileBr {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .grid {
     grid-template-columns: 1fr;
   }
+
+  .instructorRow {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .instructorPhotoWrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .instructorPhoto {
+    width: 180px;
+    height: 220px;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 50%;
+  }
+
+  .instructorInfo {
+    padding-top: 0;
+    text-align: center;
+  }
+
+  .instructorName {
+    font-size: 20px;
+  }
+
+  .instructorMessage {
+    text-align: left;
+  }
+
+  .studioPhotos {
+    grid-template-columns: 1fr;
+  }
+
+  .studioPhoto {
+    height: 200px;
+  }
 }
 
 @media (max-width: 576px) {
+  .mobileBr {
+    display: block;
+  }
+
   .section {
     padding: 24px 0 48px;
   }

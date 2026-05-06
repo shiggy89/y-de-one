@@ -275,7 +275,7 @@ export default function Instructor() {
       </section>
 
       {/* ━━━ 松井眞琴 ━━━ */}
-      <section className={styles.instructorSection}>
+      <section id="makoto" className={styles.instructorSection}>
         <div className="inner">
 
           <div className={styles.instructorHeader}>

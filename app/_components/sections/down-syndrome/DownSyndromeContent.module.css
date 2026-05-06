@@ -73,7 +73,7 @@
 }
 
 .infoLabel {
-  width: 120px;
+  width: 70px;
   flex-shrink: 0;
   padding: 16px 20px;
   background: #e8f4fd;
@@ -114,10 +114,79 @@
   line-height: 1.7;
 }
 
+/* ━━━ 担当講師 ━━━ */
+.instructorSection {
+  padding: 0 0 64px;
+}
+
+.instructorGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.instructorCard {
+  text-align: center;
+}
+
+.instructorPhoto {
+  width: 240px !important;
+  height: 340px !important;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 24px;
+  display: block;
+  margin: 0 auto 14px;
+}
+
+.instructorName {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.instructorKana {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.instructorLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e05080;
+  text-decoration: none;
+  border-bottom: 1px solid #e05080;
+  padding-bottom: 2px;
+  transition: opacity 0.2s;
+}
+
+.instructorLink:hover {
+  opacity: 0.7;
+}
+
+.mobileBr {
+  display: none;
+}
+
 /* ━━━ Responsive ━━━ */
 @media (max-width: 768px) {
   .featureGrid {
     grid-template-columns: 1fr;
+  }
+
+  .instructorGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .instructorPhotoWrap {
+    width: 240px;
+    height: 320px;
+    margin: 0 auto 14px;
   }
 }
 
@@ -130,16 +199,30 @@
     padding: 0 0 48px;
   }
 
+  .mobileBr {
+    display: inline;
+  }
+
+  .instructorPhoto {
+    width: 190px !important;
+    height: 260px !important;
+  }
+
+  .featureGrid {
+    padding: 0 5%;
+  }
+
   .featureCard {
     padding: 20px;
   }
 
   .infoLabel {
-    width: 90px;
+    width: 50px;
     padding: 14px 12px;
   }
 
   .infoValue {
     padding: 14px 12px;
+    margin-left: 12px;
   }
 }

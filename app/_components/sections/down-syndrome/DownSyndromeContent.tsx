@@ -1,5 +1,7 @@
+import Image from "next/image";
+import Link from "next/link";
+import ContactCtaButton from "../common/ContactCtaButton";
 import Heading2 from "../common/Heading2";
-import SectionCtaButton from "../common/SectionCtaButton";
 import styles from "./DownSyndromeContent.module.css";
 
 const FEATURES = [
@@ -30,8 +32,35 @@ const CLASS_INFO = [
   { label: "定員", value: "8名（少人数制）" },
   { label: "日時", value: "月2回・火曜日 16:00〜17:00（60分）" },
   { label: "場所", value: "新宿区内コミュニティセンター\n（主に戸塚コミュニティセンター）" },
-  { label: "料金", value: "1,000円〜1,500円 / 回\n（保護者参加の場合：1,500円）" },
+  { label: "料金", value: "1,000円 / 回（当事者のみ）\n1,500円 / 回（保護者と一緒）" },
   { label: "内容", value: "ストレッチ・リズム運動・バレエ/コンテンポラリーの簡易動作" },
+];
+
+const INSTRUCTORS = [
+  {
+    id: "yoshiki",
+    name: "青山 佳樹",
+    kana: "あおやま よしき",
+    photo: "/images/instructor/yoshiki-profile-1.jpg",
+    href: "/instructor#yoshiki",
+    objectPosition: "center",
+  },
+  {
+    id: "kazuki",
+    name: "門馬 和樹",
+    kana: "もんま かずき",
+    photo: "/images/instructor/kazuki-profile-1.jpg",
+    href: "/instructor#kazuki",
+    objectPosition: "center",
+  },
+  {
+    id: "makoto",
+    name: "松井 眞琴",
+    kana: "まつい まこと",
+    photo: "/images/instructor/makoto-profile-1.jpg",
+    href: "/instructor#makoto",
+    objectPosition: "top",
+  },
 ];
 
 export default function DownSyndromeContent() {
@@ -40,7 +69,7 @@ export default function DownSyndromeContent() {
       <section className={styles.section}>
         <div className="inner">
           <Heading2
-            title={<>ダウン症のある方のための<br />ダンスクラス</>}
+            title="ダウン症の方向けダンスクラス"
             lead="音楽と身体表現を安全な環境で楽しむことを目的としたクラスです。身体機能の向上・自己肯定感・社会参加の機会を広げることを目指しています。"
           />
 
@@ -60,9 +89,7 @@ export default function DownSyndromeContent() {
 
       <section className={styles.infoSection}>
         <div className="inner">
-          <Heading2
-            title="クラス詳細"
-          />
+          <Heading2 title="クラス詳細" lead="ダウン症の方向けダンスクラスの詳細です。" />
           <div className={styles.infoTable}>
             {CLASS_INFO.map((item) => (
               <div key={item.label} className={styles.infoRow}>
@@ -74,12 +101,36 @@ export default function DownSyndromeContent() {
 
           <div className={styles.noteBox}>
             <i className="fa-solid fa-circle-info" />
-            <p>
-              体験参加を随時受け付けています。お気軽にLINEよりお問い合わせください。
-            </p>
+            <p>下記よりお気軽にお問い合わせください。</p>
           </div>
 
-          <SectionCtaButton />
+          <ContactCtaButton />
+        </div>
+      </section>
+
+      <section className={styles.instructorSection}>
+        <div className="inner">
+          <Heading2 title="担当講師" lead={<>ダウン症の方向けダンスクラスの<br className={styles.mobileBr} />担当講師を紹介します。</>} />
+          <div className={styles.instructorGrid}>
+            {INSTRUCTORS.map((inst) => (
+              <div key={inst.id} className={styles.instructorCard}>
+                <Image
+                  src={inst.photo}
+                  alt={inst.name}
+                  width={300}
+                  height={380}
+                  className={styles.instructorPhoto}
+                  style={{ objectPosition: inst.objectPosition }}
+                />
+                <p className={styles.instructorName}>{inst.name}</p>
+                <p className={styles.instructorKana}>{inst.kana}</p>
+                <Link href={inst.href} className={styles.instructorLink}>
+                  プロフィール詳細はこちら <i className="fa-solid fa-arrow-right" />
+                </Link>
+              </div>
+            ))}
+          </div>
+          <ContactCtaButton />
         </div>
       </section>
     </>

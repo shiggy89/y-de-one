@@ -11,8 +11,8 @@ export default function SaitamaPage() {
   return (
     <>
       <Hero
-        title="大人バレエ教室 Y-de-ONE"
-        subtitle="埼玉クラス -Saitama-"
+        title="埼玉エリアで バレエを楽しみたい方へ"
+        subtitle="門馬和樹クラス"
       />
       <SaitamaContent />
     </>

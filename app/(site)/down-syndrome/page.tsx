@@ -11,8 +11,8 @@ export default function DownSyndromePage() {
   return (
     <>
       <Hero
-        title="大人バレエ教室 Y-de-ONE"
-        subtitle="ダウン症ダンスクラス"
+        title="Y-de-ONE"
+        subtitle={<>ダウン症の方向け<br />ダンスクラス</>}
       />
       <DownSyndromeContent />
     </>

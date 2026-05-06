@@ -1,9 +1,11 @@
 import Image from "next/image";
 import styles from "./Hero.module.css";
 
+import type { ReactNode } from "react";
+
 type Props = {
 	title: string
-	subtitle: string
+	subtitle: ReactNode
 }
 export default function Hero({ title, subtitle }: Props) {
 	const [titleFirst = title, titleSecond = ""] = title.split(" ");
