@@ -36,6 +36,7 @@ export default function ModernBalletInstructor() {
     <section className={styles.section}>
       <div className="inner">
         <Heading2
+          className="h2SmallMargin"
           title={<>モダンバレエを教える講師紹介<br />青山佳樹・門馬和樹</>}
           lead="Y-de-ONEのモダンバレエクラスを担当する2人の講師を紹介します。どちらも第一線で活躍するダンサーであり、大人になってからダンスを始めた指導者です。"
           rightSrc="/images/modern-ballet/dog-perform-icon.png"

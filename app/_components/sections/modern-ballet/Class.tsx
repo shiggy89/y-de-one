@@ -25,6 +25,7 @@ export default function ModernBalletClass() {
     <section className={styles.classSection}>
       <div className="inner">
         <Heading2
+          className="h2SmallMargin"
           title={<>高田馬場・新宿<br className={styles.mobileOnlyBreak} />モダンバレエクラス<br />初心者歓迎・週5回開講</>}
           lead="Y-de-ONEのモダンバレエクラスは、週5回開講しています。初めての方も、経験者の方も、ご自身のペースで参加できます。"
           leftSrc="/images/modern-ballet/dog-spin-icon.png"

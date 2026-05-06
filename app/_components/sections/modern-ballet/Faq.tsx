@@ -11,6 +11,7 @@ export default function ModernBalletFaq() {
     <section className={sectionStyles.section}>
       <div className="inner">
         <Heading2
+          className="h2SmallMargin"
           title={<>モダンバレエ初心者からの<br className={sectionStyles.mobileOnlyBreak} />よくある質問</>}
           lead="モダンバレエが初めての方からよくいただく質問をまとめました。"
           leftSrc="/images/modern-ballet/dog-dance-icon.png"
