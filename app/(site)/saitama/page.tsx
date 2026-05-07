@@ -4,14 +4,14 @@ import SaitamaContent from "../../_components/sections/saitama/SaitamaContent";
 
 export const metadata: Metadata = {
   title: "埼玉クラス（大宮・朝霞） | 大人バレエ教室 Y-de-ONE",
-  description: "Y-de-ONEの埼玉クラス。大宮・朝霞の2拠点でレッスン開催。バレエ歴1年程度の方向けクラスです。",
+  description: "埼玉エリア（大宮・朝霞台）でバレエを楽しみたい方へ。ワイデワン講師・門馬和樹が担当するバレエクラスです。初心者・ブランクのある方も歓迎。月謝制・単発参加どちらも対応しています。",
 };
 
 export default function SaitamaPage() {
   return (
     <>
       <Hero
-        title="埼玉エリアで バレエを楽しみたい方へ"
+        title="埼玉エリアでバレエを楽しみたい方へ"
         subtitle="門馬和樹クラス"
       />
       <SaitamaContent />
