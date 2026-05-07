@@ -119,6 +119,10 @@
     height: 560px;
   }
 
+  .card:hover .photo {
+    transform: none;
+  }
+
   .name {
     font-size: 36px;
   }
