@@ -57,8 +57,16 @@ img {
   padding: 0 16px;
 }
 
+.spBr {
+  display: none;
+}
+
 @media (max-width: 576px) {
   .h2SmallMargin {
     margin-top: 60px !important;
+  }
+
+  .spBr {
+    display: block;
   }
 }

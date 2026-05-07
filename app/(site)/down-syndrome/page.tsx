@@ -12,7 +12,8 @@ export default function DownSyndromePage() {
     <>
       <Hero
         title="Y-de-ONE"
-        subtitle={<>ダウン症の方向け<br />ダンスクラス</>}
+        subtitle={<>ダウン症の方向け<br className="spBr" />ダンスクラス</>}
+        lead="〜心も体も柔軟に〜"
       />
       <DownSyndromeContent />
     </>
