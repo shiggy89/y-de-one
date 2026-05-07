@@ -1,0 +1,18 @@
+.page {
+  margin-top: 36px;
+}
+
+.lastCta {
+  margin-bottom: 64px;
+}
+
+@media (max-width: 576px) {
+  .accessWrapper {
+    margin-bottom: 80px;
+  }
+}
+
+.page :global(a[class*="ctaBtn"]) {
+  background-color: #de4e8c;
+  box-shadow: 0 4px 0 #a0306a;
+}

@@ -115,7 +115,7 @@ export default function Instructor() {
       </section>
 
       {/* ━━━ 青山佳樹 ━━━ */}
-      <section className={styles.instructorSection}>
+      <section id="yoshiki" className={styles.instructorSection}>
         <div className={"inner"}>
 
           {/* 名前ヘッダー */}
@@ -189,7 +189,7 @@ export default function Instructor() {
       </section>
 
       {/* ━━━ 門馬和樹 ━━━ */}
-      <section className={styles.instructorSection}>
+      <section id="kazuki" className={styles.instructorSection}>
         <div className="inner">
 
           <div className={styles.instructorHeader}>
@@ -275,7 +275,7 @@ export default function Instructor() {
       </section>
 
       {/* ━━━ 松井眞琴 ━━━ */}
-      <section className={styles.instructorSection}>
+      <section id="makoto" className={styles.instructorSection}>
         <div className="inner">
 
           <div className={styles.instructorHeader}>

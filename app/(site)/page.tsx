@@ -1,5 +1,6 @@
 import Hero from "../_components/sections/top/Hero";
 import Features from "../_components/sections/top/Features";
+import ModernBalletFloat from "../_components/sections/top/ModernBalletFloat";
 import Compare from "../_components/sections/top/Compare";
 import Flow from "../_components/sections/top/Flow";
 import About from "../_components/sections/top/About";
@@ -19,6 +20,7 @@ export default function Page() {
         <Access />
         <Faq />
       </main>
+      <ModernBalletFloat />
     </>
   );
 }

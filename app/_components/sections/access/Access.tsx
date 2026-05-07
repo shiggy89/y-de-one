@@ -28,13 +28,19 @@ const STATIONS = [
   {
     id: "higashinakano",
     station: "東中野駅",
-    line: "JR総武線・都営大江戸線",
-    time: "徒歩約10分",
+    line: "JR総武線（STEP4から）・都営大江戸線（STEP1から）",
+    time: "徒歩約15分",
     steps: [
-      { step: 1, label: "東中野駅東口を出る", photo: null },
-      { step: 2, label: "大久保通りを東へ直進", photo: null },
-      { step: 3, label: "交差点を左折", photo: null },
-      { step: 4, label: "兼子ビル2階が目印", photo: null },
+      { step: 1, label: "都営大江戸線東中野駅A1出口をでる", photo: "/images/access/higashinakano-station-1.jpg" },
+      { step: 2, label: "正面にUFJ銀行が見えたら、右に曲がる", photo: "/images/access/higashinakano-station-2.jpg" },
+      { step: 3, label: "ずっと直進（STEP5へ）", photo: "/images/access/higashinakano-station-3.jpg" },
+      { step: 4, label: "JR総武線東中野駅東口（改札を出て左に進んだ出口）をでる", photo: "/images/access/higashinakano-station-4.jpg" },
+      { step: 5, label: "左カーブの道を道なりずっとまっすぐ進む", photo: "/images/access/higashinakano-station-5.jpg" },
+      { step: 6, label: "まいばすけっとを左手に見ながら、そのまま直進します", photo: "/images/access/higashinakano-station-6.jpg" },
+      { step: 7, label: "セブンイレブンがある交差点を右に曲がる", photo: "/images/access/higashinakano-station-7.jpg" },
+      { step: 8, label: "さらに直進", photo: "/images/access/higashinakano-station-8.jpg" },
+      { step: 9, label: "小滝橋五差路を左へ（左に曲がるとフラワーマスダ、セオサイクルがあります）", photo: "/images/access/higashinakano-station-9.jpg" },
+      { step: 10, label: "セブンイレブンの向かいに「MEIJI」の看板があるビルが見える", photo: "/images/access/higashinakano-station-10.jpg" },
     ],
   },
   {
@@ -43,10 +49,12 @@ const STATIONS = [
     line: "東京メトロ東西線",
     time: "徒歩約8分",
     steps: [
-      { step: 1, label: "落合駅2番出口を出る", photo: null },
-      { step: 2, label: "目白通りを東へ直進", photo: null },
-      { step: 3, label: "交差点を右折", photo: null },
-      { step: 4, label: "兼子ビル2階が目印", photo: null },
+      { step: 1, label: "落合駅4番出口をでる", photo: "/images/access/ochiai-station-1.jpg" },
+      { step: 2, label: "正面に郵便局が見えたら、左に曲がる", photo: "/images/access/ochiai-station-2.jpg" },
+      { step: 3, label: "セブンイレブンがある交差点を直進", photo: "/images/access/ochiai-station-3.jpg" },
+      { step: 4, label: "さらに直進", photo: "/images/access/ochiai-station-4.jpg" },
+      { step: 5, label: "小滝橋五差路を左へ（左に曲がるとフラワーマスダ、セオサイクルがあります）", photo: "/images/access/ochiai-station-5.jpg" },
+      { step: 6, label: "セブンイレブンの向かいに「MEIJI」の看板があるビルが見える", photo: "/images/access/ochiai-station-6.jpg" },
     ],
   },
   {
@@ -132,7 +140,17 @@ export default function Access() {
               {s.steps.map((step) => (
                 <div key={step.step} className={styles.stepCard}>
                   <div className={styles.stepPhoto}>
-                    <span className={styles.stepPhotoPlaceholder}>Photo</span>
+                    {step.photo ? (
+                      <Image
+                        src={step.photo}
+                        alt={step.label}
+                        width={600}
+                        height={400}
+                        className={styles.stepPhotoImg}
+                      />
+                    ) : (
+                      <span className={styles.stepPhotoPlaceholder}>Photo</span>
+                    )}
                   </div>
                   <div className={styles.stepBody}>
                     <span className={styles.stepNum}>STEP {step.step}</span>

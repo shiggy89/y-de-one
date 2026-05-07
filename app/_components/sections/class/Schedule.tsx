@@ -116,7 +116,7 @@ export default function Schedule() {
   );
 
   return (
-    <div className={styles.scheduleBlock}>
+    <div id="schedule" className={styles.scheduleBlock}>
       <Heading2
         className={styles.scheduleHeading}
         title={

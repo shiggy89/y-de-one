@@ -1,11 +1,14 @@
 import Image from "next/image";
 import styles from "./Hero.module.css";
 
+import type { ReactNode } from "react";
+
 type Props = {
 	title: string
-	subtitle: string
+	subtitle: ReactNode
+	lead?: ReactNode
 }
-export default function Hero({ title, subtitle }: Props) {
+export default function Hero({ title, subtitle, lead }: Props) {
 	const [titleFirst = title, titleSecond = ""] = title.split(" ");
 
 	return (
@@ -44,6 +47,7 @@ export default function Hero({ title, subtitle }: Props) {
 					<br />
 					{ subtitle }
 				</h2>
+				{lead && <p className={styles.lead}>{lead}</p>}
 				</div>
 			</div>
 		</section>

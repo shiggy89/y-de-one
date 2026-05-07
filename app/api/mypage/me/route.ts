@@ -41,6 +41,21 @@ const BADGE_LABEL: Record<string, string> = {
   gold: "ゴールド", platinum: "プラチナ", diamond: "ダイヤモンド",
 };
 
+export async function PATCH(req: Request) {
+  try {
+    const { lineUserId, line_picture_url } = await req.json();
+    if (!lineUserId || !line_picture_url) return NextResponse.json({ error: "invalid params" }, { status: 400 });
+    await supabaseAdmin
+      .from("users")
+      .update({ line_picture_url })
+      .eq("line_user_id", lineUserId);
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json({ error: "サーバーエラー" }, { status: 500 });
+  }
+}
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);

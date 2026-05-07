@@ -25,6 +25,17 @@
   text-align: center;
 }
 
+.lead {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: #008fd8;
+  font-size: 42px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-top: 0;
+}
+
 .mobileBreak {
   display: none;
 }
@@ -68,6 +79,11 @@
   }
 
   .title {
+    font-size: 28px;
+    line-height: 1.35;
+  }
+
+  .lead {
     font-size: 28px;
     line-height: 1.35;
   }

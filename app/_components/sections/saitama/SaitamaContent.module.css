@@ -1,0 +1,289 @@
+.section {
+  padding: 40px 0 64px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.card {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+.cardHeader {
+  background: #0090e8;
+  padding: 16px 24px;
+  color: #fff;
+}
+
+.studioName {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.location i {
+  font-size: 12px;
+}
+
+.cardBody {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #555;
+}
+
+.infoRow i {
+  color: #0090e8;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.infoRowIndented {
+  padding-left: 24px;
+  font-size: 14px;
+  color: #555;
+}
+
+.subSection {
+  margin-top: 16px;
+}
+
+.subTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #888;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.subTitle i {
+  color: #0090e8;
+}
+
+.scheduleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #e8f4fd;
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.day {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+}
+
+.time {
+  font-size: 14px;
+  color: #0090e8;
+  font-weight: 700;
+}
+
+.priceList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.priceItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.priceLabel {
+  color: #555;
+}
+
+.priceAmount {
+  font-weight: 700;
+  color: #e05080;
+}
+
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fff0f5;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 40px;
+  font-size: 14px;
+  color: #555;
+}
+
+.note i {
+  color: #e05080;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.note p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ━━━ 担当講師 ━━━ */
+.instructorSection {
+  padding: 0 0 64px;
+}
+
+.instructorRow {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  margin-bottom: 40px;
+}
+
+.instructorPhotoWrap {
+  flex-shrink: 0;
+  width: 220px;
+}
+
+.instructorPhoto {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.instructorInfo {
+  flex: 1;
+  padding-top: 8px;
+}
+
+.instructorName {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.instructorKana {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 20px;
+}
+
+.instructorMessage {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.9;
+  border-left: 3px solid #0090e8;
+  padding-left: 16px;
+  margin: 0;
+}
+
+.studioPhotos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.studioPhoto {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+}
+
+.mobileBr {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .instructorRow {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .instructorPhotoWrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .instructorPhoto {
+    width: 180px;
+    height: 220px;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 50%;
+  }
+
+  .instructorInfo {
+    padding-top: 0;
+    text-align: center;
+  }
+
+  .instructorName {
+    font-size: 20px;
+  }
+
+  .instructorMessage {
+    text-align: left;
+  }
+
+  .studioPhotos {
+    grid-template-columns: 1fr;
+  }
+
+  .studioPhoto {
+    height: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .mobileBr {
+    display: block;
+  }
+
+  .section {
+    padding: 24px 0 48px;
+  }
+
+  .studioName {
+    font-size: 18px;
+  }
+}

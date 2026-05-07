@@ -83,6 +83,72 @@
   color: #333;
 }
 
+.dropdownGroup {
+  padding: 8px 20px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0090e8;
+  letter-spacing: 0.05em;
+  border-top: 1px solid #eee;
+}
+
+.dropdownGroup:first-child {
+  border-top: none;
+}
+
+/* サブドロップダウン（クラス > Y-de-ONE等） */
+.subNavItem {
+  position: relative;
+}
+
+.subDropdownTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  font-family: inherit;
+}
+
+.subChevron {
+  font-size: 9px;
+  transition: transform 0.2s;
+  color: #aaa;
+}
+
+.subChevronOpen {
+  transform: rotate(90deg);
+}
+
+.subDropdown {
+  display: none;
+}
+
+.subDropdown.subDropdownOpen {
+  display: block;
+}
+
+.subDropdown li a {
+  display: block;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* デスクトップ: subDropdownTriggerホバー時の黄色アンダーライン */
+@media (hover: hover) {
+  .subDropdownTrigger:hover span {
+    background: linear-gradient(transparent 60%, #ffff66 0%);
+  }
+}
+
 /* ホバー時の黄色アンダーライン（マウスあり端末のみ） */
 @media (hover: hover) {
   .dropdownTrigger:hover span,
@@ -229,6 +295,17 @@
 
   .dropdown li:last-child a {
     padding-bottom: 0;
+  }
+
+  .subDropdownTrigger {
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 0;
+  }
+
+  .subDropdown li a {
+    text-align: center;
+    padding: 8px 0;
   }
 
 }

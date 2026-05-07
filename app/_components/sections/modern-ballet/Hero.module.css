@@ -1,0 +1,198 @@
+.innerHero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "left catch"
+    "left right";
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.heroLeft {
+  grid-area: left;
+  position: relative;
+}
+
+.heroLeft h1 {
+  font-size: 40px;
+  line-height: 1.6;
+  color: #de4e8c;
+  margin-bottom: 20px;
+}
+
+.lead {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0px;
+  margin-left: 16px;
+}
+
+.heroCtaWrap {
+  margin-bottom: 0;
+  display: inline-block;
+  text-align: center;
+  margin-left: 40px; 
+}
+
+.heroRight {
+  grid-area: right;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.catchCopy {
+  grid-area: catch;
+  padding-top: 24px;
+  padding-left: 80px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1.5px solid #ddd;
+  border-radius: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  padding: 10px 20px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+.searchBar i {
+  color: #de4e8c;
+  font-size: 16px;
+}
+
+.searchResult {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 26px;
+  font-weight: 700;
+  white-space: nowrap;
+  margin-left: 16px;
+}
+
+.searchText {
+  color: #333;
+}
+
+.rank {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  color: #f5a623;
+  font-size: 22px;
+  font-weight: 900;
+  margin-left: 8px;
+  flex-shrink: 0;
+  letter-spacing: 0.03em;
+}
+
+.rank i {
+  font-size: 26px;
+  filter: drop-shadow(0 2px 4px rgba(245, 166, 35, 0.5));
+}
+
+.heroDanceImg {
+  width: 620px;
+  height: auto;
+}
+
+
+.dogImg {
+  position: absolute;
+  top: 70px;
+  left: -60px;
+  width: 130px;
+  height: auto;
+}
+
+.studentsDanceIcon {
+  width: 430px;
+  height: auto;
+  margin-top: 32px;
+}
+
+.dogImgMobile {
+  display: none;
+}
+
+@media (max-width: 576px) {
+  .innerHero {
+    display: flex;
+    flex-direction: column;
+    padding-top: 0;
+    padding-bottom: 0;
+    text-align: center;
+  }
+
+  .catchCopy {
+    order: 1;
+  }
+
+  .heroLeft {
+    order: 2;
+  }
+
+  .heroRight {
+    order: 3;
+  }
+
+  .heroLeft h1 {
+    font-size: 28px;
+  }
+
+  .lead {
+    font-size: 16px;
+    margin-left: 0;
+  }
+
+  .heroCtaWrap {
+    text-align: center;
+    margin-left: 0;
+  }
+
+  .dogImg {
+    display: none;
+  }
+
+  .studentsDanceIcon {
+    display: block;
+    width: 100%;
+    margin-top: 24px;
+  }
+
+  .dogImgMobile {
+    display: block;
+    width: 150px;
+    height: auto;
+    margin: 16px auto 0;
+  }
+
+  .catchCopy {
+    font-size: 18px;
+    padding-left: 0;
+    padding-top: 0;
+    padding-bottom: 36px;
+    text-align: center;
+    align-items: center;
+  }
+
+  .heroDanceImg {
+    width: 100%;
+  }
+}

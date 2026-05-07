@@ -678,6 +678,7 @@ export default function AdminPanel() {
   const handleAttendance = async () => {
     setAttendanceError(null);
     if (selectedUserIds.length === 0) { setAttendanceError("生徒を選択してください"); return; }
+    if (lessonType === "通常" && !selectedLesson) { setAttendanceError("レッスンを選択してください"); return; }
 
     // 選択した生徒のアイコンをAPIレスポンス待たずに即時非表示
     const prevAttendedIds = attendedIds;
