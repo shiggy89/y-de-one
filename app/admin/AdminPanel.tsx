@@ -575,7 +575,7 @@ export default function AdminPanel() {
   }, [tab, isAdmin]);
 
   const fetchUsers = async () => {
-    const res = await adminFetch("/api/admin/users");
+    const res = await adminFetch("/api/admin/users", { cache: "no-store" });
     const data = await res.json();
     setUsers(data.users ?? []);
     setTrialCount((data.users ?? []).filter((u: User) => u.status === "trial").length);
