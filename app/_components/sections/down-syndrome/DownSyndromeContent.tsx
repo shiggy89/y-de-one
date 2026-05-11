@@ -63,9 +63,33 @@ const INSTRUCTORS = [
   },
 ];
 
+const ACTIVITY_PHOTOS = [
+  { src: "/images/down-syndrome/activity-1.jpg", alt: "クラスの様子1" },
+  { src: "/images/down-syndrome/activity-2.jpg", alt: "クラスの様子2" },
+  { src: "/images/down-syndrome/activity-3.jpg", alt: "クラスの様子3" },
+];
+
 export default function DownSyndromeContent() {
   return (
     <>
+      <section className={styles.photoStrip}>
+        <div className="inner">
+          <div className={styles.photoGrid}>
+            {ACTIVITY_PHOTOS.map((p) => (
+              <div key={p.src} className={styles.photoItem}>
+                <Image
+                  src={p.src}
+                  alt={p.alt}
+                  fill
+                  className={styles.photoImg}
+                  sizes="(max-width: 576px) 50vw, 33vw"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className={styles.section}>
         <div className="inner">
           <Heading2

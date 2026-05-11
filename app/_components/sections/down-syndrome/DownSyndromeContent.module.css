@@ -1,3 +1,49 @@
+/* ━━━ Photo Strip ━━━ */
+.photoStrip {
+  padding: 24px 0 48px 0;
+  margin-bottom: 0;
+}
+
+.photoStrip :global(.inner) {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.photoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.photoItem {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+}
+
+.photoImg {
+  object-fit: cover;
+  object-position: center top;
+  transition: transform 0.5s ease;
+}
+
+.photoItem:hover .photoImg {
+  transform: scale(1.04);
+}
+
+@media (max-width: 576px) {
+  .photoGrid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .photoItem {
+    border-radius: 12px;
+  }
+}
+
+/* ━━━ Sections ━━━ */
 .section {
   padding: 40px 0 48px;
 }
