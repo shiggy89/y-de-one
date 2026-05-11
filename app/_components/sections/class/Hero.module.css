@@ -44,6 +44,10 @@
   margin-left: 0.3em;
 }
 
+.titleBottomNoSpace {
+  margin-left: 0;
+}
+
 .dogIcon {
   position: absolute;
   z-index: 1;

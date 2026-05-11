@@ -7,8 +7,9 @@ type Props = {
 	title: string
 	subtitle: ReactNode
 	lead?: ReactNode
+	noTitleSpace?: boolean
 }
-export default function Hero({ title, subtitle, lead }: Props) {
+export default function Hero({ title, subtitle, lead, noTitleSpace }: Props) {
 	const [titleFirst = title, titleSecond = ""] = title.split(" ");
 
 	return (
@@ -41,7 +42,7 @@ export default function Hero({ title, subtitle, lead }: Props) {
 					{titleSecond && (
 						<>
 							<br className={styles.mobileBreak} />
-							<span className={styles.titleBottom}>{titleSecond}</span>
+							<span className={`${styles.titleBottom} ${noTitleSpace ? styles.titleBottomNoSpace : ""}`}>{titleSecond}</span>
 						</>
 					)}
 					<br />
