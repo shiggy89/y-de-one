@@ -49,10 +49,14 @@
 
 .infoRow {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   font-size: 14px;
   color: #555;
+}
+
+.infoRow span {
+  white-space: pre-line;
 }
 
 .infoRow i {
