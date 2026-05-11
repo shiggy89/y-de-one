@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import type { CSSProperties } from "react";
 import Heading2 from "../common/Heading2";
+import ContactCtaButton from "../common/ContactCtaButton";
 import SectionCtaButton from "../common/SectionCtaButton";
 import styles from "./Instructor.module.css";
 
@@ -10,7 +12,9 @@ const YOSHIKI_PHOTOS = [1, 2, 3, 4].map(
   (n) => `/images/instructor/yoshiki-profile-${n}.jpg`
 );
 
-function PhotoCarousel({ photos }: { photos: string[] }) {
+type PhotoItem = string | { src: string; style?: CSSProperties };
+
+function PhotoCarousel({ photos }: { photos: PhotoItem[] }) {
   const [current, setCurrent] = useState(0);
   const [touchStart, setTouchStart] = useState<number | null>(null);
 
@@ -25,6 +29,10 @@ function PhotoCarousel({ photos }: { photos: string[] }) {
     setTouchStart(null);
   };
 
+  const currentPhoto = photos[current];
+  const src = typeof currentPhoto === "string" ? currentPhoto : currentPhoto.src;
+  const photoStyle = typeof currentPhoto === "object" ? currentPhoto.style : undefined;
+
   return (
     <div className={styles.carousel}>
       <div className={styles.carouselMain}>
@@ -35,11 +43,12 @@ function PhotoCarousel({ photos }: { photos: string[] }) {
           onTouchEnd={handleTouchEnd}
         >
           <Image
-            src={photos[current]}
+            src={src}
             alt={`写真${current + 1}`}
             width={800}
             height={1000}
             className={styles.carouselPhoto}
+            style={photoStyle}
           />
         </div>
         <button className={`${styles.carouselBtn} ${styles.carouselBtnNext}`} onClick={next}>›</button>
@@ -95,6 +104,63 @@ const MAKOTO_PHOTOS = [1, 2, 3].map(
   (n) => `/images/instructor/makoto-profile-${n}.jpg`
 );
 
+const KARIN_PHOTOS: PhotoItem[] = [
+  "/images/instructor/karin-profile-1.jpg",
+  { src: "/images/instructor/karin-profile-2.jpg", style: { width: "auto", maxHeight: "340px", margin: "0 auto" } },
+];
+
+const KARIN_STAGE = [
+  "オペラ 『椿姫』 フローラ役　池袋サンシャイン劇場",
+  "『カルメンシータ』 メルセデウス役　都市センター",
+  "『カルメン』 マヌエリータ役　大宮ソニックシティ大ホール",
+  "ミュージカル 劇団東小『鶴の恩返し』 つる役",
+  "劇団東小『眠れる森の美女』 お妃役　三越劇場",
+  "劇団東小『ごんぎつね』 薬屋役",
+  "イマジン『トラップ一家物語』 修練長役（エステー化学）",
+  "イマジン『小公子セディ』 ミンナ役（ハウス食品）",
+  "和物ミュージカル『風の忍者』 忍役",
+  "舟木一夫主演『アイ・ラブ・ニューヨーク』 モニカ役　シアターアプル 神戸オリエンタル劇場",
+  "エステー化学『赤毛のアン』 バリー夫人役（全国ツアー）",
+  "森繁久弥主演『浪速の花道』 名古屋中日劇場",
+  "森繁久弥主演『明治太平記』 帝国劇場",
+  "森繁久弥主演『レインボー通りの人々』 歌手・花村順子役　東京宝塚劇場",
+  "『紅弁天部隊上海へ行く』 張花宛役　シアターV赤坂",
+  "中村玉緒主演『新・おんなたちの同窓会』 名古屋名鉄ホール",
+  "山本富士子主演『舞化粧』 東京宝塚劇場",
+  "山本富士子主演『浪花恋ごよみ』 帝国劇場",
+  "十朱幸代主演『ヨコハマ物語』 帝国劇場 飛天 御園座",
+  "浅丘ルリ子主演『カルメンと呼ばれた女』 帝国劇場",
+  "浅丘ルリ子主演『にごり絵』 帝国劇場",
+  "浅丘ルリ子主演『鏡花幻想』 帝国劇場",
+  "山田五十鈴主演『花のうさぎ屋』 帝国劇場",
+  "坂東八十助主演『近松心中物語』 御園座",
+  "舟木一夫主演『眠り狂四郎』 南座",
+  "川中美幸主演『あばれ芸者』 明治座",
+  "藤 あや子特別公演　新歌舞伎座",
+  "中条きよし特別公演　新歌舞伎座",
+  "佐久間良子・平幹二郎主演『鹿鳴館』 ル・テアトル銀座",
+  "2007年12月・2月 菊川怜主演「チャングム」日生劇場・御園座",
+  "明治座8月公演「大江戸緋鳥808」",
+];
+
+const KARIN_FILM_TV = [
+  "映画：片岡鶴太郎主演『Mr．レディー夜明けのシンデレラ』",
+  "NHK大河ドラマ『太平記』",
+  "CM 『住友新築そっくりさん』",
+];
+
+const KARIN_OTHER = [
+  "2016年1月 「宝塚OGと仲間たちによる レビュ－ショ－」 江東区文化センタ－　出演：大輝ゆう 咲良 他",
+  "2015年12月 長野ホテル国際21「千歳の間」ディナーショー",
+  "2014年12月 クリスマスディナーショー　長野 ホテル国際21「千歳の間」　出演：咲良 南かりん",
+  "山梨芸術祭音楽部門優秀賞及びみのる賞受賞",
+  "信玄公祭り 湖衣姫役",
+  "平成11年度 山梨中央郵便局1日郵便局長",
+  "平成23年11月　恩賜林御下賜100周年記念大会　ライフミュージカル「いのちを守る」",
+  "CD『ワインで乾杯』発売（コロンビアレコード）",
+  "ミュージカル・アカデミー・アプローズ理事 ミュージカル・シアター・アプローズ代表",
+];
+
 export default function Instructor() {
   return (
     <>
@@ -104,7 +170,7 @@ export default function Instructor() {
             className={styles.instructorHeading}
             title={
               <>
-                Y-de-ONE | ワイデワン
+                Y-de-ONE（ワイデワン）
                 <br />
                 講師紹介
               </>
@@ -274,12 +340,25 @@ export default function Instructor() {
         </div>
       </section>
 
+      <div className="inner">
+        <SectionCtaButton />
+      </div>
+
+      <section className={styles.headingSection}>
+        <div className="inner">
+          <Heading2
+            title={<>Y-de-ONE（ワイデワン）<br />アーティスト紹介</>}
+            lead="バレエダンサー・シンガーとして第一線で活躍するアーティストたち。それぞれが積み重ねてきた豊かな舞台経験と表現を、ワイデワンの公演や日々の指導に活かしています。"
+          />
+        </div>
+      </section>
+
       {/* ━━━ 松井眞琴 ━━━ */}
       <section id="makoto" className={styles.instructorSection}>
         <div className="inner">
 
           <div className={styles.instructorHeader}>
-            <span className={styles.instructorRole}>講師</span>
+            <span className={styles.instructorRole}>ダンサー</span>
             <h3 className={styles.instructorName}>松井 眞琴</h3>
             <p className={styles.instructorNameKana}>まつい まこと</p>
           </div>
@@ -302,8 +381,63 @@ export default function Instructor() {
         </div>
       </section>
 
+      {/* ━━━ 南かりん ━━━ */}
+      {/* TODO: 非表示中 */}
+      {false && <section id="karin" className={styles.instructorSection}>
+        <div className="inner">
+
+          <div className={styles.instructorHeader}>
+            <span className={styles.instructorRole}>シンガー</span>
+            <h3 className={styles.instructorName}>南 かりん</h3>
+            <p className={styles.instructorNameKana}>みなみ かりん</p>
+          </div>
+
+          <div className={styles.profileRow}>
+            <div className={styles.profilePhotoWrap}>
+              <PhotoCarousel photos={KARIN_PHOTOS} />
+            </div>
+            <div className={styles.profileContent}>
+              <SectionHeading icon="career-icon.png" alt="経歴アイコン" label="経歴" />
+              <div className={styles.bioBlock}>
+                <p>ミュージカル・オペラ・歌劇など多彩な舞台で幅広く活躍。帝国劇場・東京宝塚劇場・明治座など名だたる劇場での公演に多数出演し、森繁久弥・浅丘ルリ子・山本富士子など著名な俳優と共演を重ねる。NHK大河ドラマ・映画・CMにも出演。CDをコロンビアレコードより発売。ミュージカル・シアター・アプローズ代表を務める。</p>
+                <p>山梨県甲府市出身。東京音楽大学声楽科出身。</p>
+                <p>趣味・特技：ソプラノ（ミュージカル・シャンソン・ポピュラーetc）、日本舞踊（藤間きち弥）、ピアノ、作曲。</p>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.appearanceBlock}>
+            <SectionHeading icon="stage-icon.png" alt="舞台アイコン" label="舞台" />
+            <ul className={styles.awardList}>
+              {KARIN_STAGE.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className={styles.awardBlock}>
+            <SectionHeading icon="video-icon.png" alt="映画・TVアイコン" label="映画 / TV" />
+            <ul className={styles.awardList}>
+              {KARIN_FILM_TV.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className={styles.awardBlock}>
+            <SectionHeading icon="award-icon.png" alt="その他アイコン" label="その他" />
+            <ul className={styles.awardList}>
+              {KARIN_OTHER.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+        </div>
+      </section>}
+
       <div className="inner">
-        <SectionCtaButton className={styles.ctaWrap} />
+        <ContactCtaButton className={styles.ctaWrap} />
       </div>
     </>
   );
