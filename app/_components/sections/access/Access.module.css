@@ -162,6 +162,66 @@
   margin: 4px 0 0;
 }
 
+/* ━━━ リダイレクトカード（新宿駅） ━━━ */
+.redirectGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.redirectCard {
+  background: #e8f4fd;
+  border-radius: 16px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.redirectLine {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0090e8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.redirectLine i {
+  font-size: 14px;
+}
+
+.redirectInstruction {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.5;
+}
+
+.redirectButton {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0090e8;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.redirectButton:hover {
+  background: #007acc;
+}
+
+.redirectButton i {
+  font-size: 12px;
+}
+
 /* ━━━ レスポンシブ ━━━ */
 @media (max-width: 768px) {
   .mapCard {
@@ -174,6 +234,12 @@
 
   .stepsGrid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .redirectGrid {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -12,7 +12,27 @@ const NAV_ITEMS = [
   { label: "新宿駅", href: "#shinjuku" },
 ];
 
-const STATIONS = [
+type StepStation = {
+  id: string;
+  station: string;
+  line: string;
+  time: string;
+  steps: { step: number; label: string; photo: string | null }[];
+  redirects?: never;
+};
+
+type RedirectStation = {
+  id: string;
+  station: string;
+  line?: never;
+  time?: never;
+  steps?: never;
+  redirects: { line: string; instruction: string; targetId?: string; targetLabel?: string; accent?: string }[];
+};
+
+type Station = StepStation | RedirectStation;
+
+const STATIONS: Station[] = [
   {
     id: "takadanobaba",
     station: "高田馬場駅",
@@ -41,6 +61,8 @@ const STATIONS = [
       { step: 8, label: "さらに直進", photo: "/images/access/higashinakano-station-8.jpg" },
       { step: 9, label: "小滝橋五差路を左へ（左に曲がるとフラワーマスダ、セオサイクルがあります）", photo: "/images/access/higashinakano-station-9.jpg" },
       { step: 10, label: "セブンイレブンの向かいに「MEIJI」の看板があるビルが見える", photo: "/images/access/higashinakano-station-10.jpg" },
+      { step: 11, label: "「MEIJI」の看板がある兼子ビル2階にY-de-ONE（ワイデワン）があります", photo: "/images/access/higashinakano-station-11.JPG" },
+      { step: 12, label: "階段から2階にお上りください", photo: "/images/access/higashinakano-station-12.JPG" },
     ],
   },
   {
@@ -55,18 +77,17 @@ const STATIONS = [
       { step: 4, label: "さらに直進", photo: "/images/access/ochiai-station-4.jpg" },
       { step: 5, label: "小滝橋五差路を左へ（左に曲がるとフラワーマスダ、セオサイクルがあります）", photo: "/images/access/ochiai-station-5.jpg" },
       { step: 6, label: "セブンイレブンの向かいに「MEIJI」の看板があるビルが見える", photo: "/images/access/ochiai-station-6.jpg" },
+      { step: 7, label: "「MEIJI」の看板がある兼子ビル2階にY-de-ONE（ワイデワン）があります", photo: "/images/access/ochiai-station-7.JPG" },
+      { step: 8, label: "階段から2階にお上りください", photo: "/images/access/ochiai-station-8.JPG" },
     ],
   },
   {
     id: "shinjuku",
     station: "新宿駅",
-    line: "各線",
-    time: "徒歩約20分 / バス約10分",
-    steps: [
-      { step: 1, label: "新宿駅西口を出る", photo: null },
-      { step: 2, label: "青梅街道を北西へ直進", photo: null },
-      { step: 3, label: "高田馬場3丁目交差点を右折", photo: null },
-      { step: 4, label: "兼子ビル2階が目印", photo: null },
+    redirects: [
+      { line: "JR山手線・西武新宿線", instruction: "高田馬場駅で下車\n徒歩12分（900m）", targetId: "takadanobaba", targetLabel: "高田馬場駅からのアクセスを見る" },
+      { line: "JR総武線", instruction: "東中野駅で下車\n徒歩15分（1km）", targetId: "higashinakano", targetLabel: "東中野駅からのアクセスを見る" },
+      { line: "宿02・宿08", instruction: "新宿駅西口バス停から乗車\n小滝橋バス停で下車\n徒歩4分（250m）", accent: "#de4e8c" },
     ],
   },
 ];
@@ -78,7 +99,7 @@ export default function Access() {
       <section className={styles.mapSection}>
         <div className="inner">
           <Heading2
-            title={<>Y-de-ONE | ワイデワン<br />へのアクセス</>}
+            title={<>Y-de-ONE（ワイデワン）<br />へのアクセス</>}
             lead="JR山手線・JR総武線・東京メトロ東西線・西武新宿線など複数路線が利用可能です。高田馬場・東中野・落合の各駅から徒歩10〜20分圏内にあるワイデワンへぜひお越しください。"
           />
           <div className={styles.mapCard}>
@@ -131,34 +152,66 @@ export default function Access() {
           <div className="inner">
             <div className={styles.stationHeader}>
               <h2 className={styles.stationName}>
-                <i className="fa-solid fa-train"></i>
+                <i className={s.id === "shinjuku-bus" ? "fa-solid fa-bus" : "fa-solid fa-train"}></i>
                 {s.station}からのアクセス
               </h2>
-              <p className={styles.stationMeta}>{s.line}｜{s.time}</p>
+              {s.line && <p className={styles.stationMeta}>{s.line}｜{s.time}</p>}
             </div>
-            <div className={styles.stepsGrid}>
-              {s.steps.map((step) => (
-                <div key={step.step} className={styles.stepCard}>
-                  <div className={styles.stepPhoto}>
-                    {step.photo ? (
-                      <Image
-                        src={step.photo}
-                        alt={step.label}
-                        width={600}
-                        height={400}
-                        className={styles.stepPhotoImg}
-                      />
-                    ) : (
-                      <span className={styles.stepPhotoPlaceholder}>Photo</span>
-                    )}
+
+            {s.redirects ? (
+              <div className={styles.redirectGrid}>
+                {s.redirects.map((r) => {
+                  const accent = r.accent ?? "#0090e8";
+                  const bg = r.accent ? "#fde8f0" : "#e8f4fd";
+                  const icon = r.accent ? "fa-solid fa-bus" : "fa-solid fa-train";
+                  return (
+                    <div key={r.line} className={styles.redirectCard} style={{ background: bg }}>
+                      <p className={styles.redirectLine} style={{ color: accent }}>
+                        <i className={icon}></i>{r.line}
+                      </p>
+                      <p className={styles.redirectInstruction} style={{ whiteSpace: "pre-line" }}>{r.instruction}</p>
+                      {r.targetId && (
+                        <button
+                          className={styles.redirectButton}
+                          style={{ background: accent }}
+                          onClick={() => {
+                            setTimeout(() => {
+                              document.getElementById(r.targetId!)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                            }, 100);
+                          }}
+                        >
+                          {r.targetLabel}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className={styles.stepsGrid}>
+                {s.steps.map((step) => (
+                  <div key={step.step} className={styles.stepCard}>
+                    <div className={styles.stepPhoto}>
+                      {step.photo ? (
+                        <Image
+                          src={step.photo}
+                          alt={step.label}
+                          width={600}
+                          height={400}
+                          className={styles.stepPhotoImg}
+                        />
+                      ) : (
+                        <span className={styles.stepPhotoPlaceholder}>Photo</span>
+                      )}
+                    </div>
+                    <div className={styles.stepBody}>
+                      <span className={styles.stepNum}>STEP {step.step}</span>
+                      <p className={styles.stepLabel}>{step.label}</p>
+                    </div>
                   </div>
-                  <div className={styles.stepBody}>
-                    <span className={styles.stepNum}>STEP {step.step}</span>
-                    <p className={styles.stepLabel}>{step.label}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       ))}
