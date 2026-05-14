@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
 const LINE_ENDPOINT = "https://api.line.me/v2/bot/message/push";
-const ADMIN_EMAIL = "shigeru.1222@gmail.com";
+const ADMIN_EMAILS = ["shigeru.1222@gmail.com", "ydeone.danceschool@gmail.com"];
 const FROM_ADDRESS = "onboarding@resend.dev";
 
 function isValidLineUserId(id: string) {
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
         // ② 管理者へ通知メール（Reply-To でユーザーへ直接返信可能）
         resend.emails.send({
           from: FROM_ADDRESS,
-          to: ADMIN_EMAIL,
+          to: ADMIN_EMAILS,
           replyTo: email,
           subject: `【お問い合わせ】${name} 様より`,
           text:
