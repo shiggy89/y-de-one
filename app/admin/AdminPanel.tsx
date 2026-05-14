@@ -9,6 +9,12 @@ import * as Holiday from "@holiday-jp/holiday_jp";
 
 const TipTapEditor = dynamic(() => import("./TipTapEditor"), { ssr: false });
 
+function LineAvatar({ src, imgClass, placeholderClass }: { src: string | null; imgClass: string; placeholderClass: string }) {
+  const [broken, setBroken] = useState(false);
+  if (!src || broken) return <div className={placeholderClass}><i className="fa-solid fa-user" /></div>;
+  return <img src={src} alt="" className={imgClass} onError={() => setBroken(true)} />;
+}
+
 type User = {
   id: number;
   name: string | null;
@@ -1012,11 +1018,7 @@ export default function AdminPanel() {
                       }
                     }}
                   >
-                    {u.line_picture_url ? (
-                      <img src={u.line_picture_url} alt="" className={styles.studentIcon} />
-                    ) : (
-                      <div className={styles.studentIconPlaceholder}><i className="fa-solid fa-user" /></div>
-                    )}
+                    <LineAvatar src={u.line_picture_url} imgClass={styles.studentIcon} placeholderClass={styles.studentIconPlaceholder} />
                     <span className={styles.studentName}>{u.name ?? "名前なし"}</span>
                   </div>
                 ))}
@@ -1026,11 +1028,7 @@ export default function AdminPanel() {
               <div className={styles.feePreview}>
                 {feePreviews.map((f) => (
                   <div key={f.userId} className={styles.feePreviewRow}>
-                    {f.line_picture_url ? (
-                      <img src={f.line_picture_url} alt="" className={styles.feePreviewIcon} />
-                    ) : (
-                      <div className={styles.feePreviewIconPlaceholder}><i className="fa-solid fa-user" /></div>
-                    )}
+                    <LineAvatar src={f.line_picture_url} imgClass={styles.feePreviewIcon} placeholderClass={styles.feePreviewIconPlaceholder} />
                     <span className={styles.feePreviewName}>{f.name}</span>
                     <span className={styles.feePreviewAmount}>
                       <span className={styles.feePreviewAmountNum}>
@@ -1150,10 +1148,7 @@ export default function AdminPanel() {
                     </div>
                     {g.records.map((r) => (
                       <div key={r.id} className={styles.ledgerRow}>
-                        {r.line_picture_url
-                          ? <img src={r.line_picture_url} alt="" className={styles.ledgerIcon} />
-                          : <div className={styles.ledgerIconPlaceholder}><i className="fa-solid fa-user" /></div>
-                        }
+                        <LineAvatar src={r.line_picture_url} imgClass={styles.ledgerIcon} placeholderClass={styles.ledgerIconPlaceholder} />
                         <span className={styles.ledgerName}>{r.name}</span>
                         <button
                           className={styles.ledgerDeleteBtn}
@@ -1190,11 +1185,7 @@ export default function AdminPanel() {
           <div className={styles.userList}>
             {filteredUsers.map((u) => (
               <div key={u.id} className={styles.userCard}>
-                {u.line_picture_url ? (
-                  <img src={u.line_picture_url} alt="" className={styles.lineIcon} />
-                ) : (
-                  <div className={styles.lineIconPlaceholder}><i className="fa-solid fa-user"></i></div>
-                )}
+                <LineAvatar src={u.line_picture_url} imgClass={styles.lineIcon} placeholderClass={styles.lineIconPlaceholder} />
                 <div className={styles.userInfo}>
                   <span className={styles.userName}>{u.name ?? "（名前なし）"}</span>
                   {u.line_display_name && (
@@ -1231,11 +1222,7 @@ export default function AdminPanel() {
         <div className={styles.modalOverlay} onClick={() => setHistoryUser(null)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              {historyUser.line_picture_url ? (
-                <img src={historyUser.line_picture_url} alt="" className={styles.modalIcon} />
-              ) : (
-                <div className={styles.modalIconPlaceholder}><i className="fa-solid fa-user" /></div>
-              )}
+              <LineAvatar src={historyUser.line_picture_url} imgClass={styles.modalIcon} placeholderClass={styles.modalIconPlaceholder} />
               <span className={styles.modalName}>{historyUser.name ?? "（名前なし）"}</span>
               <button className={styles.modalClose} onClick={() => setHistoryUser(null)}>✕</button>
             </div>
@@ -1331,10 +1318,7 @@ export default function AdminPanel() {
         <div className={styles.modalOverlay} onClick={() => setEditUser(null)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              {editUser.line_picture_url
-                ? <img src={editUser.line_picture_url} alt="" className={styles.modalIcon} />
-                : <div className={styles.modalIconPlaceholder}><i className="fa-solid fa-user" /></div>
-              }
+              <LineAvatar src={editUser.line_picture_url} imgClass={styles.modalIcon} placeholderClass={styles.modalIconPlaceholder} />
               <span className={styles.modalName}>{editUser.name ?? "（名前なし）"}</span>
               <button className={styles.modalClose} onClick={() => setEditUser(null)}>✕</button>
             </div>
@@ -1360,10 +1344,7 @@ export default function AdminPanel() {
         <div className={styles.modalOverlay} onClick={() => setBadgeUser(null)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              {badgeUser.line_picture_url
-                ? <img src={badgeUser.line_picture_url} alt="" className={styles.modalIcon} />
-                : <div className={styles.modalIconPlaceholder}><i className="fa-solid fa-user" /></div>
-              }
+              <LineAvatar src={badgeUser.line_picture_url} imgClass={styles.modalIcon} placeholderClass={styles.modalIconPlaceholder} />
               <span className={styles.modalName}>{badgeUser.name ?? "（名前なし）"}</span>
               <button className={styles.modalClose} onClick={() => setBadgeUser(null)}>✕</button>
             </div>
@@ -1580,10 +1561,7 @@ export default function AdminPanel() {
                                 <div className={styles.reportAttendees}>
                                   {g.attendees.map((a, i) => (
                                     <div key={i} className={styles.reportAttendee}>
-                                      {a.pic
-                                        ? <img src={a.pic} alt="" className={styles.reportAttendeePic} />
-                                        : <div className={styles.reportAttendeeIcon}><i className="fa-solid fa-user" /></div>
-                                      }
+                                      <LineAvatar src={a.pic} imgClass={styles.reportAttendeePic} placeholderClass={styles.reportAttendeeIcon} />
                                       <span className={styles.reportAttendeeName}>{a.name ?? "?"}</span>
                                     </div>
                                   ))}
