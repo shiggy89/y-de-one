@@ -428,61 +428,32 @@ export default function Instructor() {
           </div>
 
           <div className={styles.appearanceBlock}>
-            <SectionHeading icon="stage-icon.png" alt="舞台アイコン" label="舞台" />
-            <p style={{ fontSize: "13px", fontWeight: 700, color: "#6b7280", marginBottom: "4px", marginTop: "12px" }}>オペラ</p>
-            <ul className={styles.awardList}>
-              {KARIN_OPERA.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-            <p style={{ fontSize: "13px", fontWeight: 700, color: "#6b7280", marginBottom: "4px", marginTop: "12px" }}>ミュージカル</p>
-            <ul className={styles.awardList}>
-              {KARIN_MUSICAL.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-            <p style={{ fontSize: "13px", fontWeight: 700, color: "#6b7280", marginBottom: "4px", marginTop: "12px" }}>演劇</p>
-            <ul className={styles.awardList}>
-              {KARIN_DRAMA.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className={styles.awardBlock}>
-            <SectionHeading icon="video-icon.png" alt="映画・TVアイコン" label="映画 / TV / CM / ラジオ" />
-            <ul className={styles.awardList}>
-              {KARIN_FILM_TV.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className={styles.awardBlock}>
-            <SectionHeading icon="award-icon.png" alt="その他アイコン" label="その他" />
-            <ul className={styles.awardList}>
-              {KARIN_OTHER.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className={styles.awardBlock}>
-            <SectionHeading icon="stage-icon.png" alt="オリジナルミュージカルアイコン" label="オリジナルミュージカル（作詞・作曲・演出）" />
-            <ul className={styles.awardList}>
-              {KARIN_ORIGINAL_MUSICAL.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className={styles.awardBlock}>
-            <SectionHeading icon="award-icon.png" alt="生徒合格アイコン" label="生徒合格実績" />
-            <ul className={styles.awardList}>
-              {KARIN_STUDENTS.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
+            <SectionHeading icon="stage-icon.png" alt="出演アイコン" label="出演" />
+            <table className={styles.appearanceTable}>
+              <tbody>
+                {(
+                  [
+                    ["オペラ", KARIN_OPERA],
+                    ["ミュージカル", KARIN_MUSICAL],
+                    ["演劇", KARIN_DRAMA],
+                    ["映画 / TV / CM / ラジオ", KARIN_FILM_TV],
+                    ["その他", KARIN_OTHER],
+                    ["オリジナルミュージカル（作詞・作曲・演出）", KARIN_ORIGINAL_MUSICAL],
+                    ["生徒合格実績", KARIN_STUDENTS],
+                  ] as [string, string[]][]
+                ).map(([label, items]) => (
+                  <tr key={label}>
+                    <td>
+                      <span className={styles.yearCell}>{label}</span>
+                      <br />
+                      {items.map((item, i) => (
+                        <span key={item}>{item}{i < items.length - 1 && <br />}</span>
+                      ))}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
         </div>
