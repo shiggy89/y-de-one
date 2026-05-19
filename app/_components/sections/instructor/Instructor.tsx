@@ -404,7 +404,7 @@ export default function Instructor() {
       </section>
 
       {/* ━━━ 南かりん ━━━ */}
-      {process.env.NODE_ENV === 'development' && <section id="karin" className={styles.instructorSection}>
+      <section id="karin" className={styles.instructorSection}>
         <div className="inner">
 
           <div className={styles.instructorHeader}>
@@ -457,7 +457,7 @@ export default function Instructor() {
           </div>
 
         </div>
-      </section>}
+      </section>
 
       <div className="inner">
         <ContactCtaButton className={styles.ctaWrap} />
