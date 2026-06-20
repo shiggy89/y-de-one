@@ -17,6 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta name="format-detection" content="telephone=no, email=no" />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-LFPKC48DGG"></script>
         <script
           dangerouslySetInnerHTML={{
