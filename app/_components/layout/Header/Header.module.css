@@ -195,19 +195,7 @@
 }
 
 .phoneLink {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  color: #333;
-  text-decoration: none;
-  margin-top: 4px;
-}
-
-.phoneLink i {
-  color: #0090e8;
-  font-size: 12px;
+  display: none;
 }
 
 /* ----------------------
@@ -235,14 +223,14 @@
   }
 
   .phoneLink {
+    display: flex;
+    align-items: center;
     position: absolute;
     right: 56px;
     top: 50%;
     transform: translateY(-50%);
-    margin-top: 0;
-  }
-
-  .phoneLink i {
+    color: #0090e8;
+    text-decoration: none;
     font-size: 20px;
   }
 

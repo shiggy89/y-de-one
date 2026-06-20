@@ -26,9 +26,9 @@ export default function SectionCtaButton({
         {note}
       </span>
       <span className={styles.lineSubText}>見学（無料）もお申込みいただけます</span>
-      <Link href="/contact" className={styles.lineNotText}>
-        LINEをお持ちでない方はこちら
-      </Link>
+      <span className={styles.lineNotText}>
+        LINEをお持ちでない方は<Link href="/contact" className={styles.lineNotLink}>こちら</Link>
+      </span>
     </div>
   );
 }

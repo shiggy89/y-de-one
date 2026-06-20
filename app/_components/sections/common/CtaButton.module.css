@@ -29,9 +29,13 @@
   display: block;
   font-size: 14px;
   line-height: 1.4;
+  color: #333;
+  margin-top: -2px;
+}
+
+.lineNotLink {
   color: #666;
   text-decoration: underline;
-  margin-top: 4px;
 }
 
 .lineAddText :global(.fa-line) {
@@ -54,6 +58,10 @@
   }
 
   .lineSubText {
+    margin-bottom: 0;
+  }
+
+  .lineNotText {
     margin-bottom: 32px;
   }
 

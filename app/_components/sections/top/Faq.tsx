@@ -137,9 +137,9 @@ export default function Faq() {
             LINEから簡単に予約できます
           </span>
           <span className={ctaStyles.lineSubText}>見学（無料）もお申込みいただけます</span>
-          <a href="/contact" className={ctaStyles.lineNotText}>
-            LINEをお持ちでない方はこちら
-          </a>
+          <span className={ctaStyles.lineNotText}>
+            LINEをお持ちでない方は<a href="/contact" className={ctaStyles.lineNotLink}>こちら</a>
+          </span>
         </div>
       </div>
     </section>
