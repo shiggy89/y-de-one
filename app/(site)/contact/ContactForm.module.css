@@ -45,16 +45,6 @@
   text-align: center;
 }
 
-.mobileBreak {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .mobileBreak {
-    display: block;
-  }
-}
-
 .form {
   background-color: #fff;
   border-radius: 8px;

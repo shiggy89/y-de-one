@@ -65,7 +65,7 @@ export default function ContactForm() {
         <section>
           <Heading2
             title="お問い合わせ"
-            lead={<>Y-de-ONEへのご質問・ご相談は<br className={styles.mobileBreak} />こちらからお気軽にご連絡ください。</>}
+            lead={<>Y-de-ONEへのご質問・ご相談は<br />こちらからお気軽にご連絡ください。</>}
           />
 
           <div className={styles.phoneSection}>
