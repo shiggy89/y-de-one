@@ -47,7 +47,7 @@ export default function Footer() {
               <span>
                 <i className="fa-solid fa-phone"></i>
               </span>
-              <span>080-6740-0770</span>
+              <a href="tel:08067400770" className={styles.footerPhone}>080-6740-0770</a>
             </p>
             <p className={styles.footerContactRow}>
               <span>

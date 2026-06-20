@@ -64,6 +64,11 @@
   margin: 0 0 4px;
 }
 
+.footerPhone {
+  color: inherit;
+  text-decoration: none;
+}
+
 .footerLinks {
   display: flex;
   justify-content: flex-end;
