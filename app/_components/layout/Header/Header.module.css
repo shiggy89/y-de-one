@@ -194,6 +194,22 @@
   height: auto;
 }
 
+.phoneLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+  text-decoration: none;
+  margin-top: 4px;
+}
+
+.phoneLink i {
+  color: #0090e8;
+  font-size: 12px;
+}
+
 /* ----------------------
    モバイル
 ---------------------- */
@@ -210,12 +226,28 @@
   }
 
   .headerLeft {
-    padding-right: 56px;
+    padding-right: 96px;
   }
 
   .siteLogo {
     width: 220px;
     height: auto;
+  }
+
+  .phoneLink {
+    position: absolute;
+    right: 56px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-top: 0;
+  }
+
+  .phoneLink i {
+    font-size: 20px;
+  }
+
+  .phoneNumber {
+    display: none;
   }
 
   .navToggle {

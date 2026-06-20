@@ -2,6 +2,49 @@
   padding: 32px 0 64px;
 }
 
+.phoneSection {
+  max-width: 640px;
+  margin: 0 auto 16px;
+  padding: 24px;
+  background-color: #e8f4fd;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.phoneSectionTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #555;
+  margin: 0 0 10px;
+}
+
+.phoneSectionTitle i {
+  color: #0090e8;
+  margin-right: 6px;
+}
+
+.phoneNumber {
+  display: inline-block;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0090e8;
+  text-decoration: none;
+  letter-spacing: 0.05em;
+}
+
+.phoneNumber:hover {
+  text-decoration: underline;
+}
+
+.formTitle {
+  max-width: 640px;
+  margin: 0 auto 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #555;
+  text-align: center;
+}
+
 .form {
   background-color: #fff;
   border-radius: 8px;

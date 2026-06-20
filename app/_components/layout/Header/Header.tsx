@@ -104,6 +104,10 @@ export default function Header() {
               height={103}
             />
           </Link>
+          <a href="tel:08067400770" className={styles.phoneLink}>
+            <i className="fa-solid fa-phone" aria-hidden="true" />
+            <span className={styles.phoneNumber}>080-6740-0770</span>
+          </a>
         </div>
         <button
           className={styles.navToggle}

@@ -26,6 +26,9 @@ export default function HeroCtaButton({
             LINEから簡単に予約できます
           </span>
           <span className={styles.lineSubText}>見学（無料）もお申込みいただけます</span>
+          <Link href="/contact" className={styles.lineNotText}>
+            LINEをお持ちでない方はこちら
+          </Link>
         </>
       )}
     </div>

@@ -68,6 +68,18 @@ export default function ContactForm() {
             lead="Y-de-ONEへのご質問・ご相談はこちらからお気軽にご連絡ください。"
           />
 
+          <div className={styles.phoneSection}>
+            <p className={styles.phoneSectionTitle}>
+              <i className="fa-solid fa-phone" aria-hidden="true" />
+              お電話でのお問い合わせ
+            </p>
+            <a href="tel:08067400770" className={styles.phoneNumber}>
+              080-6740-0770
+            </a>
+          </div>
+
+          <p className={styles.formTitle}>フォームでのお問い合わせ</p>
+
           <form className={styles.form} onSubmit={handleSubmit}>
             <div className={styles.field}>
               <label className={styles.label}>

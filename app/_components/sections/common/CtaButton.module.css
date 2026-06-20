@@ -25,6 +25,14 @@
   margin-top: -2px;
 }
 
+.lineNotText {
+  display: block;
+  font-size: 13px;
+  color: #888;
+  text-decoration: underline;
+  margin-top: 10px;
+}
+
 .lineAddText :global(.fa-line) {
   color: #08b949;
 }
