@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
 const LINE_ENDPOINT = "https://api.line.me/v2/bot/message/push";
-const ADMIN_EMAILS = ["shigeru.1222@gmail.com", "ydeone.danceschool@gmail.com"];
-const FROM_ADDRESS = "onboarding@resend.dev";
+const ADMIN_EMAILS = ["ydeone.danceschool@gmail.com"];
+const FROM_ADDRESS = "noreply@y-de-one.com";
 
 function isValidLineUserId(id: string) {
   return /^U[a-fA-F0-9]{16,64}$/.test(id);
