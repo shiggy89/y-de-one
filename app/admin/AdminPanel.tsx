@@ -374,7 +374,7 @@ export default function AdminPanel() {
   const [sendError, setSendError] = useState<string | null>(null);
 
   // 個別メッセージ
-  const [directTarget, setDirectTarget] = useState<User | null>(null);
+  const [directTargets, setDirectTargets] = useState<User[]>([]);
   const [directMessage, setDirectMessage] = useState("");
   const [directSending, setDirectSending] = useState(false);
   const [directMsg, setDirectMsg] = useState<string | null>(null);
@@ -858,22 +858,27 @@ export default function AdminPanel() {
   const handleSendDirectMessage = async () => {
     setDirectMsg(null);
     setDirectError(null);
-    if (!directTarget) { setDirectError("送信先を選択してください"); return; }
+    if (directTargets.length === 0) { setDirectError("送信先を選択してください"); return; }
     if (!directMessage.trim()) { setDirectError("メッセージを入力してください"); return; }
-    if (!confirm(`${directTarget.name ?? directTarget.line_display_name} さんにメッセージを送信しますか？`)) return;
+    const names = directTargets.map((t) => t.name ?? t.line_display_name ?? "名前なし").join("、");
+    if (!confirm(`${directTargets.length}人（${names}）にメッセージを送信しますか？`)) return;
     setDirectSending(true);
-    const res = await adminFetch("/api/admin/direct-message", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lineUserId: directTarget.line_user_id, message: directMessage }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setDirectMsg("送信しました");
+    let successCount = 0;
+    for (const target of directTargets) {
+      const res = await adminFetch("/api/admin/direct-message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lineUserId: target.line_user_id, message: directMessage }),
+      });
+      if (res.ok) successCount++;
+    }
+    if (successCount === directTargets.length) {
+      setDirectMsg(`${successCount}人に送信しました`);
       setDirectMessage("");
-      setDirectTarget(null);
+      setDirectTargets([]);
     } else {
-      setDirectError(data.error ?? "エラーが発生しました");
+      setDirectError(`${successCount}/${directTargets.length}人に送信しました（一部失敗）`);
+      setDirectSending(false);
     }
     setDirectSending(false);
   };
@@ -1662,36 +1667,59 @@ export default function AdminPanel() {
           {(["teacher", "member", "trial"] as const).map((status) => {
             const group = users.filter((u) => u.status === status);
             if (group.length === 0) return null;
+            const allSelected = group.every((u) => directTargets.some((t) => t.id === u.id));
             return (
               <div key={status} className={styles.directStatusGroup}>
-                <span className={`${styles.directStatusLabel} ${styles[`directStatus_${status}`]}`}>
+                <span
+                  className={`${styles.directStatusLabel} ${styles[`directStatus_${status}`]}`}
+                  style={{ cursor: "pointer" }}
+                  onClick={() => {
+                    setDirectMsg(null);
+                    setDirectError(null);
+                    if (allSelected) {
+                      setDirectTargets((prev) => prev.filter((t) => !group.some((g) => g.id === t.id)));
+                    } else {
+                      setDirectTargets((prev) => {
+                        const without = prev.filter((t) => !group.some((g) => g.id === t.id));
+                        return [...without, ...group];
+                      });
+                    }
+                  }}
+                >
                   {status === "teacher" ? "Teacher" : status === "member" ? "Member" : "Trial"}
                 </span>
                 <div className={styles.studentGrid}>
-                  {group.map((u) => (
-                    <div
-                      key={u.id}
-                      className={`${styles.studentItem} ${directTarget?.id === u.id ? styles.selected : ""} ${directTarget && directTarget.id !== u.id ? styles.dimmed : ""}`}
-                      onClick={() => {
-                        setDirectTarget(directTarget?.id === u.id ? null : u);
-                        setDirectMsg(null);
-                        setDirectError(null);
-                      }}
-                    >
-                      <LineAvatar src={u.line_picture_url} imgClass={styles.studentIcon} placeholderClass={styles.studentIconPlaceholder} />
-                      <span className={styles.studentName}>{u.name ?? u.line_display_name ?? "名前なし"}</span>
-                    </div>
-                  ))}
+                  {group.map((u) => {
+                    const isSelected = directTargets.some((t) => t.id === u.id);
+                    return (
+                      <div
+                        key={u.id}
+                        className={`${styles.studentItem} ${isSelected ? styles.selected : ""} ${directTargets.length > 0 && !isSelected ? styles.dimmed : ""}`}
+                        onClick={() => {
+                          setDirectMsg(null);
+                          setDirectError(null);
+                          setDirectTargets((prev) =>
+                            isSelected ? prev.filter((t) => t.id !== u.id) : [...prev, u]
+                          );
+                        }}
+                      >
+                        <LineAvatar src={u.line_picture_url} imgClass={styles.studentIcon} placeholderClass={styles.studentIconPlaceholder} />
+                        <span className={styles.studentName}>{u.name ?? u.line_display_name ?? "名前なし"}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
           })}
 
-          {directTarget && (
+          {directTargets.length > 0 && (
             <div className={styles.directSendArea}>
               <div className={styles.directSelectedUser}>
-                <LineAvatar src={directTarget.line_picture_url} imgClass={styles.studentIcon} placeholderClass={styles.studentIconPlaceholder} />
-                <span className={styles.directSelectedName}>{directTarget.name ?? directTarget.line_display_name ?? "名前なし"} さんへ</span>
+                {directTargets.map((t) => (
+                  <LineAvatar key={t.id} src={t.line_picture_url} imgClass={styles.studentIcon} placeholderClass={styles.studentIconPlaceholder} />
+                ))}
+                <span className={styles.directSelectedName}>{directTargets.length}人に送信</span>
               </div>
               <div className={styles.messageForm}>
                 <textarea
@@ -1704,13 +1732,13 @@ export default function AdminPanel() {
                 {directMsg && <p className={styles.successMsg}>{directMsg}</p>}
                 {directError && <p className={styles.errorMsg}>{directError}</p>}
                 <button className={styles.sendBtn} onClick={handleSendDirectMessage} disabled={directSending}>
-                  {directSending ? "送信中..." : "送信する"}
+                  {directSending ? "送信中..." : `${directTargets.length}人に送信する`}
                 </button>
               </div>
             </div>
           )}
 
-          {directMsg && !directTarget && (
+          {directMsg && directTargets.length === 0 && (
             <p className={styles.successMsg}>{directMsg}</p>
           )}
         </div>
