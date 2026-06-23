@@ -153,6 +153,12 @@ export default function ScheduleTab({ adminFetch }: { adminFetch: (url: string, 
 
   useEffect(() => { fetchSchedule(); }, [fetchSchedule]);
 
+  const isModalOpen = !!editTarget || showAddForm;
+  useEffect(() => {
+    document.body.style.overflow = isModalOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isModalOpen]);
+
   const openEdit = (template: Template, date: string) => {
     const instance = instances.find(
       (i) => i.class_template_id === template.id && i.lesson_date === date
