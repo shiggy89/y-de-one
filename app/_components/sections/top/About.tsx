@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { type CSSProperties } from "react";
 import Image from "next/image";
 import Heading2 from "../common/Heading2";
 import styles from "./About.module.css";
 
 export default function About() {
-  const [showAlternateProfile, setShowAlternateProfile] = useState(false);
   const universeDanceStyle = {
     "--heading-icon-width": "220px",
     "--heading-icon-radius": "999px",
@@ -99,17 +98,10 @@ export default function About() {
           </p>
           <Image
             className={styles.yoshikiProfile}
-            src={
-              showAlternateProfile
-                ? "/images/home/yoshiki-profile-2.jpg"
-                : "/images/home/yoshiki-profile.jpg"
-            }
+            src="/images/home/yoshiki-profile-2.jpg"
             alt="佳樹先生のプロフィール写真"
             width={720}
             height={997}
-            onMouseEnter={() => setShowAlternateProfile(true)}
-            onMouseLeave={() => setShowAlternateProfile(false)}
-            onClick={() => setShowAlternateProfile((current) => !current)}
           />
           <Image
             className={styles.hornIcon}
