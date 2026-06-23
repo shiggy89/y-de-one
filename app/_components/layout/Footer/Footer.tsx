@@ -76,16 +76,20 @@ export default function Footer() {
         </div>
         <div className={`${styles.footerCol} ${styles.footerLinks}`}>
           <ul className={styles.footerNav}>
-            <li><Link href="#class">クラス</Link></li>
-            <li><Link href="#price">料金システム</Link></li>
-            <li><Link href="#instructor">講師一覧</Link></li>
+            <li><Link href="/">ホーム</Link></li>
+            <li><Link href="/class">Y-de-ONE 大人バレエクラス</Link></li>
+            <li><Link href="/modern-ballet">Y-de-ONE モダンバレエクラス</Link></li>
+            <li><Link href="/saitama">埼玉クラス（門馬和樹クラス）</Link></li>
+            <li><Link href="/down-syndrome">ダウン症の方向けクラス</Link></li>
+            <li><Link href="/price">料金</Link></li>
+            <li><Link href="/instructor">講師</Link></li>
             <li><Link href="/studio">スタジオ紹介</Link></li>
             <li><Link href="/works">作品・活動</Link></li>
             <li><Link href="/access">アクセス</Link></li>
             <li><Link href="/blog">ブログ</Link></li>
             <li><Link href="/news">お知らせ</Link></li>
             <li><Link href="/contact">お問い合わせ</Link></li>
-            <li><Link href="#trial">体験レッスン</Link></li>
+            <li><a href="https://lin.ee/iz33eCM" target="_blank" rel="noopener noreferrer">体験レッスン</a></li>
           </ul>
         </div>
       </div>
