@@ -8,10 +8,6 @@ import ContactCtaButton from "../common/ContactCtaButton";
 import SectionCtaButton from "../common/SectionCtaButton";
 import styles from "./Instructor.module.css";
 
-const YOSHIKI_PHOTOS = [1, 2, 3, 4].map(
-  (n) => `/images/instructor/yoshiki-profile-${n}.jpg`
-);
-
 type PhotoItem = string | { src: string; style?: CSSProperties };
 
 function PhotoCarousel({ photos }: { photos: PhotoItem[] }) {
@@ -213,10 +209,16 @@ export default function Instructor() {
             <p className={styles.instructorNameKana}>あおやま よしき</p>
           </div>
 
-          {/* プロフィール写真（カルーセル）+ 経歴 */}
+          {/* プロフィール写真 + 経歴 */}
           <div className={styles.profileRow}>
             <div className={styles.profilePhotoWrap}>
-              <PhotoCarousel photos={YOSHIKI_PHOTOS} />
+              <Image
+                src="/images/instructor/yoshiki-profile-2.jpg"
+                alt="青山佳樹"
+                width={300}
+                height={400}
+                className={styles.mainPhoto}
+              />
             </div>
             <div className={styles.profileContent}>
               <SectionHeading icon="career-icon.png" alt="経歴アイコン" label="経歴" />
