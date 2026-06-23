@@ -2133,3 +2133,53 @@
   line-height: 1.5;
   margin-top: 4px;
 }
+
+/* ━━━ 個別メッセージ ━━━ */
+.directStatusGroup {
+  margin-bottom: 20px;
+}
+
+.directStatusLabel {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.directStatus_teacher {
+  background: #888;
+}
+
+.directStatus_member {
+  background: #0090e8;
+}
+
+.directStatus_trial {
+  background: #e05080;
+}
+
+.dimmed {
+  opacity: 0.3 !important;
+}
+
+.directSendArea {
+  border-top: 1px solid #eee;
+  padding-top: 16px;
+  margin-top: 8px;
+}
+
+.directSelectedUser {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.directSelectedName {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+}

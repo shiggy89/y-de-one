@@ -27,7 +27,7 @@ type User = {
   is_admin: boolean;
 };
 
-type Tab = "attendance" | "ledger" | "users" | "message" | "report" | "hp_news" | "blog" | "schedule" | "analytics";
+type Tab = "attendance" | "ledger" | "users" | "message" | "direct" | "report" | "hp_news" | "blog" | "schedule" | "analytics";
 
 type HpNewsRecord = { id: number; title: string; content: string; category: string | null; published_at: string };
 
@@ -124,7 +124,7 @@ export default function AdminPanel() {
   const [tab, setTab] = useState<Tab>(() => {
     if (typeof window !== "undefined") {
       const hash = window.location.hash.replace("#", "") as Tab;
-      const valid: Tab[] = ["attendance", "ledger", "users", "message", "report", "hp_news", "blog", "schedule", "analytics"];
+      const valid: Tab[] = ["attendance", "ledger", "users", "message", "direct", "report", "hp_news", "blog", "schedule", "analytics"];
       if (valid.includes(hash)) return hash;
     }
     return "attendance";
@@ -372,6 +372,13 @@ export default function AdminPanel() {
   const [trialCount, setTrialCount] = useState(0);
   const [sendMsg, setSendMsg] = useState<string | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
+
+  // 個別メッセージ
+  const [directTarget, setDirectTarget] = useState<User | null>(null);
+  const [directMessage, setDirectMessage] = useState("");
+  const [directSending, setDirectSending] = useState(false);
+  const [directMsg, setDirectMsg] = useState<string | null>(null);
+  const [directError, setDirectError] = useState<string | null>(null);
 
   // レッスン別出席回数（生徒ソート用）
   const [lessonCounts, setLessonCounts] = useState<Record<number, number>>({});
@@ -848,6 +855,29 @@ export default function AdminPanel() {
     }
   };
 
+  const handleSendDirectMessage = async () => {
+    setDirectMsg(null);
+    setDirectError(null);
+    if (!directTarget) { setDirectError("送信先を選択してください"); return; }
+    if (!directMessage.trim()) { setDirectError("メッセージを入力してください"); return; }
+    if (!confirm(`${directTarget.name ?? directTarget.line_display_name} さんにメッセージを送信しますか？`)) return;
+    setDirectSending(true);
+    const res = await adminFetch("/api/admin/direct-message", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lineUserId: directTarget.line_user_id, message: directMessage }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setDirectMsg("送信しました");
+      setDirectMessage("");
+      setDirectTarget(null);
+    } else {
+      setDirectError(data.error ?? "エラーが発生しました");
+    }
+    setDirectSending(false);
+  };
+
   const filteredUsers = users.filter((u) =>
     (u.name ?? "").includes(search) || u.line_user_id.includes(search)
   );
@@ -870,6 +900,7 @@ export default function AdminPanel() {
           <button className={`${styles.tab} ${tab === "hp_news" ? styles.active : ""}`} onClick={() => changeTab("hp_news")}>お知らせ</button>
           <button className={`${styles.tab} ${tab === "blog" ? styles.active : ""}`} onClick={() => changeTab("blog")}>ブログ</button>
           <button className={`${styles.tab} ${tab === "message" ? styles.active : ""}`} onClick={() => changeTab("message")}>メッセージ</button>
+          <button className={`${styles.tab} ${tab === "direct" ? styles.active : ""}`} onClick={() => changeTab("direct")}>個別メッセージ</button>
           {isSuperAdmin && (
             <>
               <button className={`${styles.tab} ${tab === "schedule" ? styles.active : ""}`} onClick={() => changeTab("schedule")}>スケジュール管理</button>
@@ -1621,6 +1652,67 @@ export default function AdminPanel() {
               {trialCount}人に送信する
             </button>
           </div>
+        </div>
+      )}
+
+      {/* ━━━ 個別メッセージ ━━━ */}
+      {tab === "direct" && (
+        <div className={styles.section}>
+          <p className={styles.sectionTitle}>個別メッセージを送る</p>
+          {(["teacher", "member", "trial"] as const).map((status) => {
+            const group = users.filter((u) => u.status === status);
+            if (group.length === 0) return null;
+            return (
+              <div key={status} className={styles.directStatusGroup}>
+                <span className={`${styles.directStatusLabel} ${styles[`directStatus_${status}`]}`}>
+                  {status === "teacher" ? "Teacher" : status === "member" ? "Member" : "Trial"}
+                </span>
+                <div className={styles.studentGrid}>
+                  {group.map((u) => (
+                    <div
+                      key={u.id}
+                      className={`${styles.studentItem} ${directTarget?.id === u.id ? styles.selected : ""} ${directTarget && directTarget.id !== u.id ? styles.dimmed : ""}`}
+                      onClick={() => {
+                        setDirectTarget(directTarget?.id === u.id ? null : u);
+                        setDirectMsg(null);
+                        setDirectError(null);
+                      }}
+                    >
+                      <LineAvatar src={u.line_picture_url} imgClass={styles.studentIcon} placeholderClass={styles.studentIconPlaceholder} />
+                      <span className={styles.studentName}>{u.name ?? u.line_display_name ?? "名前なし"}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+
+          {directTarget && (
+            <div className={styles.directSendArea}>
+              <div className={styles.directSelectedUser}>
+                <LineAvatar src={directTarget.line_picture_url} imgClass={styles.studentIcon} placeholderClass={styles.studentIconPlaceholder} />
+                <span className={styles.directSelectedName}>{directTarget.name ?? directTarget.line_display_name ?? "名前なし"} さんへ</span>
+              </div>
+              <div className={styles.messageForm}>
+                <textarea
+                  className={styles.textarea}
+                  rows={5}
+                  placeholder="送信するメッセージを入力..."
+                  value={directMessage}
+                  onChange={(e) => setDirectMessage(e.target.value)}
+                />
+                {directMsg && <p className={styles.successMsg}>{directMsg}</p>}
+                {directError && <p className={styles.errorMsg}>{directError}</p>}
+                <button className={styles.sendBtn} onClick={handleSendDirectMessage} disabled={directSending}>
+                  {directSending ? "送信中..." : "送信する"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {directMsg && !directTarget && (
+            <p className={styles.successMsg}>{directMsg}</p>
+          )}
         </div>
       )}
 
