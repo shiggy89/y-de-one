@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import liff from "@line/liff";
 import styles from "./admin.module.css";
-type Lesson = { start: string; end: string; title: string; teacher: string };
+type Lesson = { start: string; end: string; title: string; teacher: string; lessonType?: string };
 import * as Holiday from "@holiday-jp/holiday_jp";
 
 const TipTapEditor = dynamic(() => import("./TipTapEditor"), { ssr: false });
@@ -982,6 +982,7 @@ export default function AdminPanel() {
                         className={`${styles.lessonBtn} ${selectedLesson?.start === l.start && selectedLesson?.title === l.title ? styles.lessonBtnActive : ""}`}
                         onClick={() => {
                           setSelectedLesson(l);
+                          if (l.lessonType) setLessonType(l.lessonType);
                           setSelectedUserIds([]);
                           setFeePreviews([]);
                           const lessonTimeStr = `${l.start}〜${l.end}`;
