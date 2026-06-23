@@ -1,46 +1,25 @@
-"use client";
-
 import Image from "next/image";
 import Heading2 from "../common/Heading2";
 import SectionCtaButton from "../common/SectionCtaButton";
+import { supabaseAdmin } from "@/lib/supabase";
 import styles from "./Schedule.module.css";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
-const START_MINUTES = 12 * 60 + 30; // 12:30
-const END_MINUTES = 21 * 60; // 21:00
+const START_MINUTES = 12 * 60 + 30;
+const END_MINUTES = 21 * 60;
 const TOTAL_MINUTES = END_MINUTES - START_MINUTES;
 
-type Lesson = {
-  day: (typeof DAYS)[number];
-  start: string;
-  end: string;
+type ClassTemplate = {
+  id: number;
+  day_of_week: string;
+  start_time: string;
+  end_time: string;
   title: string;
   teacher: string;
-  type: "pink" | "blue" | "yellow";
-  stretch?: boolean;
-  topOffsetPct?: number;
+  color_type: "pink" | "blue" | "yellow";
+  has_stretch: boolean;
+  top_offset_pct: number;
 };
-
-const LESSONS: Lesson[] = [
-  { day: "Tue", start: "13:00", end: "14:30", title: "バレエ\n入門", teacher: "門馬和樹", type: "pink", stretch: true },
-  { day: "Tue", start: "14:30", end: "15:05", title: "プレモダン", teacher: "門馬和樹", type: "blue" },
-  { day: "Tue", start: "19:30", end: "21:00", title: "モダンバレエ", teacher: "青山佳樹", type: "blue", stretch: true },
-  { day: "Wed", start: "13:00", end: "14:30", title: "バレエ\n基礎", teacher: "門馬和樹", type: "pink" },
-  { day: "Wed", start: "15:00", end: "16:30", title: "モダンバレエ", teacher: "門馬和樹", type: "blue" },
-  { day: "Wed", start: "19:15", end: "20:45", title: "バレエ\n入門基礎", teacher: "青山佳樹", type: "pink" },
-  { day: "Thu", start: "13:00", end: "14:30", title: "バレエ\n基礎", teacher: "青山佳樹", type: "pink" },
-  { day: "Thu", start: "14:30", end: "15:05", title: "ポワント", teacher: "青山佳樹", type: "yellow" },
-  { day: "Thu", start: "15:30", end: "17:00", title: "モダンバレエ", teacher: "青山佳樹", type: "blue", stretch: true },
-  { day: "Thu", start: "19:30", end: "21:00", title: "モダンバレエ", teacher: "門馬和樹", type: "blue", stretch: true },
-  { day: "Fri", start: "15:00", end: "16:30", title: "バレエ\n入門", teacher: "青山佳樹", type: "pink", stretch: true },
-  { day: "Fri", start: "16:30", end: "17:05", title: "ポワント", teacher: "青山佳樹", type: "yellow" },
-  { day: "Sat", start: "12:30", end: "14:00", title: "バレエ\n入門基礎", teacher: "門馬和樹", type: "pink", topOffsetPct: 3.4 },
-  { day: "Sat", start: "14:30", end: "16:00", title: "バレエ\n基礎", teacher: "青山佳樹", type: "pink" },
-  { day: "Sat", start: "16:30", end: "18:00", title: "モダンバレエ", teacher: "青山佳樹", type: "blue", stretch: true },
-  { day: "Sun", start: "12:30", end: "14:00", title: "バレエ\n入門", teacher: "青山佳樹", type: "pink", topOffsetPct: 3.4 },
-  { day: "Sun", start: "14:30", end: "16:00", title: "バレエ\n基礎", teacher: "青山佳樹", type: "pink" },
-  { day: "Sun", start: "16:00", end: "16:35", title: "ポワント", teacher: "青山佳樹", type: "yellow" },
-];
 
 const toMinutes = (time: string) => {
   const [hour, minute] = time.split(":").map(Number);
@@ -57,7 +36,15 @@ const blockStyle = (start: string, end: string, topOffsetPct = 0) => {
   return { top: `${top}%`, height: `${height}%` };
 };
 
-export default function Schedule() {
+export default async function Schedule() {
+  const { data } = await supabaseAdmin
+    .from("class_templates")
+    .select("id, day_of_week, start_time, end_time, title, teacher, color_type, has_stretch, top_offset_pct")
+    .eq("is_active", true)
+    .order("sort_order");
+
+  const lessons = (data ?? []) as ClassTemplate[];
+
   const renderBoard = (days: readonly (typeof DAYS)[number][]) => (
     <div className={styles.scheduleBoard}>
       <div
@@ -85,20 +72,18 @@ export default function Schedule() {
                 日
               </p>
             )}
-            {LESSONS.filter((lesson) => lesson.day === day).map((lesson) => (
+            {lessons.filter((l) => l.day_of_week === day).map((l) => (
               <article
-                key={`${lesson.day}-${lesson.start}-${lesson.title}`}
-                className={`${styles.lessonBlock} ${styles[lesson.type]}`}
-                style={blockStyle(lesson.start, lesson.end, lesson.topOffsetPct)}
+                key={`${l.day_of_week}-${l.start_time}-${l.id}`}
+                className={`${styles.lessonBlock} ${styles[l.color_type]}`}
+                style={blockStyle(l.start_time, l.end_time, Number(l.top_offset_pct))}
               >
                 <p className={styles.time}>
-                  {lesson.start}-{lesson.end}
+                  {l.start_time}-{l.end_time}
                 </p>
-                <p className={styles.lessonTitle}>
-                  {lesson.title}
-                </p>
-                <p className={styles.teacher}>{lesson.teacher}</p>
-                {lesson.stretch && (
+                <p className={styles.lessonTitle}>{l.title}</p>
+                <p className={styles.teacher}>{l.teacher}</p>
+                {l.has_stretch && (
                   <Image
                     className={styles.stretchDummy}
                     src="/images/class/paw-icon.png"
