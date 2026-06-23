@@ -899,7 +899,7 @@ export default function AdminPanel() {
           <button className={`${styles.tab} ${tab === "report" ? styles.active : ""}`} onClick={() => changeTab("report")}>レポート</button>
           <button className={`${styles.tab} ${tab === "hp_news" ? styles.active : ""}`} onClick={() => changeTab("hp_news")}>お知らせ</button>
           <button className={`${styles.tab} ${tab === "blog" ? styles.active : ""}`} onClick={() => changeTab("blog")}>ブログ</button>
-          <button className={`${styles.tab} ${tab === "message" ? styles.active : ""}`} onClick={() => changeTab("message")}>メッセージ</button>
+          {/* <button className={`${styles.tab} ${tab === "message" ? styles.active : ""}`} onClick={() => changeTab("message")}>メッセージ</button> */}
           <button className={`${styles.tab} ${tab === "direct" ? styles.active : ""}`} onClick={() => changeTab("direct")}>個別メッセージ</button>
           {isSuperAdmin && (
             <>
