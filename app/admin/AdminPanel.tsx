@@ -9,7 +9,6 @@ import * as Holiday from "@holiday-jp/holiday_jp";
 
 const TipTapEditor = dynamic(() => import("./TipTapEditor"), { ssr: false });
 const ScheduleTab = dynamic(() => import("./ScheduleTab"), { ssr: false });
-const RosterTab = dynamic(() => import("./RosterTab"), { ssr: false });
 
 function LineAvatar({ src, imgClass, placeholderClass }: { src: string | null; imgClass: string; placeholderClass: string }) {
   const [broken, setBroken] = useState(false);
@@ -27,7 +26,7 @@ type User = {
   is_admin: boolean;
 };
 
-type Tab = "attendance" | "ledger" | "users" | "message" | "report" | "hp_news" | "blog" | "schedule" | "class_roster";
+type Tab = "attendance" | "ledger" | "users" | "message" | "report" | "hp_news" | "blog" | "schedule";
 
 type HpNewsRecord = { id: number; title: string; content: string; category: string | null; published_at: string };
 
@@ -124,7 +123,7 @@ export default function AdminPanel() {
   const [tab, setTab] = useState<Tab>(() => {
     if (typeof window !== "undefined") {
       const hash = window.location.hash.replace("#", "") as Tab;
-      const valid: Tab[] = ["attendance", "ledger", "users", "message", "report", "hp_news", "blog", "schedule", "class_roster"];
+      const valid: Tab[] = ["attendance", "ledger", "users", "message", "report", "hp_news", "blog", "schedule"];
       if (valid.includes(hash)) return hash;
     }
     return "attendance";
@@ -859,7 +858,6 @@ export default function AdminPanel() {
           {isSuperAdmin && (
             <>
               <button className={`${styles.tab} ${tab === "schedule" ? styles.active : ""}`} onClick={() => changeTab("schedule")}>スケジュール管理</button>
-              <button className={`${styles.tab} ${tab === "class_roster" ? styles.active : ""}`} onClick={() => changeTab("class_roster")}>クラス出席</button>
             </>
           )}
         </div>
@@ -1794,13 +1792,6 @@ export default function AdminPanel() {
       {tab === "schedule" && isSuperAdmin && (
         <div className={styles.section}>
           <ScheduleTab adminFetch={adminFetch} />
-        </div>
-      )}
-
-      {/* ━━━ 出席簿 ━━━ */}
-      {tab === "class_roster" && isSuperAdmin && (
-        <div className={styles.section}>
-          <RosterTab adminFetch={adminFetch} />
         </div>
       )}
 
