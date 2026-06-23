@@ -8,6 +8,8 @@ import { getLessonsForDate, type Lesson } from "@/lib/lessons";
 import * as Holiday from "@holiday-jp/holiday_jp";
 
 const TipTapEditor = dynamic(() => import("./TipTapEditor"), { ssr: false });
+const ScheduleTab = dynamic(() => import("./ScheduleTab"), { ssr: false });
+const RosterTab = dynamic(() => import("./RosterTab"), { ssr: false });
 
 function LineAvatar({ src, imgClass, placeholderClass }: { src: string | null; imgClass: string; placeholderClass: string }) {
   const [broken, setBroken] = useState(false);
@@ -25,7 +27,7 @@ type User = {
   is_admin: boolean;
 };
 
-type Tab = "attendance" | "ledger" | "users" | "message" | "report" | "hp_news" | "blog";
+type Tab = "attendance" | "ledger" | "users" | "message" | "report" | "hp_news" | "blog" | "schedule" | "roster";
 
 type HpNewsRecord = { id: number; title: string; content: string; category: string | null; published_at: string };
 
@@ -110,6 +112,7 @@ export default function AdminPanel() {
       headers: { ...(options.headers as Record<string, string> ?? {}), "x-admin-id": lineUserIdRef.current ?? "" },
     });
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -121,7 +124,7 @@ export default function AdminPanel() {
   const [tab, setTab] = useState<Tab>(() => {
     if (typeof window !== "undefined") {
       const hash = window.location.hash.replace("#", "") as Tab;
-      const valid: Tab[] = ["attendance", "ledger", "users", "message", "report", "hp_news", "blog"];
+      const valid: Tab[] = ["attendance", "ledger", "users", "message", "report", "hp_news", "blog", "schedule", "roster"];
       if (valid.includes(hash)) return hash;
     }
     return "attendance";
@@ -513,6 +516,7 @@ export default function AdminPanel() {
         if (process.env.NODE_ENV !== "production") {
           setLineUserId("debug");
           setIsAdmin(true);
+          setIsSuperAdmin(true);
           setLoading(false);
           return;
         }
@@ -529,6 +533,7 @@ export default function AdminPanel() {
         const res = await adminFetch(`/api/admin/me?lineUserId=${p.userId}`);
         const data = await res.json();
         setIsAdmin(data.isAdmin ?? false);
+        setIsSuperAdmin(data.isSuperAdmin ?? false);
       } catch (e) {
         console.error(e);
       } finally {
@@ -851,6 +856,12 @@ export default function AdminPanel() {
           <button className={`${styles.tab} ${tab === "hp_news" ? styles.active : ""}`} onClick={() => changeTab("hp_news")}>お知らせ</button>
           <button className={`${styles.tab} ${tab === "blog" ? styles.active : ""}`} onClick={() => changeTab("blog")}>ブログ</button>
           <button className={`${styles.tab} ${tab === "message" ? styles.active : ""}`} onClick={() => changeTab("message")}>メッセージ</button>
+          {isSuperAdmin && (
+            <>
+              <button className={`${styles.tab} ${tab === "schedule" ? styles.active : ""}`} onClick={() => changeTab("schedule")}>スケジュール管理</button>
+              <button className={`${styles.tab} ${tab === "roster" ? styles.active : ""}`} onClick={() => changeTab("roster")}>出席簿</button>
+            </>
+          )}
         </div>
       </div>
 
@@ -1778,6 +1789,20 @@ export default function AdminPanel() {
         </div>
       )}
       </div>
+
+      {/* ━━━ スケジュール管理 ━━━ */}
+      {tab === "schedule" && isSuperAdmin && (
+        <div className={styles.section}>
+          <ScheduleTab adminFetch={adminFetch} />
+        </div>
+      )}
+
+      {/* ━━━ 出席簿 ━━━ */}
+      {tab === "roster" && isSuperAdmin && (
+        <div className={styles.section}>
+          <RosterTab adminFetch={adminFetch} />
+        </div>
+      )}
 
       {/* ━━━ トースト通知 ━━━ */}
       {toast && (
