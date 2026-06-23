@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import liff from "@line/liff";
 import styles from "./admin.module.css";
-import { getLessonsForDate, type Lesson } from "@/lib/lessons";
+type Lesson = { start: string; end: string; title: string; teacher: string };
 import * as Holiday from "@holiday-jp/holiday_jp";
 
 const TipTapEditor = dynamic(() => import("./TipTapEditor"), { ssr: false });
@@ -150,6 +150,7 @@ export default function AdminPanel() {
     userId: number; name: string; line_picture_url: string | null;
     isTeacher: boolean; lessonFee: number; maintenanceFee: number; total: number;
   }[]>([]);
+  const [lessonsForDate, setLessonsForDate] = useState<Lesson[]>([]);
   const [attendanceMonthData, setAttendanceMonthData] = useState<LedgerRecord[]>([]);
   // 全期間の (lessonTime__lessonTitle) → { userId: count } マップ（ソート用）
   const [allLessonCountsMap, setAllLessonCountsMap] = useState<Record<string, Record<number, number>>>({});
@@ -563,6 +564,13 @@ export default function AdminPanel() {
   }, [tab, isAdmin, lessonMonth]);
 
   useEffect(() => {
+    if (tab === "attendance" && isAdmin) fetchLessonsForDate(lessonDate);
+    setSelectedLesson(null);
+    setFeePreviews([]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, isAdmin, lessonDate]);
+
+  useEffect(() => {
     if (tab === "hp_news" && isAdmin) fetchHpNews();
     if (tab === "blog" && isAdmin) { fetchBlogList(); fetchCategories(); setBlogView("list"); }
   }, [tab, isAdmin]);
@@ -664,6 +672,12 @@ export default function AdminPanel() {
       map[key][row.student_id] = (map[key][row.student_id] ?? 0) + 1;
     }
     setAllLessonCountsMap(map);
+  };
+
+  const fetchLessonsForDate = async (date: string) => {
+    const res = await adminFetch(`/api/admin/lessons-for-date?date=${date}`);
+    const data = await res.json();
+    setLessonsForDate(data.lessons ?? []);
   };
 
   // クライアント側で料金を即座に計算（APIコールなし）
@@ -957,13 +971,11 @@ export default function AdminPanel() {
                 </div>
               </div>
             )}
-            {lessonType === "通常" && (() => {
-              const lessons = getLessonsForDate(lessonDate);
-              return lessons.length > 0 ? (
+            {lessonType === "通常" && (lessonsForDate.length > 0 ? (
                 <div className={styles.formRow}>
                   <label className={styles.formLabel}>レッスンを選択</label>
                   <div className={styles.lessonGrid}>
-                    {lessons.map((l) => (
+                    {lessonsForDate.map((l) => (
                       <button
                         key={`${l.start}-${l.title}`}
                         type="button"
@@ -990,9 +1002,8 @@ export default function AdminPanel() {
                   </div>
                 </div>
               ) : (
-                <p className={styles.noLesson}>この日はレッスンがありません（月曜休講）</p>
-              );
-            })()}
+                <p className={styles.noLesson}>この日はレッスンがありません</p>
+              ))}
             <div className={styles.formRow}>
               <div className={styles.studentLabelRow}>
                 <label className={styles.formLabel}>生徒を選択</label>
