@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export const NEWS_VISITED_KEY = "news_last_visited";
 
 export function useNewsBadge() {
   const [showBadge, setShowBadge] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     async function check() {
@@ -24,6 +26,13 @@ export function useNewsBadge() {
     }
     check();
   }, []);
+
+  useEffect(() => {
+    if (pathname === "/news") {
+      localStorage.setItem(NEWS_VISITED_KEY, new Date().toISOString());
+      setShowBadge(false);
+    }
+  }, [pathname]);
 
   return showBadge;
 }
