@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./Header.module.css";
+import { useNewsBadge } from "../../hooks/useNewsBadge";
 
 type NavGrandchild = { label: string; href: string };
 type NavChild =
@@ -39,19 +40,15 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   { label: "アクセス", href: "/access" },
-  {
-    label: "最新情報",
-    children: [
-      { label: "ブログ", href: "/blog" },
-      { label: "お知らせ", href: "/news" },
-    ],
-  },
+  { label: "ブログ", href: "/blog" },
+  { label: "お知らせ", href: "/news" },
   { label: "お問い合わせ", href: "/contact" },
   { label: "体験レッスン", href: "https://lin.ee/iz33eCM" },
 ];
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const showBadge = useNewsBadge();
   const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set());
   const [openSubDropdowns, setOpenSubDropdowns] = useState<Set<string>>(new Set());
 
@@ -103,6 +100,10 @@ export default function Header() {
               width={300}
               height={103}
             />
+          </Link>
+          <Link href="/news" className={styles.bellLink} aria-label="お知らせ">
+            <i className="fa-solid fa-bell" aria-hidden="true" />
+            {showBadge && <span className={styles.bellBadge} />}
           </Link>
           <a href="tel:08067400770" className={styles.phoneLink}>
             <i className="fa-solid fa-phone" aria-hidden="true" />
@@ -178,10 +179,16 @@ export default function Header() {
                 );
               }
 
+              const isNews = item.label === "お知らせ";
               return (
                 <li key={item.label} className={isCta ? styles.ctaItem : ""}>
-                  <Link href={item.href} onClick={handleClose}>
+                  <Link
+                    href={item.href}
+                    onClick={handleClose}
+                    className={isNews ? styles.newsNavLink : ""}
+                  >
                     {item.label}
+                    {isNews && showBadge && <span className={styles.navBadge} />}
                   </Link>
                 </li>
               );

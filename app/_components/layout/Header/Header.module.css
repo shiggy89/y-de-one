@@ -198,6 +198,25 @@
   display: none;
 }
 
+.bellLink {
+  display: none;
+}
+
+/* デスクトップ お知らせバッジ */
+.newsNavLink {
+  position: relative;
+}
+
+.navBadge {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #e05080;
+}
+
 /* ----------------------
    モバイル
 ---------------------- */
@@ -214,12 +233,34 @@
   }
 
   .headerLeft {
-    padding-right: 96px;
+    padding-right: 136px;
   }
 
   .siteLogo {
     width: 220px;
     height: auto;
+  }
+
+  .bellLink {
+    display: flex;
+    align-items: center;
+    position: absolute;
+    right: 96px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #0090e8;
+    text-decoration: none;
+    font-size: 20px;
+  }
+
+  .bellBadge {
+    position: absolute;
+    top: -3px;
+    right: -4px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #e05080;
   }
 
   .phoneLink {

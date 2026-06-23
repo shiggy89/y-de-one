@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { supabaseAdmin } from "../../../lib/supabase";
 import Heading2 from "../../_components/sections/common/Heading2";
+import { NewsReadTracker } from "../../_components/NewsReadTracker";
 import styles from "./news.module.css";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +22,7 @@ export default async function NewsPage() {
 
   return (
     <main>
+      <NewsReadTracker />
       <div className={`inner ${styles.newsPage}`}>
         <Heading2
           title="お知らせ"
