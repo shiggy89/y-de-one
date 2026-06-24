@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import liff from "@line/liff";
 import Heading2 from "../_components/sections/common/Heading2";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./TrialForm.module.css";
 
 type Profile = {
@@ -65,12 +65,15 @@ const VISIT_SLOTS: Record<number, string[]> = {
 
 export default function TrialPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // フォーム
-  const [formType, setFormType] = useState<"trial" | "visit">("trial");
+  const [formType, setFormType] = useState<"trial" | "visit">(
+    searchParams.get("type") === "visit" ? "visit" : "trial"
+  );
   const [name, setName] = useState("");
   const [genre, setGenre] = useState("");
   const [date, setDate] = useState("");
