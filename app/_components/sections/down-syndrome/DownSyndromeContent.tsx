@@ -123,6 +123,10 @@ export default function DownSyndromeContent() {
             ))}
           </div>
 
+          <p className={styles.grantNote}>
+            ※本事業は、新宿区障害者福祉活動助成金の助成を受けて実施しています。
+          </p>
+
           <div className={styles.noteBox}>
             <i className="fa-solid fa-circle-info" />
             <p>下記よりお気軽にお問い合わせください。</p>
