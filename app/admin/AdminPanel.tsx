@@ -61,7 +61,7 @@ type LedgerRecord = {
 };
 
 const LESSON_TYPE_LABEL: Record<string, string> = {
-  通常: "通常レッスン", 祝日: "祝日レッスン", 個人: "個人レッスン", 特別: "特別レッスン",
+  通常: "通常レッスン", 祝日: "祝日レッスン", 個人: "個人レッスン", 特別: "特別レッスン", リハーサル: "リハーサル",
 };
 
 function buildCalendar(yearMonth: string): (number | null)[][] {
@@ -83,6 +83,7 @@ function buildCalendar(yearMonth: string): (number | null)[][] {
 const LESSON_FEES_ONLY = [2800, 5400, 7800, 9600, 11800, 14000, 16200, 17600];
 
 function isStandardLesson(lessonType: string, lessonTitle: string | null | undefined): boolean {
+  if (lessonType === "リハーサル") return lessonTitle === "90分リハーサル";
   if (lessonType !== "通常" && lessonType !== "祝日") return false;
   if (lessonTitle === "ポワント" || lessonTitle === "プレモダン" || lessonTitle === "特別レッスン") return false;
   return true;
@@ -90,6 +91,7 @@ function isStandardLesson(lessonType: string, lessonTitle: string | null | undef
 
 function calcLessonFee(countThisMonth: number, lessonType: string, privateMinutes = 15, lessonTitle?: string): number {
   if (lessonType === "個人") return 2500 * (privateMinutes / 15);
+  if (lessonType === "リハーサル" && lessonTitle === "120分リハーサル") return 3000;
   if (lessonType === "祝日") {
     if (lessonTitle === "特別レッスン") return 3000;
     if (lessonTitle === "ポワント" || lessonTitle === "プレモダン") return 1100;
@@ -145,6 +147,7 @@ export default function AdminPanel() {
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [holidayLessonType, setHolidayLessonType] = useState("特別レッスン");
   const [privateMinutes, setPrivateMinutes] = useState(15);
+  const [rehearsalDuration, setRehearsalDuration] = useState<"90" | "120">("90");
   const [feePreviews, setFeePreviews] = useState<{
     userId: number; name: string; line_picture_url: string | null;
     isTeacher: boolean; lessonFee: number; maintenanceFee: number; total: number;
@@ -708,7 +711,9 @@ export default function AdminPanel() {
     setAttendedIds((prev) => [...new Set([...prev, ...selectedUserIds])]);
 
     // attendanceMonthDataへも即時追加（fetchAttendanceMonth完了前に再選択されても二重出席防止）
-    const lessonTitle = lessonType === "祝日" ? holidayLessonType : selectedLesson?.title ?? null;
+    const lessonTitle = lessonType === "祝日" ? holidayLessonType
+      : lessonType === "リハーサル" ? `${rehearsalDuration}分リハーサル`
+      : selectedLesson?.title ?? null;
     const lessonTime = selectedLesson ? `${selectedLesson.start}〜${selectedLesson.end}` : null;
     const optimisticRecords: LedgerRecord[] = selectedUserIds.map((userId) => ({
       id: -(userId * 100000 + Date.now() % 100000), // 一時的な負のID
@@ -733,7 +738,9 @@ export default function AdminPanel() {
           body: JSON.stringify({
             userId, lessonDate, lessonType,
             privateMinutes: lessonType === "個人" ? privateMinutes : undefined,
-            lessonTitle: lessonType === "祝日" ? holidayLessonType : selectedLesson?.title,
+            lessonTitle: lessonType === "祝日" ? holidayLessonType
+              : lessonType === "リハーサル" ? `${rehearsalDuration}分リハーサル`
+              : selectedLesson?.title,
             lessonTime: selectedLesson ? `${selectedLesson.start}〜${selectedLesson.end}` : null,
             lessonTeacher: selectedLesson?.teacher ?? null,
           }),
@@ -754,6 +761,7 @@ export default function AdminPanel() {
       setSelectedLesson(null);
       setLessonType("通常");
       setPrivateMinutes(15);
+      setRehearsalDuration("90");
       setHolidayLessonType("特別レッスン");
       setLessonDate(today);
       setAttendedIds([]);
@@ -943,10 +951,12 @@ export default function AdminPanel() {
                 setSelectedUserIds([]);
                 setFeePreviews([]);
                 setLessonCounts({});
+                setRehearsalDuration("90");
               }}>
                 <option value="通常">通常レッスン</option>
                 <option value="祝日">祝日レッスン</option>
                 <option value="個人">個人レッスン</option>
+                <option value="リハーサル">リハーサル</option>
               </select>
             </div>
             {lessonType === "個人" && (
@@ -967,6 +977,34 @@ export default function AdminPanel() {
                     <option key={m} value={m}>{m}分（¥{(2500 * m / 15).toLocaleString()}）</option>
                   ))}
                 </select>
+              </div>
+            )}
+            {lessonType === "リハーサル" && (
+              <div className={styles.formRow}>
+                <label className={styles.formLabel}>レッスンを選択</label>
+                <div className={styles.lessonGrid}>
+                  {([["90", "回数料金"], ["120", "¥3,000固定"]] as const).map(([dur, label]) => (
+                    <button
+                      key={dur}
+                      type="button"
+                      className={`${styles.lessonBtn} ${rehearsalDuration === dur ? styles.lessonBtnActive : ""}`}
+                      onClick={() => {
+                        setRehearsalDuration(dur);
+                        setSelectedUserIds([]);
+                        setFeePreviews([]);
+                        const title = `${dur}分リハーサル`;
+                        const fromHistory = attendanceMonthData
+                          .filter(r => r.lesson_date === lessonDate && r.lesson_title === title)
+                          .map(r => r.student_id);
+                        const fromJustRecorded = justRecordedMap[`${lessonDate}__null__${title}`] ?? [];
+                        setAttendedIds([...new Set<number>([...fromHistory, ...fromJustRecorded])]);
+                      }}
+                    >
+                      <span className={styles.lessonBtnTitle}>{dur}分リハーサル</span>
+                      <span className={styles.lessonBtnTeacher}>{label}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
             {lessonType === "祝日" && (
