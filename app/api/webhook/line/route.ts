@@ -119,7 +119,7 @@ export async function POST(req: Request) {
         } else if (text === "いいえ") {
           await replyMessage(
             replyToken,
-            `まずは見学だけでもお気軽にどうぞ😊\n無料でご参加いただけます。\n\n👇見学のお申込みはこちら\n${LIFF_URL}/trial?type=visit`
+            `見学も大歓迎です😊\n無料なので、お気軽にお越しください🩰\n\n👇見学のお申込みはこちら\n${LIFF_URL}/trial?type=visit`
           );
         }
       }
