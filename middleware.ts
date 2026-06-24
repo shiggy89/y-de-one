@@ -12,11 +12,13 @@ export function middleware(request: NextRequest) {
 
   if (liffState && request.nextUrl.pathname === "/") {
     try {
-      const targetPath = decodeURIComponent(liffState);
+      const decoded = decodeURIComponent(liffState);
+      const [pathOnly, queryString] = decoded.split("?");
       // /trial, /mypage, /admin, /register のみ対象
-      if (/^\/(trial|mypage|admin|register)(\/.*)?$/.test(targetPath)) {
+      if (/^\/(trial|mypage|admin|register)(\/.*)?$/.test(pathOnly)) {
         const url = request.nextUrl.clone();
-        url.pathname = targetPath;
+        url.pathname = pathOnly;
+        url.search = queryString ? `?${queryString}` : "";
         return NextResponse.redirect(url);
       }
     } catch {
