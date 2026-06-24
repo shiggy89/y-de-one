@@ -983,7 +983,7 @@ export default function AdminPanel() {
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>レッスンを選択</label>
                 <div className={styles.lessonGrid}>
-                  {([["90", "回数料金"], ["120", "¥3,000固定"]] as const).map(([dur, label]) => (
+                  {(["90", "120"] as const).map((dur) => (
                     <button
                       key={dur}
                       type="button"
@@ -1001,7 +1001,6 @@ export default function AdminPanel() {
                       }}
                     >
                       <span className={styles.lessonBtnTitle}>{dur}分リハーサル</span>
-                      <span className={styles.lessonBtnTeacher}>{label}</span>
                     </button>
                   ))}
                 </div>
