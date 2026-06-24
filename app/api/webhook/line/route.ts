@@ -40,6 +40,35 @@ async function pushMessage(to: string, text: string) {
   });
 }
 
+// クイックリプライ付きプッシュAPI
+async function pushMessageWithQuickReply(
+  to: string,
+  text: string,
+  items: { label: string; text: string }[]
+) {
+  const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
+  await fetch(LINE_PUSH_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      to,
+      messages: [{
+        type: "text",
+        text,
+        quickReply: {
+          items: items.map((item) => ({
+            type: "action",
+            action: { type: "message", label: item.label, text: item.text },
+          })),
+        },
+      }],
+    }),
+  });
+}
+
 // お問い合わせ未返信を示すキーワード
 const ALERT_KEYWORDS = [
   "返信", "連絡", "届いていない", "届かない", "返ってこない",
@@ -76,39 +105,58 @@ export async function POST(req: Request) {
     const events = body.events ?? [];
 
     for (const event of events) {
-      // テキストメッセージイベント
+      // 「はい」「いいえ」への返信
       if (event.type === "message" && event.message?.type === "text") {
-        const lineUserId = event.source?.userId;
         const replyToken: string = event.replyToken;
         const text: string = event.message.text ?? "";
-        if (!lineUserId) continue;
+        const LIFF_URL = "https://liff.line.me/2008551653-JRwQxXrB";
 
-        if (containsAlertKeyword(text)) {
-          // キーワードあり → 返信API（無料）+ 管理者にプッシュ通知
+        if (text === "はい") {
           await replyMessage(
             replyToken,
-            `ご不便をおかけして申し訳ありません🙇‍♂️\n担当者に確認して、すぐに返信いたします。\n少しお待ちください。`
+            `ぜひお待ちしております🩰\n\n👇体験レッスンのお申込みはこちら\n${LIFF_URL}/trial`
           );
-          const profile = await getLineProfile(lineUserId);
-          const displayName = profile?.displayName ?? "不明なユーザー";
-          await notifyAdmins([
-            {
-              type: "text",
-              text:
-                `⚠️ お問い合わせ未返信の連絡あり\n\n` +
-                `👤 ${displayName}\n` +
-                `💬 「${text}」\n\n` +
-                `公式LINEから返信をお願いします。`,
-            },
-          ]);
-        } else {
-          // キーワードなし → 返信API（無料）
+        } else if (text === "いいえ") {
           await replyMessage(
             replyToken,
-            `こちらでは返信していません🙇‍♂️\nメニューの「お問い合わせ」からお願いします！\n返信がない場合のみ、ここへメッセージをください。`
+            `まずは見学だけでもお気軽にどうぞ😊\n無料でご参加いただけます。\n\n👇見学のお申込みはこちら\n${LIFF_URL}/trial?type=visit`
           );
         }
       }
+
+      // // テキストメッセージイベント（一時無効化）
+      // if (event.type === "message" && event.message?.type === "text") {
+      //   const lineUserId = event.source?.userId;
+      //   const replyToken: string = event.replyToken;
+      //   const text: string = event.message.text ?? "";
+      //   if (!lineUserId) continue;
+
+      //   if (containsAlertKeyword(text)) {
+      //     // キーワードあり → 返信API（無料）+ 管理者にプッシュ通知
+      //     await replyMessage(
+      //       replyToken,
+      //       `ご不便をおかけして申し訳ありません🙇‍♂️\n担当者に確認して、すぐに返信いたします。\n少しお待ちください。`
+      //     );
+      //     const profile = await getLineProfile(lineUserId);
+      //     const displayName = profile?.displayName ?? "不明なユーザー";
+      //     await notifyAdmins([
+      //       {
+      //         type: "text",
+      //         text:
+      //           `⚠️ お問い合わせ未返信の連絡あり\n\n` +
+      //           `👤 ${displayName}\n` +
+      //           `💬 「${text}」\n\n` +
+      //           `公式LINEから返信をお願いします。`,
+      //       },
+      //     ]);
+      //   } else {
+      //     // キーワードなし → 返信API（無料）
+      //     await replyMessage(
+      //       replyToken,
+      //       `こちらでは返信していません🙇‍♂️\nメニューの「お問い合わせ」からお願いします！\n返信がない場合のみ、ここへメッセージをください。`
+      //     );
+      //   }
+      // }
 
       // 友達追加イベント（replyTokenなし → プッシュAPI）
       if (event.type === "follow") {
@@ -116,15 +164,17 @@ export async function POST(req: Request) {
         if (!lineUserId) continue;
 
         const LIFF_URL = "https://liff.line.me/2008551653-JRwQxXrB";
-        await pushMessage(
-          lineUserId,
-          `Y-de-ONE（ワイデワン）へようこそ！🩰\n\n` +
-          `▼ 体験レッスンをご希望の方はこちら\n${LIFF_URL}/trial\n\n` +
-          `▼ すでに会員の方はこちらから登録をお願いします\n${LIFF_URL}/register`
-        );
-
         // LINEプロフィール取得
         const profile = await getLineProfile(lineUserId);
+        const displayName = profile?.displayName ?? "はじめまして";
+        await pushMessageWithQuickReply(
+          lineUserId,
+          `${displayName}さん\n友だち追加ありがとうございます😊\n\nY-de-ONEは初心者の方でも安心して楽しめる「質問できる大人バレエの教室」です。\n\n体験レッスンのお申込みですか？`,
+          [
+            { label: "はい", text: "はい" },
+            { label: "いいえ", text: "いいえ" },
+          ]
+        );
 
         // Supabaseにtrialで登録（未登録の場合のみ）
         const { data: existing } = await supabaseAdmin
