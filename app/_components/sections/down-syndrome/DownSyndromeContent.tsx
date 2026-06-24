@@ -31,7 +31,7 @@ const CLASS_INFO = [
   { label: "対象", value: "ダウン症のある方（年齢問わず）" },
   { label: "定員", value: "8名（少人数制）" },
   { label: "日時", value: "月2回・火曜日 16:00〜17:00（60分）" },
-  { label: "場所", value: "新宿区内コミュニティセンター\n（主に戸塚コミュニティセンター）" },
+  { label: "場所", value: "新宿区内コミュニティセンター\n（主に戸塚コミュニティセンター）\n※8月はY-de-ONE バレエ教室" },
   { label: "料金", value: "1,000円 / 回（当事者のみ）\n1,500円 / 回（保護者と一緒）" },
   { label: "内容", value: "ストレッチ・リズム運動・バレエ/コンテンポラリーの簡易動作" },
 ];
@@ -129,6 +129,7 @@ export default function DownSyndromeContent() {
           </div>
 
           <ContactCtaButton />
+          <p className={styles.grantNote}>※本事業は、新宿区障害者福祉活動助成金の助成を受けて実施しています。</p>
         </div>
       </section>
 

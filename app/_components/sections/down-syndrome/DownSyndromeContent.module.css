@@ -160,6 +160,13 @@
   line-height: 1.7;
 }
 
+.grantNote {
+  margin: 24px 0 0;
+  font-size: 13px;
+  color: #333;
+  line-height: 1.7;
+}
+
 /* ━━━ 担当講師 ━━━ */
 .instructorSection {
   padding: 0 0 64px;
