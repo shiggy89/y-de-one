@@ -142,6 +142,23 @@ npm run dev
 
 ---
 
+## レッスンスケジュール変更時の必須更新箇所
+
+レッスンの追加・変更・削除を行う際は、**必ず以下3ファイルすべてを更新すること**：
+
+| ファイル | 内容 | 対象 |
+|---|---|---|
+| `app/_components/sections/class/Schedule.tsx` | `LESSONS` 配列 | クラスページのスケジュール表示 |
+| `lib/lessons.ts` | `LESSONS_BY_DAY` | 管理画面の出席記録レッスン選択 |
+| `app/trial/TrialForm.tsx` | `TRIAL_SLOTS` / `VISIT_SLOTS` | 体験・見学フォームの時間帯選択 |
+
+### 各ファイルの更新ポイント
+- `Schedule.tsx`：色（pink/blue/yellow/gray）、ストレッチ（stretch: true）、topOffsetPct も忘れずに
+- `lessons.ts`：シンプルに start/end/title/teacher のみ。リハーサルは teacher: "" でOK
+- `TrialForm.tsx`：`TRIAL_SLOTS`（体験レッスン用・ジャンル×曜日→時間帯）と `VISIT_SLOTS`（見学用・曜日→全クラス）の両方。リハーサルは体験・見学対象外のため除外する
+
+---
+
 ## 作成済みページ
 | ページ | パス | 状態 |
 |---|---|---|
