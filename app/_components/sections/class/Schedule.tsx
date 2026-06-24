@@ -16,7 +16,7 @@ type Lesson = {
   end: string;
   title: string;
   teacher: string;
-  type: "pink" | "blue" | "yellow";
+  type: "pink" | "blue" | "yellow" | "gray";
   stretch?: boolean;
   topOffsetPct?: number;
 };
@@ -34,9 +34,9 @@ const LESSONS: Lesson[] = [
   { day: "Thu", start: "19:30", end: "21:00", title: "モダンバレエ", teacher: "門馬和樹", type: "blue", stretch: true },
   { day: "Fri", start: "15:00", end: "16:30", title: "バレエ\n入門", teacher: "青山佳樹", type: "pink", stretch: true },
   { day: "Fri", start: "16:30", end: "17:05", title: "ポワント", teacher: "青山佳樹", type: "yellow" },
-  { day: "Sat", start: "12:30", end: "14:00", title: "バレエ\n入門基礎", teacher: "門馬和樹", type: "pink", topOffsetPct: 3.4 },
-  { day: "Sat", start: "14:30", end: "16:00", title: "バレエ\n基礎", teacher: "青山佳樹", type: "pink" },
-  { day: "Sat", start: "16:30", end: "18:00", title: "モダンバレエ", teacher: "青山佳樹", type: "blue", stretch: true },
+  { day: "Sat", start: "12:30", end: "14:00", title: "バレエ\n入門基礎合同", teacher: "門馬和樹", type: "pink", topOffsetPct: 3.4 },
+  { day: "Sat", start: "14:30", end: "16:00", title: "モダンバレエ", teacher: "青山佳樹", type: "blue" },
+  { day: "Sat", start: "16:30", end: "18:00", title: "リハーサル", teacher: "", type: "gray" },
   { day: "Sun", start: "12:30", end: "14:00", title: "バレエ\n入門", teacher: "青山佳樹", type: "pink", topOffsetPct: 3.4 },
   { day: "Sun", start: "14:30", end: "16:00", title: "バレエ\n基礎", teacher: "青山佳樹", type: "pink" },
   { day: "Sun", start: "16:00", end: "16:35", title: "ポワント", teacher: "青山佳樹", type: "yellow" },
@@ -97,7 +97,7 @@ export default function Schedule() {
                 <p className={styles.lessonTitle}>
                   {lesson.title}
                 </p>
-                <p className={styles.teacher}>{lesson.teacher}</p>
+                {lesson.teacher && <p className={styles.teacher}>{lesson.teacher}</p>}
                 {lesson.stretch && (
                   <Image
                     className={styles.stretchDummy}
