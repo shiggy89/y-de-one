@@ -81,6 +81,7 @@ export default function Footer() {
             <li><Link href="/modern-ballet">モダンバレエクラス</Link></li>
             <li><Link href="/saitama">埼玉クラス（門馬和樹クラス）</Link></li>
             <li><Link href="/down-syndrome">ダウン症の方向けクラス</Link></li>
+            <li><Link href="/class#schedule">レッスンスケジュール</Link></li>
             <li><Link href="/price">料金</Link></li>
             <li><Link href="/instructor">講師</Link></li>
             <li><Link href="/studio">スタジオ紹介</Link></li>

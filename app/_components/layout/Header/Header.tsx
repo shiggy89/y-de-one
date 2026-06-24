@@ -28,6 +28,7 @@ const NAV_ITEMS: NavItem[] = [
           { label: "ダウン症の方向けクラス", href: "/down-syndrome" },
         ],
       },
+      { label: "レッスンスケジュール", href: "/class#schedule" },
       { label: "料金", href: "/price" },
       { label: "講師", href: "/instructor" },
     ],
