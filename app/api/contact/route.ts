@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       const categoryText = category ? `\nお問い合わせ種別：${category}` : "";
 
       const categoryRow = category ? `<tr><td style="padding:4px 0;color:#666;">種別</td><td style="padding:4px 0 4px 16px;">${category}</td></tr>` : "";
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://y-de-one.vercel.app";
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://y-de-one.com";
       const userHtml = `<!DOCTYPE html>
 <html lang="ja">
 <body style="margin:0;padding:0;background:#f5f5f5;font-family:'Helvetica Neue',Arial,sans-serif;">
