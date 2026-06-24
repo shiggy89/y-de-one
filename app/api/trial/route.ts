@@ -126,7 +126,6 @@ export async function POST(req: Request) {
           `\n当日はスタジオでお待ちしております😊\n` +
           `動きやすい服装でお越しください。\n\n` +
           `📍Y-de-ONEスタジオ\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n` +
-          (question ? `\nP.S.ご質問については、担当者より追ってご連絡いたします。\n` : ``) +
           `\n何か変更やキャンセルがある場合は、このLINEからお知らせください。`
         : `${displayNameForMessage} 様\n\n` +
           `Y-de-ONEバレエ教室です🩰\n` +
@@ -141,7 +140,6 @@ export async function POST(req: Request) {
           (question ? `・ご質問 / 不安なこと：${question}\n` : "") +
           `\n当日はスタジオでお会いできることを楽しみにしております😊\n\n` +
           `📍Y-de-ONEスタジオ\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n` +
-          (question ? `\nP.S.ご質問については、担当者より追ってご連絡いたします。\n` : ``) +
           `\n何か変更やキャンセルがある場合は、このLINEからお知らせください。`;
 
       const lineResponse = await fetch(LINE_ENDPOINT, {
@@ -190,7 +188,6 @@ export async function POST(req: Request) {
             `・LINE表示名：${lineDisplayName ?? "不明"}\n` +
             `・見学希望日：${dateWithYoubi}\n` +
             `・時間帯：${timeSlot}\n` +
-            (question ? `\n⚠️質問がきています⚠️\n${name} 様へ質問の返信をしてください。` : "") +
             (question ? `\n\n・ご質問／不安なこと：${question}\n` : "")
           : `【体験レッスン申込み通知】\n\n` +
             `▼ お申込み内容\n` +
@@ -200,7 +197,6 @@ export async function POST(req: Request) {
             `・希望日：${dateWithYoubi}\n` +
             `・時間帯：${timeSlot}\n` +
             `・バレエ経験：${experience ?? ""}\n` +
-            (question ? `\n⚠️質問がきています⚠️\n${name} 様へ質問の返信をしてください。` : "") +
             (question ? `\n\n・ご質問／不安なこと：${question}\n` : "");
 
         // 管理者の人数分だけ push を回す（3〜4人ならこれで十分）
