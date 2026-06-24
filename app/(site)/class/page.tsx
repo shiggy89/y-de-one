@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-
-export const revalidate = 0;
 import Hero from "../../_components/sections/class/Hero";
 import Class from "../../_components/sections/class/Class";
 import Schedule from "../../_components/sections/class/Schedule";
