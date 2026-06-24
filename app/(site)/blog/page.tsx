@@ -12,10 +12,16 @@ export const metadata: Metadata = {
   description: "大人バレエ教室 Y-de-ONE（ワイデワン）のブログ。レッスンの様子や日々の出来事をお届けします。",
 };
 
+function extractFirstImage(html: string | null): string | null {
+  if (!html) return null;
+  const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+  return match ? match[1] : null;
+}
+
 export default async function BlogPage() {
   const { data } = await supabaseAdmin
     .from("posts")
-    .select("id, title, slug, thumbnail_url, published_at, type")
+    .select("id, title, slug, thumbnail_url, content, published_at, type")
     .eq("status", "published")
     .order("published_at", { ascending: false });
 
@@ -36,19 +42,22 @@ export default async function BlogPage() {
               <li key={item.id} className={styles.blogCard}>
                 <Link href={`/blog/${item.slug ?? item.id}`} className={styles.blogLink}>
                   <div className={styles.blogThumb}>
-                    {item.thumbnail_url ? (
-                      <Image
-                        src={item.thumbnail_url}
-                        alt={item.title}
-                        width={400}
-                        height={300}
-                        className={styles.thumbImg}
-                      />
-                    ) : (
-                      <div className={styles.thumbPlaceholder}>
-                        <i className="fa-solid fa-image"></i>
-                      </div>
-                    )}
+                    {(() => {
+                      const src = item.thumbnail_url || extractFirstImage(item.content);
+                      return src ? (
+                        <Image
+                          src={src}
+                          alt={item.title}
+                          width={400}
+                          height={300}
+                          className={styles.thumbImg}
+                        />
+                      ) : (
+                        <div className={styles.thumbPlaceholder}>
+                          <i className="fa-solid fa-image"></i>
+                        </div>
+                      );
+                    })()}
                   </div>
                   <div className={styles.blogInfo}>
                     <time className={styles.blogDate}>
