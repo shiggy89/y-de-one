@@ -157,46 +157,15 @@ export async function POST(req: Request) {
             text: `${displayName}さん\n友だち追加ありがとうございます😊\n\nY-de-ONEは初心者の方でも安心して楽しめる「質問できる大人バレエの教室」です。`,
           },
           {
-            type: "flex",
+            type: "template",
             altText: "体験レッスンのお申込みですか？",
-            contents: {
-              type: "bubble",
-              body: {
-                type: "box",
-                layout: "vertical",
-                paddingAll: "xl",
-                contents: [
-                  {
-                    type: "text",
-                    text: "体験レッスンのお申込みですか？",
-                    weight: "bold",
-                    size: "xl",
-                    wrap: true,
-                    align: "center",
-                  },
-                ],
-              },
-              footer: {
-                type: "box",
-                layout: "vertical",
-                spacing: "xl",
-                paddingAll: "xl",
-                contents: [
-                  {
-                    type: "button",
-                    style: "primary",
-                    color: "#e05080",
-                    height: "sm",
-                    action: { type: "message", label: "はい　体験レッスンを申し込む", text: "はい" },
-                  },
-                  {
-                    type: "button",
-                    style: "secondary",
-                    height: "sm",
-                    action: { type: "message", label: "いいえ　見学・お問い合わせ", text: "いいえ" },
-                  },
-                ],
-              },
+            template: {
+              type: "buttons",
+              text: "体験レッスンのお申込みですか？",
+              actions: [
+                { type: "message", label: "はい", text: "はい" },
+                { type: "message", label: "いいえ", text: "いいえ" },
+              ],
             },
           },
         ]);
