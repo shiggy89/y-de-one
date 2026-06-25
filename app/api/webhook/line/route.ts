@@ -40,12 +40,8 @@ async function pushMessage(to: string, text: string) {
   });
 }
 
-// クイックリプライ付きプッシュAPI
-async function pushMessageWithQuickReply(
-  to: string,
-  text: string,
-  items: { label: string; text: string }[]
-) {
+// 複数メッセージのプッシュAPI
+async function pushMessages(to: string, messages: object[]) {
   const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
   await fetch(LINE_PUSH_ENDPOINT, {
     method: "POST",
@@ -53,19 +49,7 @@ async function pushMessageWithQuickReply(
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({
-      to,
-      messages: [{
-        type: "text",
-        text,
-        quickReply: {
-          items: items.map((item) => ({
-            type: "action",
-            action: { type: "message", label: item.label, text: item.text },
-          })),
-        },
-      }],
-    }),
+    body: JSON.stringify({ to, messages }),
   });
 }
 
@@ -119,7 +103,7 @@ export async function POST(req: Request) {
         } else if (text === "いいえ") {
           await replyMessage(
             replyToken,
-            `見学も大歓迎です😊\n無料なのでお気軽にお越しください🩰\n\n👇見学のお申込みはこちら\n${LIFF_URL}/trial?type=visit`
+            `見学も大歓迎です😊\n無料なのでお気軽にお越しください🩰\n\n👇見学のお申込みはこちら\n${LIFF_URL}/trial?type=visit\n\n👇お問い合わせはこちら\nhttps://y-de-one.com/contact`
           );
         }
       }
@@ -167,14 +151,24 @@ export async function POST(req: Request) {
         // LINEプロフィール取得
         const profile = await getLineProfile(lineUserId);
         const displayName = profile?.displayName ?? "はじめまして";
-        await pushMessageWithQuickReply(
-          lineUserId,
-          `${displayName}さん\n友だち追加ありがとうございます😊\n\nY-de-ONEは初心者の方でも安心して楽しめる「質問できる大人バレエの教室」です。\n\n体験レッスンのお申込みですか？`,
-          [
-            { label: "はい", text: "はい" },
-            { label: "いいえ", text: "いいえ" },
-          ]
-        );
+        await pushMessages(lineUserId, [
+          {
+            type: "text",
+            text: `${displayName}さん\n友だち追加ありがとうございます😊\n\nY-de-ONEは初心者の方でも安心して楽しめる「質問できる大人バレエの教室」です。`,
+          },
+          {
+            type: "template",
+            altText: "体験レッスンのお申込みですか？",
+            template: {
+              type: "buttons",
+              text: "体験レッスンのお申込みですか？",
+              actions: [
+                { type: "message", label: "はい", text: "はい" },
+                { type: "message", label: "いいえ", text: "いいえ" },
+              ],
+            },
+          },
+        ]);
 
         // Supabaseにtrialで登録（未登録の場合のみ）
         const { data: existing } = await supabaseAdmin
