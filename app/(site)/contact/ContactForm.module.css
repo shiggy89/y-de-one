@@ -104,19 +104,33 @@
   margin-bottom: 12px;
 }
 
-.otherFields {
-  background-color: #fff8f8;
-  border: 1px solid #f5c0c0;
-  border-radius: 8px;
-  padding: 16px 16px 4px;
-  margin-bottom: 20px;
+.inputShort {
+  width: 200px;
+  box-sizing: border-box;
+  padding: 10px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  font-family: inherit;
 }
 
-.otherNote {
-  font-size: 13px;
-  color: #c0392b;
+.inputShort:focus {
+  outline: none;
+  border-color: #0090e8;
+}
+
+.count {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 400;
+  color: #999;
+}
+
+.countOver {
+  margin-left: 8px;
+  font-size: 12px;
   font-weight: 600;
-  margin: 0 0 16px;
+  color: #e53935;
 }
 
 .submit {

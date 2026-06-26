@@ -27,7 +27,9 @@ export default function ContactForm() {
   const [emailConfirm, setEmailConfirm] = useState("");
   const [category, setCategory] = useState("");
   const [companyName, setCompanyName] = useState("");
-  const [companyAddress, setCompanyAddress] = useState("");
+  const [companyPostal, setCompanyPostal] = useState("");
+  const [companyPrefecture, setCompanyPrefecture] = useState("");
+  const [companyCity, setCompanyCity] = useState("");
   const [companyPhone, setCompanyPhone] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -47,22 +49,25 @@ export default function ContactForm() {
     if (!category) { setError("お問い合わせ種別を選択してください。"); return; }
     if (isOther) {
       if (!companyName.trim()) { setError("会社名を入力してください。"); return; }
-      if (!companyAddress.trim()) { setError("会社住所を入力してください。"); return; }
+      if (!companyPostal.trim()) { setError("郵便番号を入力してください。"); return; }
+      if (!companyPrefecture.trim()) { setError("都道府県を入力してください。"); return; }
+      if (!companyCity.trim()) { setError("市区町村・番地を入力してください。"); return; }
       if (!companyPhone.trim()) { setError("会社電話番号を入力してください。"); return; }
     }
     if (!message.trim()) { setError("お問い合わせ内容を入力してください。"); return; }
+    if (isOther && message.trim().length > 100) { setError("「その他」のお問い合わせ内容は100文字以内でご入力ください。"); return; }
 
     setSubmitting(true);
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, category, companyName, companyAddress, companyPhone, message }),
+        body: JSON.stringify({ name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyPhone, message }),
       });
 
       if (!res.ok) throw new Error("送信失敗");
 
-      sessionStorage.setItem("contactData", JSON.stringify({ name, email, category, companyName, companyAddress, companyPhone, message }));
+      sessionStorage.setItem("contactData", JSON.stringify({ name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyPhone, message }));
       router.push("/contact/thanks");
     } catch {
       setError("送信中にエラーが発生しました。時間をおいて再度お試しください。");
@@ -151,10 +156,7 @@ export default function ContactForm() {
             </div>
 
             {isOther && (
-              <div className={styles.otherFields}>
-                <p className={styles.otherNote}>
-                  「その他」をご選択の場合、以下の項目が必要です。
-                </p>
+              <>
                 <div className={styles.field}>
                   <label className={styles.label}>
                     会社名 <span className={styles.required}>必須</span>
@@ -169,14 +171,38 @@ export default function ContactForm() {
                 </div>
                 <div className={styles.field}>
                   <label className={styles.label}>
-                    会社住所 <span className={styles.required}>必須</span>
+                    郵便番号 <span className={styles.required}>必須</span>
+                  </label>
+                  <input
+                    type="text"
+                    className={styles.inputShort}
+                    value={companyPostal}
+                    onChange={(e) => setCompanyPostal(e.target.value)}
+                    placeholder="例）000-0000"
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>
+                    都道府県 <span className={styles.required}>必須</span>
+                  </label>
+                  <input
+                    type="text"
+                    className={styles.inputShort}
+                    value={companyPrefecture}
+                    onChange={(e) => setCompanyPrefecture(e.target.value)}
+                    placeholder="例）東京都"
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>
+                    市区町村・番地 <span className={styles.required}>必須</span>
                   </label>
                   <input
                     type="text"
                     className={styles.input}
-                    value={companyAddress}
-                    onChange={(e) => setCompanyAddress(e.target.value)}
-                    placeholder="例）東京都渋谷区〇〇1-2-3"
+                    value={companyCity}
+                    onChange={(e) => setCompanyCity(e.target.value)}
+                    placeholder="例）渋谷区〇〇1-2-3"
                   />
                 </div>
                 <div className={styles.field}>
@@ -185,22 +211,27 @@ export default function ContactForm() {
                   </label>
                   <input
                     type="tel"
-                    className={styles.input}
+                    className={styles.inputShort}
                     value={companyPhone}
                     onChange={(e) => setCompanyPhone(e.target.value)}
                     placeholder="例）03-1234-5678"
                   />
                 </div>
-              </div>
+              </>
             )}
 
             <div className={styles.field}>
               <label className={styles.label}>
                 お問い合わせ内容 <span className={styles.required}>必須</span>
+                {isOther && (
+                  <span className={message.length > 100 ? styles.countOver : styles.count}>
+                    {message.length}/100
+                  </span>
+                )}
               </label>
               <textarea
                 className={styles.textarea}
-                rows={6}
+                rows={isOther ? 3 : 6}
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="ご質問・ご相談内容をご記入ください"

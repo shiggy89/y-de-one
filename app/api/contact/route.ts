@@ -11,7 +11,7 @@ function isValidLineUserId(id: string) {
 
 export async function POST(req: Request) {
   try {
-    const { name, email, category, companyName, companyAddress, companyPhone, message } = await req.json();
+    const { name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyPhone, message } = await req.json();
 
     if (!name || !email || !category || !message) {
       return NextResponse.json(
@@ -20,9 +20,16 @@ export async function POST(req: Request) {
       );
     }
 
-    if (category === "その他" && (!companyName || !companyAddress || !companyPhone)) {
+    if (category === "その他" && (!companyName || !companyPostal || !companyPrefecture || !companyCity || !companyPhone)) {
       return NextResponse.json(
         { ok: false, error: "「その他」の場合は会社情報を入力してください。" },
+        { status: 400 }
+      );
+    }
+
+    if (category === "その他" && message.length > 100) {
+      return NextResponse.json(
+        { ok: false, error: "「その他」のお問い合わせ内容は100文字以内でご入力ください。" },
         { status: 400 }
       );
     }
@@ -35,7 +42,9 @@ export async function POST(req: Request) {
       const isOther = category === "その他";
       const companyRows = isOther
         ? `<tr><td style="padding:4px 0;color:#666;">会社名</td><td style="padding:4px 0 4px 16px;">${companyName}</td></tr>
-           <tr><td style="padding:4px 0;color:#666;">会社住所</td><td style="padding:4px 0 4px 16px;">${companyAddress}</td></tr>
+           <tr><td style="padding:4px 0;color:#666;">郵便番号</td><td style="padding:4px 0 4px 16px;">${companyPostal}</td></tr>
+           <tr><td style="padding:4px 0;color:#666;">都道府県</td><td style="padding:4px 0 4px 16px;">${companyPrefecture}</td></tr>
+           <tr><td style="padding:4px 0;color:#666;">市区町村・番地</td><td style="padding:4px 0 4px 16px;">${companyCity}</td></tr>
            <tr><td style="padding:4px 0;color:#666;">会社電話番号</td><td style="padding:4px 0 4px 16px;">${companyPhone}</td></tr>`
         : "";
       const categoryRow = `<tr><td style="padding:4px 0;color:#666;">種別</td><td style="padding:4px 0 4px 16px;">${category}</td></tr>${companyRows}`;
@@ -99,7 +108,9 @@ export async function POST(req: Request) {
             `・種別：${category}\n` +
             (isOther
               ? `・会社名：${companyName}\n` +
-                `・会社住所：${companyAddress}\n` +
+                `・郵便番号：${companyPostal}\n` +
+                `・都道府県：${companyPrefecture}\n` +
+                `・市区町村・番地：${companyCity}\n` +
                 `・会社電話番号：${companyPhone}\n`
               : "") +
             `・内容：\n${message}\n\n` +
@@ -128,7 +139,9 @@ export async function POST(req: Request) {
         `・種別：${category}\n` +
         (category === "その他"
           ? `・会社名：${companyName}\n` +
-            `・会社住所：${companyAddress}\n` +
+            `・郵便番号：${companyPostal}\n` +
+            `・都道府県：${companyPrefecture}\n` +
+            `・市区町村・番地：${companyCity}\n` +
             `・会社電話番号：${companyPhone}\n`
           : "") +
         `・内容：\n${message}`;
