@@ -21,20 +21,43 @@ const CATEGORIES = [
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
 
 const DEPARTMENTS = [
-  "代表・経営企画室",
+  "代表・役員",
+  "経営企画室",
+  "秘書室",
   "営業部",
+  "営業推進部",
+  "法人営業部",
+  "個人営業部",
+  "インサイドセールス部",
   "企画部",
-  "マーケティング部",
-  "広報・PR部",
-  "制作部",
+  "商品企画部",
   "事業開発部",
+  "新規事業部",
+  "マーケティング部",
+  "デジタルマーケティング部",
+  "広報・PR部",
+  "ブランド戦略部",
+  "SNS・コンテンツ部",
+  "制作部",
+  "クリエイティブ部",
+  "デザイン部",
+  "映像・動画制作部",
+  "イベント企画部",
+  "プロモーション部",
   "人事部",
+  "採用部",
+  "人材開発部",
   "総務部",
-  "経理・財務部",
+  "経理部",
+  "財務部",
   "法務部",
-  "システム・IT部",
+  "コンプライアンス部",
+  "情報システム部",
+  "DX推進部",
   "開発部",
+  "エンジニアリング部",
   "カスタマーサポート部",
+  "CS・CX部",
   "その他",
 ];
 
@@ -48,6 +71,8 @@ export default function ContactForm() {
   const [companyPostal, setCompanyPostal] = useState("");
   const [companyPrefecture, setCompanyPrefecture] = useState("");
   const [companyCity, setCompanyCity] = useState("");
+  const [companyStreet, setCompanyStreet] = useState("");
+  const [companyBuilding, setCompanyBuilding] = useState("");
   const [companyPhone, setCompanyPhone] = useState("");
   const [contactLastName, setContactLastName] = useState("");
   const [contactFirstName, setContactFirstName] = useState("");
@@ -73,7 +98,9 @@ export default function ContactForm() {
       if (!companyName.trim()) { setError("会社名を入力してください。"); return; }
       if (!companyPostal.trim()) { setError("郵便番号を入力してください。"); return; }
       if (!companyPrefecture.trim()) { setError("都道府県を入力してください。"); return; }
-      if (!companyCity.trim()) { setError("市区町村・番地を入力してください。"); return; }
+      if (!companyCity.trim()) { setError("市区町村を入力してください。"); return; }
+      if (!companyStreet.trim()) { setError("番地を入力してください。"); return; }
+      if (!companyBuilding.trim()) { setError("建物名・部屋番号を入力してください。"); return; }
       if (!companyPhone.trim()) { setError("会社電話番号を入力してください。"); return; }
       if (!contactLastName.trim()) { setError("担当者の姓を入力してください。"); return; }
       if (!contactFirstName.trim()) { setError("担当者の名を入力してください。"); return; }
@@ -89,12 +116,12 @@ export default function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyPhone, contactLastName, contactFirstName, contactDepartment, contactPhone, message }),
+        body: JSON.stringify({ name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyStreet, companyBuilding, companyPhone, contactLastName, contactFirstName, contactDepartment, contactPhone, message }),
       });
 
       if (!res.ok) throw new Error("送信失敗");
 
-      sessionStorage.setItem("contactData", JSON.stringify({ name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyPhone, contactLastName, contactFirstName, contactDepartment, contactPhone, message }));
+      sessionStorage.setItem("contactData", JSON.stringify({ name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyStreet, companyBuilding, companyPhone, contactLastName, contactFirstName, contactDepartment, contactPhone, message }));
       router.push("/contact/thanks");
     } catch {
       setError("送信中にエラーが発生しました。時間をおいて再度お試しください。");
@@ -222,14 +249,38 @@ export default function ContactForm() {
                 </div>
                 <div className={styles.field}>
                   <label className={styles.label}>
-                    市区町村・番地 <span className={styles.required}>必須</span>
+                    市区町村 <span className={styles.required}>必須</span>
                   </label>
                   <input
                     type="text"
                     className={styles.input}
                     value={companyCity}
                     onChange={(e) => setCompanyCity(e.target.value)}
-                    placeholder="例）渋谷区〇〇1-2-3"
+                    placeholder="例）渋谷区〇〇"
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>
+                    番地 <span className={styles.required}>必須</span>
+                  </label>
+                  <input
+                    type="text"
+                    className={styles.inputShort}
+                    value={companyStreet}
+                    onChange={(e) => setCompanyStreet(e.target.value)}
+                    placeholder="例）1-2-3"
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>
+                    建物名・部屋番号 <span className={styles.required}>必須</span>
+                  </label>
+                  <input
+                    type="text"
+                    className={styles.input}
+                    value={companyBuilding}
+                    onChange={(e) => setCompanyBuilding(e.target.value)}
+                    placeholder="例）〇〇ビル 5階"
                   />
                 </div>
                 <div className={styles.field}>
@@ -298,11 +349,6 @@ export default function ContactForm() {
             <div className={styles.field}>
               <label className={styles.label}>
                 お問い合わせ内容 <span className={styles.required}>必須</span>
-                {isOther && (
-                  <span className={message.length > 100 ? styles.countOver : styles.count}>
-                    {message.length}/100
-                  </span>
-                )}
               </label>
               <textarea
                 className={styles.textarea}

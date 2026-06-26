@@ -124,20 +124,6 @@
   gap: 8px;
 }
 
-.count {
-  margin-left: 8px;
-  font-size: 12px;
-  font-weight: 400;
-  color: #999;
-}
-
-.countOver {
-  margin-left: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #e53935;
-}
-
 .submit {
   width: 100%;
   padding: 16px 0;
