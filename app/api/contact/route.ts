@@ -11,7 +11,7 @@ function isValidLineUserId(id: string) {
 
 export async function POST(req: Request) {
   try {
-    const { name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyPhone, message } = await req.json();
+    const { name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyPhone, contactLastName, contactFirstName, contactDepartment, contactPhone, message } = await req.json();
 
     if (!name || !email || !category || !message) {
       return NextResponse.json(
@@ -20,18 +20,25 @@ export async function POST(req: Request) {
       );
     }
 
-    if (category === "その他" && (!companyName || !companyPostal || !companyPrefecture || !companyCity || !companyPhone)) {
-      return NextResponse.json(
-        { ok: false, error: "「その他」の場合は会社情報を入力してください。" },
-        { status: 400 }
-      );
-    }
-
-    if (category === "その他" && message.length > 100) {
-      return NextResponse.json(
-        { ok: false, error: "「その他」のお問い合わせ内容は100文字以内でご入力ください。" },
-        { status: 400 }
-      );
+    if (category === "その他") {
+      if (!companyName || !companyPostal || !companyPrefecture || !companyCity || !companyPhone || !contactLastName || !contactFirstName || !contactDepartment || !contactPhone) {
+        return NextResponse.json(
+          { ok: false, error: "「その他」の場合は会社情報・担当者情報を入力してください。" },
+          { status: 400 }
+        );
+      }
+      if (contactPhone === companyPhone) {
+        return NextResponse.json(
+          { ok: false, error: "担当電話番号は会社電話番号と異なる番号を入力してください。" },
+          { status: 400 }
+        );
+      }
+      if (message.length > 100) {
+        return NextResponse.json(
+          { ok: false, error: "「その他」のお問い合わせ内容は100文字以内でご入力ください。" },
+          { status: 400 }
+        );
+      }
     }
 
     // ① ユーザーへの受付確認メール
@@ -45,7 +52,10 @@ export async function POST(req: Request) {
            <tr><td style="padding:4px 0;color:#666;">郵便番号</td><td style="padding:4px 0 4px 16px;">${companyPostal}</td></tr>
            <tr><td style="padding:4px 0;color:#666;">都道府県</td><td style="padding:4px 0 4px 16px;">${companyPrefecture}</td></tr>
            <tr><td style="padding:4px 0;color:#666;">市区町村・番地</td><td style="padding:4px 0 4px 16px;">${companyCity}</td></tr>
-           <tr><td style="padding:4px 0;color:#666;">会社電話番号</td><td style="padding:4px 0 4px 16px;">${companyPhone}</td></tr>`
+           <tr><td style="padding:4px 0;color:#666;">会社電話番号</td><td style="padding:4px 0 4px 16px;">${companyPhone}</td></tr>
+           <tr><td style="padding:4px 0;color:#666;">担当者氏名</td><td style="padding:4px 0 4px 16px;">${contactLastName} ${contactFirstName}</td></tr>
+           <tr><td style="padding:4px 0;color:#666;">担当部署</td><td style="padding:4px 0 4px 16px;">${contactDepartment}</td></tr>
+           <tr><td style="padding:4px 0;color:#666;">担当電話番号</td><td style="padding:4px 0 4px 16px;">${contactPhone}</td></tr>`
         : "";
       const categoryRow = `<tr><td style="padding:4px 0;color:#666;">種別</td><td style="padding:4px 0 4px 16px;">${category}</td></tr>${companyRows}`;
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://y-de-one.com";
@@ -111,7 +121,10 @@ export async function POST(req: Request) {
                 `・郵便番号：${companyPostal}\n` +
                 `・都道府県：${companyPrefecture}\n` +
                 `・市区町村・番地：${companyCity}\n` +
-                `・会社電話番号：${companyPhone}\n`
+                `・会社電話番号：${companyPhone}\n` +
+                `・担当者氏名：${contactLastName} ${contactFirstName}\n` +
+                `・担当部署：${contactDepartment}\n` +
+                `・担当電話番号：${contactPhone}\n`
               : "") +
             `・内容：\n${message}\n\n` +
             `このメールに「返信」を押すと ${name} 様へ直接返信できます。`,
@@ -142,7 +155,10 @@ export async function POST(req: Request) {
             `・郵便番号：${companyPostal}\n` +
             `・都道府県：${companyPrefecture}\n` +
             `・市区町村・番地：${companyCity}\n` +
-            `・会社電話番号：${companyPhone}\n`
+            `・会社電話番号：${companyPhone}\n` +
+            `・担当者氏名：${contactLastName} ${contactFirstName}\n` +
+            `・担当部署：${contactDepartment}\n` +
+            `・担当電話番号：${contactPhone}\n`
           : "") +
         `・内容：\n${message}`;
 

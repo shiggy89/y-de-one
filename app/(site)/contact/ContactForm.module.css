@@ -119,6 +119,11 @@
   border-color: #0090e8;
 }
 
+.nameRow {
+  display: flex;
+  gap: 8px;
+}
+
 .count {
   margin-left: 8px;
   font-size: 12px;

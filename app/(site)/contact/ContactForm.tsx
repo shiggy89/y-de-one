@@ -20,6 +20,24 @@ const CATEGORIES = [
 
 const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
 
+const DEPARTMENTS = [
+  "代表・経営企画室",
+  "営業部",
+  "企画部",
+  "マーケティング部",
+  "広報・PR部",
+  "制作部",
+  "事業開発部",
+  "人事部",
+  "総務部",
+  "経理・財務部",
+  "法務部",
+  "システム・IT部",
+  "開発部",
+  "カスタマーサポート部",
+  "その他",
+];
+
 export default function ContactForm() {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -31,6 +49,10 @@ export default function ContactForm() {
   const [companyPrefecture, setCompanyPrefecture] = useState("");
   const [companyCity, setCompanyCity] = useState("");
   const [companyPhone, setCompanyPhone] = useState("");
+  const [contactLastName, setContactLastName] = useState("");
+  const [contactFirstName, setContactFirstName] = useState("");
+  const [contactDepartment, setContactDepartment] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -53,6 +75,11 @@ export default function ContactForm() {
       if (!companyPrefecture.trim()) { setError("都道府県を入力してください。"); return; }
       if (!companyCity.trim()) { setError("市区町村・番地を入力してください。"); return; }
       if (!companyPhone.trim()) { setError("会社電話番号を入力してください。"); return; }
+      if (!contactLastName.trim()) { setError("担当者の姓を入力してください。"); return; }
+      if (!contactFirstName.trim()) { setError("担当者の名を入力してください。"); return; }
+      if (!contactDepartment) { setError("担当部署を選択してください。"); return; }
+      if (!contactPhone.trim()) { setError("担当電話番号を入力してください。"); return; }
+      if (contactPhone.trim() === companyPhone.trim()) { setError("担当電話番号は会社電話番号と異なる番号を入力してください。"); return; }
     }
     if (!message.trim()) { setError("お問い合わせ内容を入力してください。"); return; }
     if (isOther && message.trim().length > 100) { setError("「その他」のお問い合わせ内容は100文字以内でご入力ください。"); return; }
@@ -62,12 +89,12 @@ export default function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyPhone, message }),
+        body: JSON.stringify({ name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyPhone, contactLastName, contactFirstName, contactDepartment, contactPhone, message }),
       });
 
       if (!res.ok) throw new Error("送信失敗");
 
-      sessionStorage.setItem("contactData", JSON.stringify({ name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyPhone, message }));
+      sessionStorage.setItem("contactData", JSON.stringify({ name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyPhone, contactLastName, contactFirstName, contactDepartment, contactPhone, message }));
       router.push("/contact/thanks");
     } catch {
       setError("送信中にエラーが発生しました。時間をおいて再度お試しください。");
@@ -215,6 +242,54 @@ export default function ContactForm() {
                     value={companyPhone}
                     onChange={(e) => setCompanyPhone(e.target.value)}
                     placeholder="例）03-1234-5678"
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>
+                    担当者氏名 <span className={styles.required}>必須</span>
+                  </label>
+                  <div className={styles.nameRow}>
+                    <input
+                      type="text"
+                      className={styles.input}
+                      value={contactLastName}
+                      onChange={(e) => setContactLastName(e.target.value)}
+                      placeholder="姓"
+                    />
+                    <input
+                      type="text"
+                      className={styles.input}
+                      value={contactFirstName}
+                      onChange={(e) => setContactFirstName(e.target.value)}
+                      placeholder="名"
+                    />
+                  </div>
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>
+                    担当部署 <span className={styles.required}>必須</span>
+                  </label>
+                  <select
+                    className={styles.select}
+                    value={contactDepartment}
+                    onChange={(e) => setContactDepartment(e.target.value)}
+                  >
+                    <option value="">選択してください</option>
+                    {DEPARTMENTS.map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>
+                    担当電話番号 <span className={styles.required}>必須</span>
+                  </label>
+                  <input
+                    type="tel"
+                    className={styles.inputShort}
+                    value={contactPhone}
+                    onChange={(e) => setContactPhone(e.target.value)}
+                    placeholder="例）090-1234-5678"
                   />
                 </div>
               </>
