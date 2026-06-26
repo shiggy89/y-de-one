@@ -158,19 +158,6 @@ export async function POST(req: Request) {
         `・お名前：${name}\n` +
         `・メール：${email}\n` +
         `・種別：${category}\n` +
-        (category === "その他"
-          ? `・会社名：${companyName}（${companyNameKana}）\n` +
-            `・郵便番号：${companyPostal}\n` +
-            `・都道府県：${companyPrefecture}\n` +
-            `・市区町村：${companyCity}\n` +
-            `・番地：${companyStreet}\n` +
-            `・建物名・部屋番号：${companyBuilding}\n` +
-            `・住所（ふりがな）：${companyAddressKana}\n` +
-            `・会社電話番号：${companyPhone}\n` +
-            `・担当者氏名：${contactName}（${contactNameKana}）\n` +
-            `・担当部署：${contactDepartment}\n` +
-            `・担当電話番号：${contactPhone}\n`
-          : "") +
         `・内容：\n${message}`;
 
       for (const adminId of adminUserIds) {
