@@ -68,14 +68,16 @@ export default function ContactForm() {
   const [emailConfirm, setEmailConfirm] = useState("");
   const [category, setCategory] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [companyNameKana, setCompanyNameKana] = useState("");
   const [companyPostal, setCompanyPostal] = useState("");
   const [companyPrefecture, setCompanyPrefecture] = useState("");
   const [companyCity, setCompanyCity] = useState("");
   const [companyStreet, setCompanyStreet] = useState("");
   const [companyBuilding, setCompanyBuilding] = useState("");
+  const [companyAddressKana, setCompanyAddressKana] = useState("");
   const [companyPhone, setCompanyPhone] = useState("");
-  const [contactLastName, setContactLastName] = useState("");
-  const [contactFirstName, setContactFirstName] = useState("");
+  const [contactName, setContactName] = useState("");
+  const [contactNameKana, setContactNameKana] = useState("");
   const [contactDepartment, setContactDepartment] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [message, setMessage] = useState("");
@@ -96,14 +98,16 @@ export default function ContactForm() {
     if (!category) { setError("お問い合わせ種別を選択してください。"); return; }
     if (isOther) {
       if (!companyName.trim()) { setError("会社名を入力してください。"); return; }
+      if (!companyNameKana.trim()) { setError("会社名（ふりがな）を入力してください。"); return; }
       if (!companyPostal.trim()) { setError("郵便番号を入力してください。"); return; }
       if (!companyPrefecture.trim()) { setError("都道府県を入力してください。"); return; }
       if (!companyCity.trim()) { setError("市区町村を入力してください。"); return; }
       if (!companyStreet.trim()) { setError("番地を入力してください。"); return; }
       if (!companyBuilding.trim()) { setError("建物名・部屋番号を入力してください。"); return; }
+      if (!companyAddressKana.trim()) { setError("住所（ふりがな）を入力してください。"); return; }
       if (!companyPhone.trim()) { setError("会社電話番号を入力してください。"); return; }
-      if (!contactLastName.trim()) { setError("担当者の姓を入力してください。"); return; }
-      if (!contactFirstName.trim()) { setError("担当者の名を入力してください。"); return; }
+      if (!contactName.trim()) { setError("担当者氏名を入力してください。"); return; }
+      if (!contactNameKana.trim()) { setError("担当者氏名（ふりがな）を入力してください。"); return; }
       if (!contactDepartment) { setError("担当部署を選択してください。"); return; }
       if (!contactPhone.trim()) { setError("担当電話番号を入力してください。"); return; }
       if (contactPhone.trim() === companyPhone.trim()) { setError("担当電話番号は会社電話番号と異なる番号を入力してください。"); return; }
@@ -116,12 +120,12 @@ export default function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyStreet, companyBuilding, companyPhone, contactLastName, contactFirstName, contactDepartment, contactPhone, message }),
+        body: JSON.stringify({ name, email, category, companyName, companyNameKana, companyPostal, companyPrefecture, companyCity, companyStreet, companyBuilding, companyAddressKana, companyPhone, contactName, contactNameKana, contactDepartment, contactPhone, message }),
       });
 
       if (!res.ok) throw new Error("送信失敗");
 
-      sessionStorage.setItem("contactData", JSON.stringify({ name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyStreet, companyBuilding, companyPhone, contactLastName, contactFirstName, contactDepartment, contactPhone, message }));
+      sessionStorage.setItem("contactData", JSON.stringify({ name, email, category, companyName, companyNameKana, companyPostal, companyPrefecture, companyCity, companyStreet, companyBuilding, companyAddressKana, companyPhone, contactName, contactNameKana, contactDepartment, contactPhone, message }));
       router.push("/contact/thanks");
     } catch {
       setError("送信中にエラーが発生しました。時間をおいて再度お試しください。");
@@ -225,6 +229,18 @@ export default function ContactForm() {
                 </div>
                 <div className={styles.field}>
                   <label className={styles.label}>
+                    会社名（ふりがな） <span className={styles.required}>必須</span>
+                  </label>
+                  <input
+                    type="text"
+                    className={styles.input}
+                    value={companyNameKana}
+                    onChange={(e) => setCompanyNameKana(e.target.value)}
+                    placeholder="例）かぶしきがいしゃ〇〇"
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>
                     郵便番号 <span className={styles.required}>必須</span>
                   </label>
                   <input
@@ -285,6 +301,18 @@ export default function ContactForm() {
                 </div>
                 <div className={styles.field}>
                   <label className={styles.label}>
+                    住所（ふりがな） <span className={styles.required}>必須</span>
+                  </label>
+                  <input
+                    type="text"
+                    className={styles.input}
+                    value={companyAddressKana}
+                    onChange={(e) => setCompanyAddressKana(e.target.value)}
+                    placeholder="例）とうきょうとしぶやく〇〇1-2-3 〇〇びる5かい"
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>
                     会社電話番号 <span className={styles.required}>必須</span>
                   </label>
                   <input
@@ -299,22 +327,25 @@ export default function ContactForm() {
                   <label className={styles.label}>
                     担当者氏名 <span className={styles.required}>必須</span>
                   </label>
-                  <div className={styles.nameRow}>
-                    <input
-                      type="text"
-                      className={styles.input}
-                      value={contactLastName}
-                      onChange={(e) => setContactLastName(e.target.value)}
-                      placeholder="姓"
-                    />
-                    <input
-                      type="text"
-                      className={styles.input}
-                      value={contactFirstName}
-                      onChange={(e) => setContactFirstName(e.target.value)}
-                      placeholder="名"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    className={styles.input}
+                    value={contactName}
+                    onChange={(e) => setContactName(e.target.value)}
+                    placeholder="例）山田太郎"
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label}>
+                    担当者氏名（ふりがな） <span className={styles.required}>必須</span>
+                  </label>
+                  <input
+                    type="text"
+                    className={styles.input}
+                    value={contactNameKana}
+                    onChange={(e) => setContactNameKana(e.target.value)}
+                    placeholder="例）やまだたろう"
+                  />
                 </div>
                 <div className={styles.field}>
                   <label className={styles.label}>

@@ -11,7 +11,7 @@ function isValidLineUserId(id: string) {
 
 export async function POST(req: Request) {
   try {
-    const { name, email, category, companyName, companyPostal, companyPrefecture, companyCity, companyStreet, companyBuilding, companyPhone, contactLastName, contactFirstName, contactDepartment, contactPhone, message } = await req.json();
+    const { name, email, category, companyName, companyNameKana, companyPostal, companyPrefecture, companyCity, companyStreet, companyBuilding, companyAddressKana, companyPhone, contactName, contactNameKana, contactDepartment, contactPhone, message } = await req.json();
 
     if (!name || !email || !category || !message) {
       return NextResponse.json(
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     }
 
     if (category === "その他") {
-      if (!companyName || !companyPostal || !companyPrefecture || !companyCity || !companyStreet || !companyBuilding || !companyPhone || !contactLastName || !contactFirstName || !contactDepartment || !contactPhone) {
+      if (!companyName || !companyNameKana || !companyPostal || !companyPrefecture || !companyCity || !companyStreet || !companyBuilding || !companyAddressKana || !companyPhone || !contactName || !contactNameKana || !contactDepartment || !contactPhone) {
         return NextResponse.json(
           { ok: false, error: "「その他」の場合は会社情報・担当者情報を入力してください。" },
           { status: 400 }
@@ -49,13 +49,16 @@ export async function POST(req: Request) {
       const isOther = category === "その他";
       const companyRows = isOther
         ? `<tr><td style="padding:4px 0;color:#666;">会社名</td><td style="padding:4px 0 4px 16px;">${companyName}</td></tr>
+           <tr><td style="padding:4px 0;color:#666;">会社名（ふりがな）</td><td style="padding:4px 0 4px 16px;">${companyNameKana}</td></tr>
            <tr><td style="padding:4px 0;color:#666;">郵便番号</td><td style="padding:4px 0 4px 16px;">${companyPostal}</td></tr>
            <tr><td style="padding:4px 0;color:#666;">都道府県</td><td style="padding:4px 0 4px 16px;">${companyPrefecture}</td></tr>
            <tr><td style="padding:4px 0;color:#666;">市区町村</td><td style="padding:4px 0 4px 16px;">${companyCity}</td></tr>
            <tr><td style="padding:4px 0;color:#666;">番地</td><td style="padding:4px 0 4px 16px;">${companyStreet}</td></tr>
            <tr><td style="padding:4px 0;color:#666;">建物名・部屋番号</td><td style="padding:4px 0 4px 16px;">${companyBuilding}</td></tr>
+           <tr><td style="padding:4px 0;color:#666;">住所（ふりがな）</td><td style="padding:4px 0 4px 16px;">${companyAddressKana}</td></tr>
            <tr><td style="padding:4px 0;color:#666;">会社電話番号</td><td style="padding:4px 0 4px 16px;">${companyPhone}</td></tr>
-           <tr><td style="padding:4px 0;color:#666;">担当者氏名</td><td style="padding:4px 0 4px 16px;">${contactLastName} ${contactFirstName}</td></tr>
+           <tr><td style="padding:4px 0;color:#666;">担当者氏名</td><td style="padding:4px 0 4px 16px;">${contactName}</td></tr>
+           <tr><td style="padding:4px 0;color:#666;">担当者氏名（ふりがな）</td><td style="padding:4px 0 4px 16px;">${contactNameKana}</td></tr>
            <tr><td style="padding:4px 0;color:#666;">担当部署</td><td style="padding:4px 0 4px 16px;">${contactDepartment}</td></tr>
            <tr><td style="padding:4px 0;color:#666;">担当電話番号</td><td style="padding:4px 0 4px 16px;">${contactPhone}</td></tr>`
         : "";
@@ -119,14 +122,15 @@ export async function POST(req: Request) {
             `・メール：${email}\n` +
             `・種別：${category}\n` +
             (isOther
-              ? `・会社名：${companyName}\n` +
+              ? `・会社名：${companyName}（${companyNameKana}）\n` +
                 `・郵便番号：${companyPostal}\n` +
                 `・都道府県：${companyPrefecture}\n` +
                 `・市区町村：${companyCity}\n` +
                 `・番地：${companyStreet}\n` +
                 `・建物名・部屋番号：${companyBuilding}\n` +
+                `・住所（ふりがな）：${companyAddressKana}\n` +
                 `・会社電話番号：${companyPhone}\n` +
-                `・担当者氏名：${contactLastName} ${contactFirstName}\n` +
+                `・担当者氏名：${contactName}（${contactNameKana}）\n` +
                 `・担当部署：${contactDepartment}\n` +
                 `・担当電話番号：${contactPhone}\n`
               : "") +
@@ -155,14 +159,15 @@ export async function POST(req: Request) {
         `・メール：${email}\n` +
         `・種別：${category}\n` +
         (category === "その他"
-          ? `・会社名：${companyName}\n` +
+          ? `・会社名：${companyName}（${companyNameKana}）\n` +
             `・郵便番号：${companyPostal}\n` +
             `・都道府県：${companyPrefecture}\n` +
             `・市区町村：${companyCity}\n` +
             `・番地：${companyStreet}\n` +
             `・建物名・部屋番号：${companyBuilding}\n` +
+            `・住所（ふりがな）：${companyAddressKana}\n` +
             `・会社電話番号：${companyPhone}\n` +
-            `・担当者氏名：${contactLastName} ${contactFirstName}\n` +
+            `・担当者氏名：${contactName}（${contactNameKana}）\n` +
             `・担当部署：${contactDepartment}\n` +
             `・担当電話番号：${contactPhone}\n`
           : "") +
