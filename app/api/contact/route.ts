@@ -11,11 +11,18 @@ function isValidLineUserId(id: string) {
 
 export async function POST(req: Request) {
   try {
-    const { name, email, category, message } = await req.json();
+    const { name, email, category, companyName, companyAddress, companyPhone, message } = await req.json();
 
-    if (!name || !email || !message) {
+    if (!name || !email || !category || !message) {
       return NextResponse.json(
         { ok: false, error: "必須項目が不足しています。" },
+        { status: 400 }
+      );
+    }
+
+    if (category === "その他" && (!companyName || !companyAddress || !companyPhone)) {
+      return NextResponse.json(
+        { ok: false, error: "「その他」の場合は会社情報を入力してください。" },
         { status: 400 }
       );
     }
@@ -25,9 +32,13 @@ export async function POST(req: Request) {
     const resendApiKey = process.env.RESEND_API_KEY;
     if (resendApiKey) {
       const resend = new Resend(resendApiKey);
-      const categoryText = category ? `\nお問い合わせ種別：${category}` : "";
-
-      const categoryRow = category ? `<tr><td style="padding:4px 0;color:#666;">種別</td><td style="padding:4px 0 4px 16px;">${category}</td></tr>` : "";
+      const isOther = category === "その他";
+      const companyRows = isOther
+        ? `<tr><td style="padding:4px 0;color:#666;">会社名</td><td style="padding:4px 0 4px 16px;">${companyName}</td></tr>
+           <tr><td style="padding:4px 0;color:#666;">会社住所</td><td style="padding:4px 0 4px 16px;">${companyAddress}</td></tr>
+           <tr><td style="padding:4px 0;color:#666;">会社電話番号</td><td style="padding:4px 0 4px 16px;">${companyPhone}</td></tr>`
+        : "";
+      const categoryRow = `<tr><td style="padding:4px 0;color:#666;">種別</td><td style="padding:4px 0 4px 16px;">${category}</td></tr>${companyRows}`;
       const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "https://y-de-one.com";
       const userHtml = `<!DOCTYPE html>
 <html lang="ja">
@@ -85,7 +96,12 @@ export async function POST(req: Request) {
             `▼ お問い合わせ内容\n` +
             `・お名前：${name}\n` +
             `・メール：${email}\n` +
-            (category ? `・種別：${category}\n` : "") +
+            `・種別：${category}\n` +
+            (isOther
+              ? `・会社名：${companyName}\n` +
+                `・会社住所：${companyAddress}\n` +
+                `・会社電話番号：${companyPhone}\n`
+              : "") +
             `・内容：\n${message}\n\n` +
             `このメールに「返信」を押すと ${name} 様へ直接返信できます。`,
         }),
@@ -109,7 +125,12 @@ export async function POST(req: Request) {
         `▼ お問い合わせ内容\n` +
         `・お名前：${name}\n` +
         `・メール：${email}\n` +
-        (category ? `・種別：${category}\n` : "") +
+        `・種別：${category}\n` +
+        (category === "その他"
+          ? `・会社名：${companyName}\n` +
+            `・会社住所：${companyAddress}\n` +
+            `・会社電話番号：${companyPhone}\n`
+          : "") +
         `・内容：\n${message}`;
 
       for (const adminId of adminUserIds) {

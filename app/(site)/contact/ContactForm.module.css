@@ -104,6 +104,21 @@
   margin-bottom: 12px;
 }
 
+.otherFields {
+  background-color: #fff8f8;
+  border: 1px solid #f5c0c0;
+  border-radius: 8px;
+  padding: 16px 16px 4px;
+  margin-bottom: 20px;
+}
+
+.otherNote {
+  font-size: 13px;
+  color: #c0392b;
+  font-weight: 600;
+  margin: 0 0 16px;
+}
+
 .submit {
   width: 100%;
   padding: 16px 0;
