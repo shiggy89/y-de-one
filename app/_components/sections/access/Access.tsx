@@ -39,8 +39,8 @@ const STATIONS: Station[] = [
     line: "JR山手線・西武新宿線・東京メトロ東西線",
     time: "徒歩約12分",
     steps: [
-      { step: 1, label: "高田馬場駅 早稲田口を出て左に曲がる", photo: "/images/access/takadanobaba-station-1.jpg" },
-      { step: 2, label: "高架下をくぐりまっすぐ進む（早稲田通り）", photo: "/images/access/takadanobaba-station-2.jpg" },
+      { step: 1, label: "高田馬場駅 早稲田口を出て左へ", photo: "/images/access/takadanobaba-station-1.jpg" },
+      { step: 2, label: "高架下をくぐり、早稲田通りをまっすぐ進む", photo: "/images/access/takadanobaba-station-2.jpg" },
       { step: 3, label: "みずほ銀行を右手にまっすぐ進む", photo: "/images/access/takadanobaba-station-3.jpg" },
       { step: 4, label: "郵便局を左手にまっすぐ進む", photo: "/images/access/takadanobaba-station-4.jpg" },
       { step: 5, label: "オオゼキを右手にまっすぐ進む", photo: "/images/access/takadanobaba-station-5.jpg" },
