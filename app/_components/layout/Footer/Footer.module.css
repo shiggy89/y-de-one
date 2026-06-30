@@ -84,6 +84,20 @@
   margin-top: 8px;
 }
 
+.footerNavGroup {
+  font-weight: 700;
+  font-size: 11px;
+  opacity: 0.6;
+  letter-spacing: 0.08em;
+  margin-top: 20px !important;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.footerNav li.footerNavGroup:first-child {
+  margin-top: 0 !important;
+}
+
 .footerNav a {
   color: #ffffff;
   text-decoration: none;

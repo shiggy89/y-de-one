@@ -16,32 +16,27 @@ type NavItem =
 
 const NAV_ITEMS: NavItem[] = [
   { label: "ホーム", href: "/" },
+  { label: "レッスンスケジュール", href: "/class#schedule" },
   {
-    label: "レッスン",
+    label: "クラス",
     children: [
-      {
-        label: "クラス",
-        children: [
-          { label: "大人バレエクラス", href: "/class" },
-          { label: "モダンバレエクラス", href: "/modern-ballet" },
-          { label: "埼玉クラス（門馬和樹クラス）", href: "/saitama" },
-          { label: "ダウン症の方向けクラス", href: "/down-syndrome" },
-        ],
-      },
-      { label: "レッスンスケジュール", href: "/class#schedule" },
-      { label: "料金", href: "/price" },
-      { label: "講師", href: "/instructor" },
+      { label: "大人バレエクラス", href: "/class" },
+      { label: "モダンバレエクラス", href: "/modern-ballet" },
+      { label: "埼玉クラス（門馬和樹クラス）", href: "/saitama" },
+      { label: "ダウン症の方向けクラス", href: "/down-syndrome" },
     ],
   },
+  { label: "料金", href: "/price" },
+  { label: "講師", href: "/instructor" },
   {
     label: "Y-de-ONEについて",
     children: [
       { label: "スタジオ紹介", href: "/studio" },
       { label: "作品・活動", href: "/works" },
+      { label: "ブログ", href: "/blog" },
     ],
   },
   { label: "アクセス", href: "/access" },
-  { label: "ブログ", href: "/blog" },
   { label: "お知らせ", href: "/news" },
   { label: "お問い合わせ", href: "/contact" },
   { label: "体験レッスン", href: "https://lin.ee/iz33eCM" },
