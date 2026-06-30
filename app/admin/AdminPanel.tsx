@@ -1081,11 +1081,9 @@ export default function AdminPanel() {
                     key={u.id}
                     className={`${styles.studentItem} ${selectedUserIds.includes(u.id) ? styles.selected : ""}`}
                     onClick={() => {
-                      const next = lessonType === "個人"
-                        ? (selectedUserIds.includes(u.id) ? [] : [u.id])
-                        : selectedUserIds.includes(u.id)
-                          ? selectedUserIds.filter((id) => id !== u.id)
-                          : [...selectedUserIds, u.id];
+                      const next = selectedUserIds.includes(u.id)
+                        ? selectedUserIds.filter((id) => id !== u.id)
+                        : [...selectedUserIds, u.id];
                       setSelectedUserIds(next);
                       setAttendanceError(null);
                       const lessonTitle = lessonType === "祝日" ? holidayLessonType : selectedLesson?.title;
