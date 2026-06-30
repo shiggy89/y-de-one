@@ -89,7 +89,6 @@ export default function Footer() {
             <li><Link href="/works">作品・活動</Link></li>
             <li><Link href="/blog">ブログ</Link></li>
             <li className={styles.footerNavGroup}>その他</li>
-            <li><Link href="/">ホーム</Link></li>
             <li><Link href="/access">アクセス</Link></li>
             <li><Link href="/news">お知らせ</Link></li>
             <li><Link href="/contact">お問い合わせ</Link></li>

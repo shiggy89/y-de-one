@@ -15,7 +15,6 @@ type NavItem =
   | { label: string; href?: undefined; children: NavChild[] };
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "ホーム", href: "/" },
   { label: "スケジュール", href: "/class#schedule" },
   {
     label: "クラス",
