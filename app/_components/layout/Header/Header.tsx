@@ -184,7 +184,7 @@ export default function Header() {
                     onClick={handleClose}
                     className={isNews ? styles.newsNavLink : ""}
                   >
-                    {item.label}
+                    {isLessonInfo ? <>祝日・変更・不定期レッスンと<br />休講のお知らせ</> : item.label}
                     {isNews && showBadge && <span className={styles.navBadge} />}
                   </Link>
                 </li>
