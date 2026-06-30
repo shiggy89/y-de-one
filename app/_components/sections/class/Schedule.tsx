@@ -143,7 +143,7 @@ export default function Schedule() {
       </div>
       <p className={styles.scheduleNote}>
         <i className="fa-solid fa-circle-info" aria-hidden="true" />
-        {"クラスが変更になっている場合がございます。最新の休講・振替情報は"}<a href="/news">こちら</a>
+        {"クラスが変更になっている場合がございます。最新の休講・振替情報は"}<a href="/lesson-info">こちら</a>
       </p>
       <div className={styles.scheduleCtaWrap}>
         <SectionCtaButton />
