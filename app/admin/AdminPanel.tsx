@@ -1980,6 +1980,7 @@ export default function AdminPanel() {
       {/* ━━━ 変更・休講 ━━━ */}
       {tab === "lesson_info" && isSuperAdmin && (
         <div className={styles.section}>
+          <div className={styles.lessonInfoWrapper}>
           <p className={styles.sectionTitle}>祝日・変更・不定期レッスン</p>
           <div className={styles.noticeForm}>
             <textarea
@@ -2035,6 +2036,7 @@ export default function AdminPanel() {
           </div>
 
           {lessonInfoMsg && <p className={styles.noticeMsg}>{lessonInfoMsg}</p>}
+          </div>
         </div>
       )}
 

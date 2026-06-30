@@ -1646,6 +1646,10 @@
 }
 
 /* ━━━ 変更・休講タブ ━━━ */
+.lessonInfoWrapper {
+  padding: 0 16px;
+}
+
 .lessonInfoTextarea {
   width: 100%;
   box-sizing: border-box;
