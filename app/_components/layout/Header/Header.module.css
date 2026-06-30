@@ -169,6 +169,11 @@
   }
 }
 
+/* 変更・休講（スマホのみ） */
+.lessonInfoNavItem {
+  display: none;
+}
+
 /* 体験レッスンCTA */
 .ctaItem a {
   color: #0090e8;
@@ -304,6 +309,10 @@
 
   .globalNav.isOpen {
     display: flex;
+  }
+
+  .lessonInfoNavItem {
+    display: block;
   }
 
   .globalNav > li {

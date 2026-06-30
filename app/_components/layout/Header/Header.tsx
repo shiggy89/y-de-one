@@ -15,6 +15,7 @@ type NavItem =
   | { label: string; href?: undefined; children: NavChild[] };
 
 const NAV_ITEMS: NavItem[] = [
+  { label: "祝日・変更・不定期レッスンと休講のお知らせ", href: "/lesson-info" },
   { label: "スケジュール", href: "/class#schedule" },
   {
     label: "クラス",
@@ -175,8 +176,9 @@ export default function Header() {
               }
 
               const isNews = item.label === "お知らせ";
+              const isLessonInfo = item.href === "/lesson-info";
               return (
-                <li key={item.label} className={isCta ? styles.ctaItem : ""}>
+                <li key={item.label} className={`${isCta ? styles.ctaItem : ""} ${isLessonInfo ? styles.lessonInfoNavItem : ""}`}>
                   <Link
                     href={item.href}
                     onClick={handleClose}
