@@ -41,6 +41,9 @@
   .content,
   .empty {
     width: 90%;
-    font-size: 15px;
+  }
+
+  .content {
+    font-size: 18px;
   }
 }
