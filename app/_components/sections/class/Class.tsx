@@ -29,7 +29,7 @@ const CLASS_ITEMS = [
   },
   {
     title: "ポワント",
-    level: "★★☆",
+    level: "★★★",
     text: "トゥシューズを履いて行うバレエクラスです。安全のため、ポワント向けのバレエクラスへの参加が必要となります。",
     icon: "/images/class/class6_icon.png",
     bg: styles.creamCard,
