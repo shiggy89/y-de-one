@@ -16,7 +16,7 @@ type NavItem =
 
 const NAV_ITEMS: NavItem[] = [
   { label: "ホーム", href: "/" },
-  { label: "レッスンスケジュール", href: "/class#schedule" },
+  { label: "スケジュール", href: "/class#schedule" },
   {
     label: "クラス",
     children: [
@@ -29,7 +29,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "料金", href: "/price" },
   { label: "講師", href: "/instructor" },
   {
-    label: "Y-de-ONEについて",
+    label: "Y-de-ONE",
     children: [
       { label: "スタジオ紹介", href: "/studio" },
       { label: "作品・活動", href: "/works" },

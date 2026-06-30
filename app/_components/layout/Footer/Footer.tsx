@@ -77,14 +77,14 @@ export default function Footer() {
         <div className={`${styles.footerCol} ${styles.footerLinks}`}>
           <ul className={styles.footerNav}>
             <li className={styles.footerNavGroup}>レッスン</li>
-            <li><Link href="/class#schedule">レッスンスケジュール</Link></li>
+            <li><Link href="/class#schedule">スケジュール</Link></li>
             <li><Link href="/class">大人バレエクラス</Link></li>
             <li><Link href="/modern-ballet">モダンバレエクラス</Link></li>
             <li><Link href="/saitama">埼玉クラス（門馬和樹クラス）</Link></li>
             <li><Link href="/down-syndrome">ダウン症の方向けクラス</Link></li>
             <li><Link href="/price">料金</Link></li>
             <li><Link href="/instructor">講師</Link></li>
-            <li className={styles.footerNavGroup}>Y-de-ONEについて</li>
+            <li className={styles.footerNavGroup}>Y-de-ONE</li>
             <li><Link href="/studio">スタジオ紹介</Link></li>
             <li><Link href="/works">作品・活動</Link></li>
             <li><Link href="/blog">ブログ</Link></li>
