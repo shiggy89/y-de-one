@@ -49,6 +49,14 @@ export default function ModernBalletFaq() {
             question="体験レッスンはモダンバレエクラスで受けられますか？"
             answer={<>はい、モダンバレエクラスでの体験レッスン（¥3,300）と無料見学を随時受け付けています。LINEからお気軽にご予約ください。<a href="https://lin.ee/iz33eCM" style={{ color: "#de4e8c", fontWeight: 700, textDecoration: "underline" }}>体験レッスンはこちら →</a></>}
           />
+          <FaqItem
+            question="男性でも参加できますか？"
+            answer="もちろんです。男性の生徒さんも多数通われています。年齢・性別問わず、どなたでも歓迎します。"
+          />
+          <FaqItem
+            question="体型や性別に関係なく参加できますか？"
+            answer="はい、体型・年齢・性別を問わず、どなたでも大歓迎です。LGBTQの方も安心してご参加いただけます。Y-de-ONEは、すべての方が自分らしく踊れる環境づくりを大切にしています。"
+          />
         </dl>
       </div>
     </section>
