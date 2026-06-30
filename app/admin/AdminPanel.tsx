@@ -607,7 +607,7 @@ export default function AdminPanel() {
   useEffect(() => {
     if (tab === "hp_news" && isAdmin) fetchHpNews();
     if (tab === "blog" && isAdmin) { fetchBlogList(); fetchCategories(); setBlogView("list"); }
-    if (tab === "lesson_info" && isSuperAdmin) fetchLessonInfo();
+    if (tab === "lesson_info" && isAdmin) fetchLessonInfo();
   }, [tab, isAdmin, isSuperAdmin]);
 
   useEffect(() => {
@@ -929,9 +929,7 @@ export default function AdminPanel() {
           <button className={`${styles.tab} ${tab === "ledger" ? styles.active : ""}`} onClick={() => changeTab("ledger")}>出席簿</button>
           <button className={`${styles.tab} ${tab === "users" ? styles.active : ""}`} onClick={() => changeTab("users")}>会員管理</button>
           <button className={`${styles.tab} ${tab === "report" ? styles.active : ""}`} onClick={() => changeTab("report")}>レポート</button>
-          {isSuperAdmin && (
-            <button className={`${styles.tab} ${tab === "lesson_info" ? styles.active : ""}`} onClick={() => changeTab("lesson_info")}>変更・休講</button>
-          )}
+          <button className={`${styles.tab} ${tab === "lesson_info" ? styles.active : ""}`} onClick={() => changeTab("lesson_info")}>変更・休講</button>
           <button className={`${styles.tab} ${tab === "hp_news" ? styles.active : ""}`} onClick={() => changeTab("hp_news")}>お知らせ</button>
           <button className={`${styles.tab} ${tab === "blog" ? styles.active : ""}`} onClick={() => changeTab("blog")}>ブログ</button>
           {/* <button className={`${styles.tab} ${tab === "message" ? styles.active : ""}`} onClick={() => changeTab("message")}>メッセージ</button> */}
@@ -1978,7 +1976,7 @@ export default function AdminPanel() {
       </div>
 
       {/* ━━━ 変更・休講 ━━━ */}
-      {tab === "lesson_info" && isSuperAdmin && (
+      {tab === "lesson_info" && isAdmin && (
         <div className={styles.section}>
           <div className={styles.lessonInfoWrapper}>
           <p className={styles.sectionTitle}>祝日・変更・不定期レッスン</p>

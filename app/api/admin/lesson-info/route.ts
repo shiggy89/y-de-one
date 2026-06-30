@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { requireSuperAdmin } from "@/lib/superAdmin";
+import { requireAdmin } from "@/lib/adminAuth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
-  if (!await requireSuperAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { data, error } = await supabaseAdmin
     .from("lesson_info")
     .select("section, content, updated_at");
@@ -14,7 +14,7 @@ export async function GET(req: Request) {
 }
 
 export async function PUT(req: Request) {
-  if (!await requireSuperAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { section, content } = await req.json();
   if (!section || !["change", "closed"].includes(section)) {
     return NextResponse.json({ error: "section は change か closed のみ" }, { status: 400 });
