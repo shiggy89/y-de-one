@@ -611,6 +611,10 @@ export default function AdminPanel() {
   }, [tab, isAdmin, isSuperAdmin]);
 
   useEffect(() => {
+    if (isAdmin) fetchLessonInfo();
+  }, [isAdmin]);
+
+  useEffect(() => {
     if (tab === "blog" && isAdmin && blogView === "list") fetchBlogList();
   }, [blogView]);
 
