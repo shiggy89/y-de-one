@@ -26,7 +26,7 @@ type User = {
   is_admin: boolean;
 };
 
-type Tab = "attendance" | "ledger" | "users" | "message" | "direct" | "report" | "hp_news" | "blog" | "analytics";
+type Tab = "attendance" | "ledger" | "users" | "message" | "direct" | "report" | "hp_news" | "blog" | "lesson_info" | "analytics";
 
 type HpNewsRecord = { id: number; title: string; content: string; category: string | null; published_at: string };
 
@@ -125,7 +125,7 @@ export default function AdminPanel() {
   const [tab, setTab] = useState<Tab>(() => {
     if (typeof window !== "undefined") {
       const hash = window.location.hash.replace("#", "") as Tab;
-      const valid: Tab[] = ["attendance", "ledger", "users", "message", "direct", "report", "hp_news", "blog", "analytics"];
+      const valid: Tab[] = ["attendance", "ledger", "users", "message", "direct", "report", "hp_news", "blog", "lesson_info", "analytics"];
       if (valid.includes(hash)) return hash;
     }
     return "attendance";
@@ -266,6 +266,33 @@ export default function AdminPanel() {
         body: JSON.stringify({ title: item.title }),
       }),
     ]);
+  };
+
+  // 変更・休講 管理
+  const [lessonInfoChange, setLessonInfoChange] = useState("");
+  const [lessonInfoClosed, setLessonInfoClosed] = useState("");
+  const [lessonInfoSaving, setLessonInfoSaving] = useState<"change" | "closed" | null>(null);
+  const [lessonInfoMsg, setLessonInfoMsg] = useState<string | null>(null);
+
+  const fetchLessonInfo = async () => {
+    const res = await adminFetch("/api/admin/lesson-info", { cache: "no-store" });
+    const data = await res.json();
+    const items: { section: string; content: string }[] = data.items ?? [];
+    setLessonInfoChange(items.find((r) => r.section === "change")?.content ?? "");
+    setLessonInfoClosed(items.find((r) => r.section === "closed")?.content ?? "");
+  };
+
+  const handleSaveLessonInfo = async (section: "change" | "closed") => {
+    setLessonInfoSaving(section);
+    setLessonInfoMsg(null);
+    const content = section === "change" ? lessonInfoChange : lessonInfoClosed;
+    const res = await adminFetch("/api/admin/lesson-info", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ section, content }),
+    });
+    setLessonInfoMsg(res.ok ? "保存しました" : "保存に失敗しました");
+    setLessonInfoSaving(null);
   };
 
   // カテゴリ管理
@@ -580,7 +607,8 @@ export default function AdminPanel() {
   useEffect(() => {
     if (tab === "hp_news" && isAdmin) fetchHpNews();
     if (tab === "blog" && isAdmin) { fetchBlogList(); fetchCategories(); setBlogView("list"); }
-  }, [tab, isAdmin]);
+    if (tab === "lesson_info" && isSuperAdmin) fetchLessonInfo();
+  }, [tab, isAdmin, isSuperAdmin]);
 
   useEffect(() => {
     if (tab === "blog" && isAdmin && blogView === "list") fetchBlogList();
@@ -905,6 +933,9 @@ export default function AdminPanel() {
           <button className={`${styles.tab} ${tab === "blog" ? styles.active : ""}`} onClick={() => changeTab("blog")}>ブログ</button>
           {/* <button className={`${styles.tab} ${tab === "message" ? styles.active : ""}`} onClick={() => changeTab("message")}>メッセージ</button> */}
           <button className={`${styles.tab} ${tab === "direct" ? styles.active : ""}`} onClick={() => changeTab("direct")}>個別メッセージ</button>
+          {isSuperAdmin && (
+            <button className={`${styles.tab} ${tab === "lesson_info" ? styles.active : ""}`} onClick={() => changeTab("lesson_info")}>変更・休講</button>
+          )}
           {isSuperAdmin && (
             <button className={`${styles.tab} ${tab === "analytics" ? styles.active : ""}`} onClick={() => changeTab("analytics")}>分析</button>
           )}
@@ -1945,6 +1976,45 @@ export default function AdminPanel() {
         </div>
       )}
       </div>
+
+      {/* ━━━ 変更・休講 ━━━ */}
+      {tab === "lesson_info" && isSuperAdmin && (
+        <div className={styles.section}>
+          <p className={styles.sectionTitle}>祝日・変更・不定期レッスン</p>
+          <textarea
+            className={styles.noticeTextarea}
+            placeholder="変更・臨時レッスンの内容を入力（空欄の場合「お知らせなし」と表示されます）"
+            value={lessonInfoChange}
+            onChange={(e) => setLessonInfoChange(e.target.value)}
+            rows={8}
+          />
+          <button
+            className={styles.noticePostBtn}
+            onClick={() => handleSaveLessonInfo("change")}
+            disabled={lessonInfoSaving === "change"}
+          >
+            {lessonInfoSaving === "change" ? "保存中..." : "保存する"}
+          </button>
+
+          <p className={styles.sectionTitle} style={{ marginTop: 40 }}>休講</p>
+          <textarea
+            className={styles.noticeTextarea}
+            placeholder="休講の内容を入力（空欄の場合「お知らせなし」と表示されます）"
+            value={lessonInfoClosed}
+            onChange={(e) => setLessonInfoClosed(e.target.value)}
+            rows={8}
+          />
+          <button
+            className={styles.noticePostBtn}
+            onClick={() => handleSaveLessonInfo("closed")}
+            disabled={lessonInfoSaving === "closed"}
+          >
+            {lessonInfoSaving === "closed" ? "保存中..." : "保存する"}
+          </button>
+
+          {lessonInfoMsg && <p className={styles.noticeMsg}>{lessonInfoMsg}</p>}
+        </div>
+      )}
 
       {/* ━━━ 分析 ━━━ */}
       {tab === "analytics" && isSuperAdmin && (

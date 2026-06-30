@@ -1,0 +1,45 @@
+.page {
+  padding: 16px 0 80px;
+}
+
+.section {
+  padding: 0 0 48px;
+}
+
+.content {
+  margin: 0 auto;
+  width: 80%;
+  max-width: 640px;
+  font-size: 16px;
+  line-height: 2;
+  color: #333;
+  white-space: pre-line;
+}
+
+.empty {
+  margin: 0 auto;
+  width: 80%;
+  max-width: 640px;
+  color: #aaa;
+  font-size: 15px;
+  text-align: center;
+  padding: 16px 0 32px;
+}
+
+.divider {
+  border: none;
+  border-top: 2px dashed #ddd;
+  margin: 0 0 48px;
+}
+
+@media (max-width: 576px) {
+  .page {
+    padding: 16px 0 60px;
+  }
+
+  .content,
+  .empty {
+    width: 90%;
+    font-size: 15px;
+  }
+}
