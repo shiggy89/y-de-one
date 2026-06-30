@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import styles from "./Header.module.css";
 import { useNewsBadge } from "../../hooks/useNewsBadge";
 
@@ -45,8 +46,15 @@ const NAV_ITEMS: NavItem[] = [
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const showBadge = useNewsBadge();
+  const pathname = usePathname();
   const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set());
   const [openSubDropdowns, setOpenSubDropdowns] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    setIsOpen(false);
+    setOpenDropdowns(new Set());
+    setOpenSubDropdowns(new Set());
+  }, [pathname]);
 
   const handleToggle = () => {
     setIsOpen((prev) => !prev);
@@ -152,7 +160,7 @@ export default function Header() {
                                 <ul className={`${styles.subDropdown} ${isSubOpen ? styles.subDropdownOpen : ""}`}>
                                   {child.children.map((grandchild) => (
                                     <li key={grandchild.href}>
-                                      <Link href={grandchild.href} onClick={handleClose}>
+                                      <Link href={grandchild.href} onClick={() => setIsOpen(false)}>
                                         <span>{grandchild.label}</span>
                                       </Link>
                                     </li>
@@ -163,7 +171,7 @@ export default function Header() {
                           }
                           return (
                             <li key={child.href}>
-                              <Link href={child.href} onClick={handleClose}>
+                              <Link href={child.href} onClick={() => setIsOpen(false)}>
                                 <span>{child.label}</span>
                               </Link>
                             </li>
@@ -181,8 +189,7 @@ export default function Header() {
                 <li key={item.label} className={`${isCta ? styles.ctaItem : ""} ${isLessonInfo ? styles.lessonInfoNavItem : ""}`}>
                   <Link
                     href={item.href}
-                    onClick={handleClose}
-                    className={isNews ? styles.newsNavLink : ""}
+                                        className={isNews ? styles.newsNavLink : ""}
                   >
                     {isLessonInfo ? <>祝日・変更・不定期レッスンと<br />休講のお知らせ</> : item.label}
                     {isNews && showBadge && <span className={styles.navBadge} />}
