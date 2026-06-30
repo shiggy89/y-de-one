@@ -929,13 +929,13 @@ export default function AdminPanel() {
           <button className={`${styles.tab} ${tab === "ledger" ? styles.active : ""}`} onClick={() => changeTab("ledger")}>出席簿</button>
           <button className={`${styles.tab} ${tab === "users" ? styles.active : ""}`} onClick={() => changeTab("users")}>会員管理</button>
           <button className={`${styles.tab} ${tab === "report" ? styles.active : ""}`} onClick={() => changeTab("report")}>レポート</button>
+          {isSuperAdmin && (
+            <button className={`${styles.tab} ${tab === "lesson_info" ? styles.active : ""}`} onClick={() => changeTab("lesson_info")}>変更・休講</button>
+          )}
           <button className={`${styles.tab} ${tab === "hp_news" ? styles.active : ""}`} onClick={() => changeTab("hp_news")}>お知らせ</button>
           <button className={`${styles.tab} ${tab === "blog" ? styles.active : ""}`} onClick={() => changeTab("blog")}>ブログ</button>
           {/* <button className={`${styles.tab} ${tab === "message" ? styles.active : ""}`} onClick={() => changeTab("message")}>メッセージ</button> */}
           <button className={`${styles.tab} ${tab === "direct" ? styles.active : ""}`} onClick={() => changeTab("direct")}>個別メッセージ</button>
-          {isSuperAdmin && (
-            <button className={`${styles.tab} ${tab === "lesson_info" ? styles.active : ""}`} onClick={() => changeTab("lesson_info")}>変更・休講</button>
-          )}
           {isSuperAdmin && (
             <button className={`${styles.tab} ${tab === "analytics" ? styles.active : ""}`} onClick={() => changeTab("analytics")}>分析</button>
           )}
@@ -1981,36 +1981,58 @@ export default function AdminPanel() {
       {tab === "lesson_info" && isSuperAdmin && (
         <div className={styles.section}>
           <p className={styles.sectionTitle}>祝日・変更・不定期レッスン</p>
-          <textarea
-            className={styles.noticeTextarea}
-            placeholder="変更・臨時レッスンの内容を入力（空欄の場合「お知らせなし」と表示されます）"
-            value={lessonInfoChange}
-            onChange={(e) => setLessonInfoChange(e.target.value)}
-            rows={8}
-          />
-          <button
-            className={styles.noticePostBtn}
-            onClick={() => handleSaveLessonInfo("change")}
-            disabled={lessonInfoSaving === "change"}
-          >
-            {lessonInfoSaving === "change" ? "保存中..." : "保存する"}
-          </button>
+          <div className={styles.noticeForm}>
+            <textarea
+              className={styles.lessonInfoTextarea}
+              placeholder="変更・臨時レッスンの内容を入力&#10;（空欄の場合「お知らせなし」と表示されます）"
+              value={lessonInfoChange}
+              onChange={(e) => setLessonInfoChange(e.target.value)}
+              rows={8}
+            />
+            <div className={styles.lessonInfoBtns}>
+              <button
+                className={styles.noticePostBtn}
+                onClick={() => handleSaveLessonInfo("change")}
+                disabled={lessonInfoSaving === "change"}
+              >
+                {lessonInfoSaving === "change" ? "保存中..." : "保存する"}
+              </button>
+              <button
+                className={styles.lessonInfoClearBtn}
+                onClick={() => setLessonInfoChange("")}
+                disabled={lessonInfoSaving === "change"}
+              >
+                クリア
+              </button>
+            </div>
+          </div>
 
-          <p className={styles.sectionTitle} style={{ marginTop: 40 }}>休講</p>
-          <textarea
-            className={styles.noticeTextarea}
-            placeholder="休講の内容を入力（空欄の場合「お知らせなし」と表示されます）"
-            value={lessonInfoClosed}
-            onChange={(e) => setLessonInfoClosed(e.target.value)}
-            rows={8}
-          />
-          <button
-            className={styles.noticePostBtn}
-            onClick={() => handleSaveLessonInfo("closed")}
-            disabled={lessonInfoSaving === "closed"}
-          >
-            {lessonInfoSaving === "closed" ? "保存中..." : "保存する"}
-          </button>
+          <p className={styles.sectionTitle} style={{ marginTop: 32 }}>休講</p>
+          <div className={styles.noticeForm}>
+            <textarea
+              className={styles.lessonInfoTextarea}
+              placeholder="休講の内容を入力&#10;（空欄の場合「お知らせなし」と表示されます）"
+              value={lessonInfoClosed}
+              onChange={(e) => setLessonInfoClosed(e.target.value)}
+              rows={8}
+            />
+            <div className={styles.lessonInfoBtns}>
+              <button
+                className={styles.noticePostBtn}
+                onClick={() => handleSaveLessonInfo("closed")}
+                disabled={lessonInfoSaving === "closed"}
+              >
+                {lessonInfoSaving === "closed" ? "保存中..." : "保存する"}
+              </button>
+              <button
+                className={styles.lessonInfoClearBtn}
+                onClick={() => setLessonInfoClosed("")}
+                disabled={lessonInfoSaving === "closed"}
+              >
+                クリア
+              </button>
+            </div>
+          </div>
 
           {lessonInfoMsg && <p className={styles.noticeMsg}>{lessonInfoMsg}</p>}
         </div>
