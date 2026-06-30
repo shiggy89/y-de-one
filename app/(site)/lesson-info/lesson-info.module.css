@@ -7,7 +7,9 @@
 }
 
 .content {
-  margin: 0 320px;
+  margin: 0 auto;
+  width: 80%;
+  max-width: 640px;
   font-size: 16px;
   line-height: 2;
   color: #333;
