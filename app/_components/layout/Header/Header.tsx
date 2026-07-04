@@ -12,7 +12,7 @@ type NavChild =
   | { label: string; href: string; children?: undefined }
   | { label: string; href?: undefined; children: NavGrandchild[] };
 type NavItem =
-  | { label: string; href: string; children?: undefined }
+  | { label: string; href: string; mobileOnly?: boolean; children?: undefined }
   | { label: string; href?: undefined; children: NavChild[] };
 
 const NAV_ITEMS: NavItem[] = [
@@ -28,6 +28,7 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   { label: "料金", href: "/price" },
+  { label: "講師", href: "/instructor", mobileOnly: true },
   { label: "生徒の声", href: "/voice" },
   {
     label: "Y-de-ONE",
@@ -186,8 +187,9 @@ export default function Header() {
 
               const isNews = item.label === "お知らせ";
               const isLessonInfo = item.href === "/lesson-info";
+              const isMobileOnly = "mobileOnly" in item && item.mobileOnly;
               return (
-                <li key={item.label} className={`${isCta ? styles.ctaItem : ""} ${isLessonInfo ? styles.lessonInfoNavItem : ""}`}>
+                <li key={item.label} className={`${isCta ? styles.ctaItem : ""} ${isLessonInfo ? styles.lessonInfoNavItem : ""} ${isMobileOnly ? styles.mobileOnlyItem : ""}`}>
                   <Link
                     href={item.href}
                                         className={isNews ? styles.newsNavLink : ""}
