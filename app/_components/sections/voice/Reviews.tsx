@@ -138,7 +138,7 @@ export default async function Reviews() {
 
             {/* レビュー一覧 */}
             <ul className={styles.reviewList}>
-              {data.reviews.map((review, i) => (
+              {data.reviews.filter((r) => r.rating === 5).map((review, i) => (
                 <li key={i} className={styles.reviewCard}>
                   <div className={styles.cardHeader}>
                     <Avatar name={review.author_name} photoUrl={review.profile_photo_url} />
