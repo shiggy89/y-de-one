@@ -86,6 +86,7 @@ function isStandardLesson(lessonType: string, lessonTitle: string | null | undef
   if (lessonType === "リハーサル") return lessonTitle === "90分リハーサル";
   if (lessonType !== "通常" && lessonType !== "祝日") return false;
   if (lessonTitle === "ポワント" || lessonTitle === "プレモダン" || lessonTitle === "特別レッスン") return false;
+  if (lessonTitle === "バレエ基礎センター" || lessonTitle === "リハーサル") return false;
   return true;
 }
 
@@ -95,8 +96,10 @@ function calcLessonFee(countThisMonth: number, lessonType: string, privateMinute
   if (lessonType === "祝日") {
     if (lessonTitle === "特別レッスン") return 3000;
     if (lessonTitle === "ポワント" || lessonTitle === "プレモダン") return 1100;
+    if (lessonTitle === "バレエ基礎センター" || lessonTitle === "リハーサル") return 1100;
   } else if (lessonType === "通常") {
     if (lessonTitle === "ポワント" || lessonTitle === "プレモダン") return 1100;
+    if (lessonTitle === "バレエ基礎センター" || lessonTitle === "リハーサル") return 1100;
   }
   if (countThisMonth >= 9) return 2000;
   const total = LESSON_FEES_ONLY[countThisMonth - 1] ?? 2800;

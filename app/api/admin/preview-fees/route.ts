@@ -11,6 +11,7 @@ function calcLessonFee(count: number, lessonType: string, lessonTitle?: string):
     // バレエ・モダン → 通常と同じ回数制
   } else if (lessonType === "通常") {
     if (lessonTitle === "ポワント" || lessonTitle === "プレモダン") return 1100;
+    if (lessonTitle === "バレエ基礎センター" || lessonTitle === "リハーサル") return 1100;
   }
   if (count >= 9) return 2000;
   const total = LESSON_FEES_ONLY[count - 1] ?? 2800;

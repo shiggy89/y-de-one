@@ -33,8 +33,10 @@ const LESSONS_BY_DAY: Record<string, Lesson[]> = {
   ],
   Sun: [
     { start: "12:30", end: "14:00", title: "バレエ入門", teacher: "青山佳樹" },
-    { start: "14:30", end: "16:00", title: "バレエ基礎", teacher: "青山佳樹" },
-    { start: "16:00", end: "16:35", title: "ポワント", teacher: "青山佳樹" },
+    { start: "14:15", end: "15:45", title: "ポワント+バレエ基礎センター", teacher: "青山佳樹" },
+    { start: "14:15", end: "14:55", title: "ポワント", teacher: "青山佳樹" },
+    { start: "15:00", end: "15:45", title: "バレエ基礎センター", teacher: "青山佳樹" },
+    { start: "16:00", end: "16:35", title: "リハーサル", teacher: "" },
   ],
 };
 

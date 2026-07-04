@@ -38,8 +38,9 @@ const LESSONS: Lesson[] = [
   { day: "Sat", start: "14:30", end: "16:00", title: "モダンバレエ", teacher: "青山佳樹", type: "blue" },
   { day: "Sat", start: "16:30", end: "18:00", title: "リハーサル", teacher: "", type: "gray" },
   { day: "Sun", start: "12:30", end: "14:00", title: "バレエ\n入門", teacher: "青山佳樹", type: "pink", topOffsetPct: 3.4, stretch: true },
-  { day: "Sun", start: "14:30", end: "16:00", title: "バレエ\n基礎", teacher: "青山佳樹", type: "pink" },
-  { day: "Sun", start: "16:00", end: "16:35", title: "ポワント", teacher: "青山佳樹", type: "yellow" },
+  { day: "Sun", start: "14:15", end: "14:55", title: "ポワント", teacher: "青山佳樹", type: "yellow" },
+  { day: "Sun", start: "15:00", end: "15:45", title: "バレエ基礎\nセンター", teacher: "青山佳樹", type: "pink" },
+  { day: "Sun", start: "16:00", end: "16:35", title: "リハーサル", teacher: "", type: "gray" },
 ];
 
 const toMinutes = (time: string) => {
