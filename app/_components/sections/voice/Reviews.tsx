@@ -104,8 +104,8 @@ export default async function Reviews() {
     <section className={styles.section}>
       <div className="inner">
         <Heading2
-          title="生徒の声・口コミ"
-          lead="Y-de-ONEに通う生徒さんのリアルな声をご紹介します。"
+          title="生徒の声・口コミ・レビュー"
+          lead="Y-de-ONEに通う生徒さんのリアルな声・体験談をご紹介します。"
         />
 
         {data ? (
