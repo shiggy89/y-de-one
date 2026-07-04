@@ -231,6 +231,10 @@
     width: 100%;
   }
 
+  .googleButtons {
+    justify-content: center;
+  }
+
   .summaryScore {
     font-size: 40px;
   }
