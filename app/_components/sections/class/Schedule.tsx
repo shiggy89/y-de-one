@@ -52,7 +52,7 @@ const blockStyle = (start: string, end: string, topOffsetPct = 0) => {
   const baseTop = ((toMinutes(start) - START_MINUTES) / TOTAL_MINUTES) * 100;
   const duration = toMinutes(end) - toMinutes(start);
   const baseHeight = (duration / TOTAL_MINUTES) * 100;
-  const minHeightPct = duration <= 40 ? 10 : 2;
+  const minHeightPct = duration <= 40 ? 10 : duration <= 60 ? 14 : 2;
   const top = baseTop + topOffsetPct;
   const height = Math.max(minHeightPct, Math.min(baseHeight - 0.5, 100 - top));
   return { top: `${top}%`, height: `${height}%` };
