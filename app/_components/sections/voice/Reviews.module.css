@@ -227,6 +227,10 @@
     min-width: unset;
   }
 
+  .summaryBars {
+    width: 100%;
+  }
+
   .summaryScore {
     font-size: 40px;
   }
