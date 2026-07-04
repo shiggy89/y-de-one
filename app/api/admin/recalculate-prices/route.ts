@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/adminAuth";
 const LESSON_FEES_ONLY = [2800, 5400, 7800, 9600, 11800, 14000, 16200, 17600];
 
 function isStandardLesson(lessonType: string, lessonTitle: string | null | undefined): boolean {
+  if (lessonType === "リハーサル") return lessonTitle === "90分リハーサル";
   if (lessonType !== "通常" && lessonType !== "祝日") return false;
   if (lessonTitle === "ポワント" || lessonTitle === "プレモダン" || lessonTitle === "特別レッスン") return false;
   if (lessonTitle === "バレエ基礎センター" || lessonTitle === "リハーサル") return false;
@@ -13,6 +14,8 @@ function isStandardLesson(lessonType: string, lessonTitle: string | null | undef
 
 function calcPrice(countThisMonth: number, lessonType: string, privateMinutes = 15, lessonTitle?: string): number {
   if (lessonType === "個人") return 2500 * (privateMinutes / 15);
+  if (lessonType === "リハーサル" && lessonTitle === "35分リハーサル") return 1100;
+  if (lessonType === "リハーサル" && lessonTitle === "120分リハーサル") return 3000;
   if (lessonType === "祝日") {
     if (lessonTitle === "特別レッスン") return 3000;
     if (lessonTitle === "ポワント" || lessonTitle === "プレモダン") return 1100;

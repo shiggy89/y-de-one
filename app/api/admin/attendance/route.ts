@@ -7,6 +7,7 @@ const LESSON_FEES_ONLY = [2800, 5400, 7800, 9600, 11800, 14000, 16200, 17600];
 
 function calcPrice(countThisMonth: number, lessonType: string, privateMinutes = 15, lessonTitle?: string): number {
   if (lessonType === "個人") return 2500 * (privateMinutes / 15);
+  if (lessonType === "リハーサル" && lessonTitle === "35分リハーサル") return 1100;
   if (lessonType === "リハーサル" && lessonTitle === "120分リハーサル") return 3000;
   if (lessonType === "祝日") {
     if (lessonTitle === "特別レッスン") return 3000;

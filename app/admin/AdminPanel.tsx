@@ -92,6 +92,7 @@ function isStandardLesson(lessonType: string, lessonTitle: string | null | undef
 
 function calcLessonFee(countThisMonth: number, lessonType: string, privateMinutes = 15, lessonTitle?: string): number {
   if (lessonType === "個人") return 2500 * (privateMinutes / 15);
+  if (lessonType === "リハーサル" && lessonTitle === "35分リハーサル") return 1100;
   if (lessonType === "リハーサル" && lessonTitle === "120分リハーサル") return 3000;
   if (lessonType === "祝日") {
     if (lessonTitle === "特別レッスン") return 3000;
@@ -150,7 +151,7 @@ export default function AdminPanel() {
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [holidayLessonType, setHolidayLessonType] = useState("特別レッスン");
   const [privateMinutes, setPrivateMinutes] = useState(15);
-  const [rehearsalDuration, setRehearsalDuration] = useState<"90" | "120">("90");
+  const [rehearsalDuration, setRehearsalDuration] = useState<"35" | "90" | "120">("90");
   const [feePreviews, setFeePreviews] = useState<{
     userId: number; name: string; line_picture_url: string | null;
     isTeacher: boolean; lessonFee: number; maintenanceFee: number; total: number;
@@ -1019,7 +1020,7 @@ export default function AdminPanel() {
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>レッスンを選択</label>
                 <div className={styles.lessonGrid}>
-                  {(["90", "120"] as const).map((dur) => (
+                  {(["35", "90", "120"] as const).map((dur) => (
                     <button
                       key={dur}
                       type="button"
