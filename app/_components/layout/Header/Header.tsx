@@ -29,6 +29,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   { label: "料金", href: "/price" },
   { label: "講師", href: "/instructor" },
+  { label: "生徒の声", href: "/voice" },
   {
     label: "Y-de-ONE",
     children: [
