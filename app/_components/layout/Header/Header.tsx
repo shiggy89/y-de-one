@@ -28,11 +28,11 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   { label: "料金", href: "/price" },
-  { label: "講師", href: "/instructor" },
   { label: "生徒の声", href: "/voice" },
   {
     label: "Y-de-ONE",
     children: [
+      { label: "講師", href: "/instructor" },
       { label: "スタジオ紹介", href: "/studio" },
       { label: "作品・活動", href: "/works" },
       { label: "ブログ", href: "/blog" },
