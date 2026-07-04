@@ -126,7 +126,7 @@ export default async function Reviews() {
 
             <div className={styles.googleButtons}>
               <a
-                href={`https://www.google.com/maps/place/?q=place_id:${process.env.GOOGLE_PLACE_ID}`}
+                href="https://www.google.com/maps/search/?api=1&query_place_id=ChIJVVWByjWNGGARsduqmASnfks"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.googleButton}
