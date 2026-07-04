@@ -1,3 +1,7 @@
+.mobileBreak {
+  display: none;
+}
+
 .section {
   padding: 60px 0 80px;
 }
@@ -229,6 +233,10 @@
 
   .summaryBars {
     width: 100%;
+  }
+
+  .mobileBreak {
+    display: block;
   }
 
   .googleButtons {

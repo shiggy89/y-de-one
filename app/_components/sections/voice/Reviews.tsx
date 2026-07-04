@@ -105,7 +105,7 @@ export default async function Reviews() {
       <div className="inner">
         <Heading2
           title="生徒の声・口コミ・レビュー"
-          lead="Y-de-ONEに通う生徒さんのリアルな声・体験談をご紹介します。"
+          lead={<>Y-de-ONEに通う生徒さんの<br className={styles.mobileBreak} />リアルな声・体験談をご紹介します。</>}
         />
 
         {data ? (
