@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# 管理画面・ユーザーページはクロール除外
+Disallow: /admin
+Disallow: /mypage
+Disallow: /register
+Disallow: /contact/thanks
+
+Sitemap: https://y-de-one.com/sitemap.xml
