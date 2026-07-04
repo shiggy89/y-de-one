@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useRef, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import Heading2 from "../../_components/sections/common/Heading2";
 import styles from "./ContactForm.module.css";
 
@@ -63,6 +64,8 @@ const DEPARTMENTS = [
 
 export default function ContactForm() {
   const router = useRouter();
+  const turnstileRef = useRef<TurnstileInstance>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [emailConfirm, setEmailConfirm] = useState("");
@@ -114,13 +117,14 @@ export default function ContactForm() {
     }
     if (!message.trim()) { setError("お問い合わせ内容を入力してください。"); return; }
     if (isOther && message.trim().length > 100) { setError("「その他」のお問い合わせ内容は100文字以内でご入力ください。"); return; }
+    if (!turnstileToken) { setError("認証に失敗しました。ページを再読み込みしてお試しください。"); return; }
 
     setSubmitting(true);
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, category, companyName, companyNameKana, companyPostal, companyPrefecture, companyCity, companyStreet, companyBuilding, companyAddressKana, companyPhone, contactName, contactNameKana, contactDepartment, contactPhone, message }),
+        body: JSON.stringify({ name, email, category, companyName, companyNameKana, companyPostal, companyPrefecture, companyCity, companyStreet, companyBuilding, companyAddressKana, companyPhone, contactName, contactNameKana, contactDepartment, contactPhone, message, turnstileToken }),
       });
 
       if (!res.ok) throw new Error("送信失敗");
@@ -129,6 +133,8 @@ export default function ContactForm() {
       router.push("/contact/thanks");
     } catch {
       setError("送信中にエラーが発生しました。時間をおいて再度お試しください。");
+      turnstileRef.current?.reset();
+      setTurnstileToken(null);
       setSubmitting(false);
     }
   };
@@ -391,9 +397,18 @@ export default function ContactForm() {
               />
             </div>
 
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+              onSuccess={(token) => setTurnstileToken(token)}
+              onExpire={() => setTurnstileToken(null)}
+              onError={() => setTurnstileToken(null)}
+              options={{ language: "ja" }}
+            />
+
             {error && <p className={styles.error}>{error}</p>}
 
-            <button type="submit" className={styles.submit} disabled={submitting}>
+            <button type="submit" className={styles.submit} disabled={submitting || !turnstileToken}>
               {submitting ? "送信中..." : "送信する"}
             </button>
           </form>

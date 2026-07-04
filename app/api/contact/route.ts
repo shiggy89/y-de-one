@@ -11,13 +11,35 @@ function isValidLineUserId(id: string) {
 
 export async function POST(req: Request) {
   try {
-    const { name, email, category, companyName, companyNameKana, companyPostal, companyPrefecture, companyCity, companyStreet, companyBuilding, companyAddressKana, companyPhone, contactName, contactNameKana, contactDepartment, contactPhone, message } = await req.json();
+    const { name, email, category, companyName, companyNameKana, companyPostal, companyPrefecture, companyCity, companyStreet, companyBuilding, companyAddressKana, companyPhone, contactName, contactNameKana, contactDepartment, contactPhone, message, turnstileToken } = await req.json();
 
     if (!name || !email || !category || !message) {
       return NextResponse.json(
         { ok: false, error: "必須項目が不足しています。" },
         { status: 400 }
       );
+    }
+
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+    if (turnstileSecret) {
+      if (!turnstileToken) {
+        return NextResponse.json(
+          { ok: false, error: "認証トークンがありません。" },
+          { status: 400 }
+        );
+      }
+      const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ secret: turnstileSecret, response: turnstileToken }),
+      });
+      const verifyData = await verifyRes.json() as { success: boolean };
+      if (!verifyData.success) {
+        return NextResponse.json(
+          { ok: false, error: "認証に失敗しました。再度お試しください。" },
+          { status: 400 }
+        );
+      }
     }
 
     if (category === "その他") {
