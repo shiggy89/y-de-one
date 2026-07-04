@@ -134,15 +134,6 @@ export default async function Reviews() {
                 <GoogleColorIcon />
                 すべての口コミを見る
               </a>
-              <a
-                href="https://g.page/r/CbHbqpgEp35LEBM/review"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={styles.googleButton}
-              >
-                <GoogleColorIcon />
-                口コミを書く
-              </a>
             </div>
 
             {/* レビュー一覧 */}
