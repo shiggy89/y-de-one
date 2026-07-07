@@ -59,6 +59,12 @@ const blockStyle = (start: string, end: string, topOffsetPct = 0) => {
 };
 
 export default function Schedule() {
+  const today = new Date();
+  const isJuly2026 = today.getFullYear() === 2026 && today.getMonth() === 6;
+  const visibleLessons = isJuly2026
+    ? LESSONS.filter((l) => !(l.day === "Tue" && l.start === "19:30"))
+    : LESSONS;
+
   const renderBoard = (days: readonly (typeof DAYS)[number][]) => (
     <div className={styles.scheduleBoard}>
       <div
@@ -86,7 +92,7 @@ export default function Schedule() {
                 日
               </p>
             )}
-            {LESSONS.filter((lesson) => lesson.day === day).map((lesson) => (
+            {visibleLessons.filter((lesson) => lesson.day === day).map((lesson) => (
               <article
                 key={`${lesson.day}-${lesson.start}-${lesson.title}`}
                 className={`${styles.lessonBlock} ${styles[lesson.type]}`}

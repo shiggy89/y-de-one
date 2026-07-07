@@ -172,10 +172,23 @@ export default function TrialPage() {
 
   const getSlots = (): string[] => {
     if (!date) return [];
-    const day = new Date(date + "T00:00:00").getDay();
-    if (formType === "visit") return VISIT_SLOTS[day] ?? [];
+    const selected = new Date(date + "T00:00:00");
+    const day = selected.getDay();
+    const isJuly2026 = selected.getFullYear() === 2026 && selected.getMonth() === 6;
+
+    if (formType === "visit") {
+      let slots = VISIT_SLOTS[day] ?? [];
+      if (isJuly2026 && day === 2) {
+        slots = slots.filter((s) => !s.startsWith("19:30"));
+      }
+      return slots;
+    }
     if (!genre) return [];
-    return TRIAL_SLOTS[genre]?.[day] ?? [];
+    let slots = TRIAL_SLOTS[genre]?.[day] ?? [];
+    if (isJuly2026 && genre === "モダンバレエ" && day === 2) {
+      slots = slots.filter((s) => s !== "19:30 - 21:00");
+    }
+    return slots;
   };
 
   // ===== 送信 =====
