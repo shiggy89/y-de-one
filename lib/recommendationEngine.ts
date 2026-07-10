@@ -177,35 +177,29 @@ export function scoreAndRankRecommendations(
     if (primaryGenre && primaryGenre !== "その他" && slotGenre === primaryGenre) {
       score += 20;
       if (favoriteClasses[0]) {
-        reasons.push(`普段参加している${favoriteClasses[0]}と同じジャンルです`);
+        reasons.push(`${favoriteClasses[0]}と同ジャンル`);
       }
     }
 
-    // Level match (+15) – add if not already using genre match reason
+    // Level match (+15)
     const slotLevel = detectLevel(slot.title);
-    if (
-      primaryLevel &&
-      primaryLevel !== "その他" &&
-      slotLevel === primaryLevel &&
-      !reasons.some((r) => r.includes("ジャンル"))
-    ) {
+    if (primaryLevel && primaryLevel !== "その他" && slotLevel === primaryLevel) {
       score += 15;
-      if (favoriteClasses[0]) {
-        reasons.push(`普段参加している${favoriteClasses[0]}と同じレベルです`);
+      if (!reasons.some((r) => r.includes("ジャンル")) && favoriteClasses[0]) {
+        reasons.push(`${favoriteClasses[0]}と同レベル`);
       }
-    } else if (primaryLevel && primaryLevel !== "その他" && slotLevel === primaryLevel) {
-      score += 15;
     }
 
     // Teacher match (+25)
     if (favoriteTeacher && slot.teacher === favoriteTeacher) {
       score += 25;
-      reasons.push(`よく参加している${slot.teacher}先生の担当クラスです`);
+      reasons.push(`${slot.teacher}先生担当（よく参加）`);
     }
 
     // Same day of week (+15)
     if (primaryDow !== null && slot.dow === primaryDow) {
       score += 15;
+      reasons.push(`${DAY_LABEL[slot.dow]}曜日（よく参加する曜日）`);
     }
 
     // Time proximity
@@ -227,17 +221,14 @@ export function scoreAndRankRecommendations(
     );
     if (contextCount > 0) {
       score += 15;
-      const dayStr = DAY_LABEL[slot.dow];
-      reasons.push(`${dayStr}曜日の参加実績があります`);
-
-      // Previously attended then stopped (mild penalty)
+      reasons.push(`${DAY_LABEL[slot.dow]}曜${slot.time}〜の参加実績あり`);
       if (currentCount === 0) score -= 5;
     }
 
     // Space available (+10)
     if (sessions > 0 && spacesLeft >= 5) {
       score += 10;
-      reasons.push(`現在 約${Math.round(spacesLeft)} 席空いています（定員${ANALYSIS_THRESHOLDS.CAPACITY}名）`);
+      reasons.push(`現在${Math.round(spacesLeft)}席空き（定員${ANALYSIS_THRESHOLDS.CAPACITY}名）`);
     } else if (sessions > 0 && spacesLeft < 2) {
       score -= 15;
     }
@@ -251,9 +242,7 @@ export function scoreAndRankRecommendations(
     const peerRatio = calcPeerOverlapRatio(contextRecords, peers, slot.dow, slot.title, slot.teacher);
     if (peerRatio >= 0.2) {
       score += 10;
-      reasons.push(
-        `同じクラスに参加している生徒の ${Math.round(peerRatio * 100)}% がこのレッスンにも参加しています`,
-      );
+      reasons.push(`同クラスの生徒${Math.round(peerRatio * 100)}%が参加中`);
     }
 
     if (score <= 0) continue;

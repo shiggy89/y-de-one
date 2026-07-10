@@ -113,6 +113,8 @@ export type PotentialStars = {
   reasons: string[];
 };
 
+export type ScoreBreakdownItem = { points: number; label: string };
+
 export type ActionPriorityStudent = {
   id: number;
   name: string;
@@ -126,6 +128,15 @@ export type ActionPriorityStudent = {
   topRecommendation: Recommendation | null;
   priorityReasons: string[];
   potentialStars: PotentialStars;
+  scoreBreakdown: ScoreBreakdownItem[];
+};
+
+export type RecruitmentCandidate = {
+  id: number;
+  name: string;
+  pictureUrl: string | null;
+  recScore: number;
+  recReasons: string[];
 };
 
 export type ClassRecruitmentOpportunity = {
@@ -139,7 +150,7 @@ export type ClassRecruitmentOpportunity = {
   avgAttendees: number;
   spacesLeft: number;
   candidateCount: number;
-  candidates: { id: number; name: string; pictureUrl: string | null }[];
+  candidates: RecruitmentCandidate[];
   recruitmentScore: number;
 };
 
@@ -155,6 +166,10 @@ export type RevenueImpact = {
   additionalLessons: number;
   additionalRevenue: number;
   avgPricePerLesson: number;
+  weeklyLessons: number;
+  weeklyRevenue: number;
+  yearlyRevenue: number;
+  formula: string;
 };
 
 export type StudentAnalysisSummary = {
@@ -782,19 +797,46 @@ export function calcPotentialStars(student: StudentAnalysisSummary): PotentialSt
 
 // ─── Action Priority Students ─────────────────────────────────────────────────
 
-function calcApproachPriorityScore(student: StudentAnalysisSummary): number {
-  let score = 0;
+function calcApproachPriorityScoreWithBreakdown(student: StudentAnalysisSummary): {
+  total: number;
+  breakdown: ScoreBreakdownItem[];
+} {
+  const breakdown: ScoreBreakdownItem[] = [];
+  let total = 0;
   const { additionalPotential, daysSinceLastAttendance, avgIntervalDays, recommendations, currentCount } = student;
 
-  if (additionalPotential === "高") score += 40;
-  if (daysSinceLastAttendance !== null && avgIntervalDays !== null && daysSinceLastAttendance > avgIntervalDays) score += 30;
-  if (daysSinceLastAttendance !== null && daysSinceLastAttendance < 30) score += 20;
-  if (recommendations.length > 0) score += 20;
-  if (currentCount >= 4 && currentCount <= 8) score += 20;
-  if (currentCount >= 10) score -= 30;
-  if (daysSinceLastAttendance !== null && daysSinceLastAttendance >= 30) score -= 50;
+  if (additionalPotential === "高") {
+    breakdown.push({ points: 40, label: "参加ポテンシャル高（参加履歴から算出）" });
+    total += 40;
+  }
+  if (daysSinceLastAttendance !== null && avgIntervalDays !== null && daysSinceLastAttendance > avgIntervalDays) {
+    const over = daysSinceLastAttendance - Math.round(avgIntervalDays);
+    breakdown.push({ points: 30, label: `平均間隔（${Math.round(avgIntervalDays)}日）を${over}日超過` });
+    total += 30;
+  }
+  if (daysSinceLastAttendance !== null && daysSinceLastAttendance < 30) {
+    breakdown.push({ points: 20, label: `直近${daysSinceLastAttendance}日以内に参加あり` });
+    total += 20;
+  }
+  if (recommendations.length > 0) {
+    const topTitle = recommendations[0]?.title ?? "";
+    breakdown.push({ points: 20, label: `おすすめクラスあり（${topTitle}等）` });
+    total += 20;
+  }
+  if (currentCount >= 4 && currentCount <= 8) {
+    breakdown.push({ points: 20, label: `今月${currentCount}回参加中（増加余地あり）` });
+    total += 20;
+  }
+  if (currentCount >= 10) {
+    breakdown.push({ points: -30, label: "今月10回以上（既に高頻度）" });
+    total -= 30;
+  }
+  if (daysSinceLastAttendance !== null && daysSinceLastAttendance >= 30) {
+    breakdown.push({ points: -50, label: `${daysSinceLastAttendance}日以上未参加` });
+    total -= 50;
+  }
 
-  return score;
+  return { total, breakdown };
 }
 
 function scoreToPriorityStars(score: number): 1 | 2 | 3 | 4 | 5 {
@@ -808,21 +850,10 @@ function scoreToPriorityStars(score: number): 1 | 2 | 3 | 4 | 5 {
 export function calcActionPriorityStudents(students: StudentAnalysisSummary[]): ActionPriorityStudent[] {
   return students
     .map((st) => {
-      const score = calcApproachPriorityScore(st);
+      const { total: score, breakdown } = calcApproachPriorityScoreWithBreakdown(st);
       const stars = scoreToPriorityStars(score);
       const topRec = st.recommendations[0] ?? null;
-
-      const reasons: string[] = [];
-      if (st.additionalPotential === "高") reasons.push("参加履歴から追加参加の余地が高い");
-      if (st.avgIntervalDays !== null && st.daysSinceLastAttendance !== null && st.daysSinceLastAttendance > st.avgIntervalDays) {
-        const over = st.daysSinceLastAttendance - Math.round(st.avgIntervalDays);
-        reasons.push(`通常の参加間隔（${Math.round(st.avgIntervalDays)}日）を${over}日超過`);
-      }
-      if (st.daysSinceLastAttendance !== null && st.daysSinceLastAttendance < 30) {
-        reasons.push(`直近${st.daysSinceLastAttendance}日以内に参加あり`);
-      }
-      if (topRec) reasons.push(`おすすめ: ${topRec.title}（${topRec.dowLabel}曜 ${topRec.time}〜）`);
-      if (st.currentCount >= 4 && st.currentCount <= 8) reasons.push(`今月${st.currentCount}回参加（増加余地あり）`);
+      const priorityReasons = breakdown.filter((b) => b.points > 0).map((b) => b.label);
 
       return {
         id: st.id,
@@ -835,8 +866,9 @@ export function calcActionPriorityStudents(students: StudentAnalysisSummary[]): 
         priorityScore: score,
         priorityStars: stars,
         topRecommendation: topRec,
-        priorityReasons: reasons.slice(0, 3),
+        priorityReasons: priorityReasons.slice(0, 4),
         potentialStars: calcPotentialStars(st),
+        scoreBreakdown: breakdown,
       };
     })
     .filter((st) => st.priorityScore > 0)
@@ -866,6 +898,13 @@ export function calcClassRecruitmentOpportunities(
     );
     if (candidates.length === 0) return;
 
+    const sortedCandidates = candidates
+      .map((st) => {
+        const rec = st.recommendations.find((r) => r.slotId === slotId)!;
+        return { id: st.id, name: st.name, pictureUrl: st.pictureUrl, recScore: rec.score, recReasons: rec.reasons };
+      })
+      .sort((a, b) => b.recScore - a.recScore);
+
     results.push({
       slotId,
       title: slot.title,
@@ -877,11 +916,7 @@ export function calcClassRecruitmentOpportunities(
       avgAttendees: Math.round(avgAttendees * 10) / 10,
       spacesLeft: Math.round(spacesLeft),
       candidateCount: candidates.length,
-      candidates: candidates.slice(0, 4).map((st) => ({
-        id: st.id,
-        name: st.name,
-        pictureUrl: st.pictureUrl,
-      })),
+      candidates: sortedCandidates,
       recruitmentScore: Math.round(spacesLeft * 2 + candidates.length * 3),
     });
   });
@@ -919,8 +954,21 @@ export function calcRevenueImpact(students: StudentAnalysisSummary[]): RevenueIm
 
   const additionalLessons = targetCount * 2;
   const additionalRevenue = additionalLessons * avgPricePerLesson;
+  const weeklyLessons = Math.ceil(additionalLessons / 4.3);
+  const weeklyRevenue = weeklyLessons * avgPricePerLesson;
+  const yearlyRevenue = additionalRevenue * 12;
+  const formula = `ポテンシャル高${targetCount}名 × 月2回追加 × 平均単価¥${avgPricePerLesson.toLocaleString()}`;
 
-  return { targetCount, additionalLessons, additionalRevenue, avgPricePerLesson };
+  return {
+    targetCount,
+    additionalLessons,
+    additionalRevenue,
+    avgPricePerLesson,
+    weeklyLessons,
+    weeklyRevenue,
+    yearlyRevenue,
+    formula,
+  };
 }
 
 // ─── KPI ─────────────────────────────────────────────────────────────────────
