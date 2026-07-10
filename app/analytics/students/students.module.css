@@ -653,6 +653,347 @@
   margin: 0;
 }
 
+/* ━━━ Star Rating ━━━ */
+.starRating { display: inline-flex; gap: 1px; line-height: 1; }
+
+/* ━━━ Revenue Impact Banner ━━━ */
+.impactBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  padding: 12px 18px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #1e293b;
+}
+.impactIcon { font-size: 16px; }
+.impactText { flex-shrink: 0; }
+.impactText strong { font-weight: 800; color: #16a34a; }
+.impactArrow { color: #94a3b8; font-size: 16px; }
+.impactStat { font-weight: 800; font-size: 15px; color: #0f172a; }
+.impactNote { font-size: 11px; color: #94a3b8; margin-left: auto; }
+
+/* ━━━ Action Priority Students ━━━ */
+.actionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.actionCard {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: default;
+}
+.actionCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.actionCardMeta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.actionCardName {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.actionScore {
+  font-size: 13px;
+  font-weight: 800;
+  color: #64748b;
+  flex-shrink: 0;
+}
+.actionCardStats {
+  display: flex;
+  gap: 0;
+  background: #f8fafc;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.actionStat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px;
+  border-right: 1px solid #e2e8f0;
+  gap: 3px;
+}
+.actionStat:last-child { border-right: none; }
+.actionStatLabel { font-size: 9px; color: #94a3b8; font-weight: 600; }
+.actionStatVal   { font-size: 12px; font-weight: 700; color: #1e293b; }
+.actionRec {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #e8f4fd;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 11px;
+}
+.actionRecLabel {
+  font-size: 9px;
+  font-weight: 700;
+  color: #0090e8;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.actionRecVal { color: #0f172a; font-weight: 600; }
+.actionReasons { display: flex; flex-direction: column; gap: 3px; }
+.actionReason {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  font-size: 11px;
+  color: #475569;
+  line-height: 1.4;
+}
+.actionReasonDot { color: #0090e8; font-size: 7px; flex-shrink: 0; margin-top: 4px; }
+.actionCardFooter {
+  display: flex;
+  gap: 8px;
+  margin-top: 2px;
+}
+.lineBtn {
+  flex: 1;
+  padding: 6px;
+  background: #06c755;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+  opacity: 0.7;
+}
+.lineBtn:hover { opacity: 1; }
+
+/* ━━━ Class Recruitment ━━━ */
+.recruitGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.recruitCard {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.recruitHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.recruitDow { font-size: 11px; font-weight: 700; color: #64748b; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; }
+.recruitSpace {
+  font-size: 11px;
+  font-weight: 800;
+  color: #16a34a;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+.recruitTitle  { font-size: 14px; font-weight: 700; color: #0f172a; }
+.recruitTeacher { font-size: 11px; color: #94a3b8; }
+.recruitFill {
+  height: 5px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.recruitFillBar {
+  height: 100%;
+  background: linear-gradient(90deg, #0090e8, #7c3aed);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+.recruitFillLabel { font-size: 10px; color: #94a3b8; }
+.recruitCandidates {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.recruitCandLabel { font-size: 11px; font-weight: 700; color: #475569; }
+.recruitAvatars { display: flex; gap: 2px; align-items: center; }
+.recruitMore { font-size: 10px; color: #94a3b8; font-weight: 700; }
+
+/* ━━━ Monthly Distribution ━━━ */
+.distCard {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.distRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.distLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  width: 60px;
+  flex-shrink: 0;
+  text-align: right;
+}
+.distBarTrack {
+  flex: 1;
+  height: 20px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.distBarFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+  min-width: 4px;
+}
+.distCount { font-size: 12px; font-weight: 700; color: #1e293b; width: 32px; text-align: right; flex-shrink: 0; }
+.distPct   { font-size: 11px; color: #94a3b8; width: 36px; flex-shrink: 0; }
+
+/* ━━━ Co-occurrence Cards ━━━ */
+.coCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+.coCard {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.coCardRef { opacity: 0.75; }
+.coFlow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.coClass {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1e293b;
+  background: #f8fafc;
+  border-radius: 6px;
+  padding: 6px 8px;
+  text-align: center;
+  line-height: 1.3;
+}
+.coArrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  flex-shrink: 0;
+}
+.coRate {
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+}
+.coArrowLine {
+  font-size: 16px;
+  color: #94a3b8;
+  border: none;
+  line-height: 1;
+}
+.coMeta { font-size: 11px; color: #94a3b8; }
+.coTalkBtn {
+  background: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  padding: 4px 10px;
+  font-family: inherit;
+  text-align: left;
+  transition: all 0.15s;
+}
+.coTalkBtn:hover { border-color: #0090e8; color: #0090e8; }
+.coTalkScript {
+  font-size: 12px;
+  color: #1e293b;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  padding: 10px 12px;
+  line-height: 1.6;
+}
+
+/* ━━━ Recommendation improved ━━━ */
+.recScoreGroup { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.recExpect {
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #16a34a;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 5px;
+  padding: 4px 8px;
+}
+
+/* ━━━ Potential cell in table ━━━ */
+.potentialCell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+.potentialLabel { font-size: 9px; font-weight: 700; }
+
+/* ━━━ Attendance Possibility Section ━━━ */
+.possibilityGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.possibilityItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #f0f9ff;
+  border-radius: 8px;
+  padding: 10px 12px;
+  border: 1px solid #bae6fd;
+}
+.possibilityLabel { font-size: 10px; color: #0090e8; font-weight: 700; }
+.possibilityVal   { font-size: 14px; font-weight: 700; color: #0f172a; }
+
 /* ━━━ Misc ━━━ */
 .empty { text-align: center; color: #94a3b8; font-size: 13px; padding: 16px 0; }
 
@@ -662,10 +1003,14 @@
   .chartGrid { grid-template-columns: 1fr; }
   .trendGrid { grid-template-columns: 1fr; }
   .infoGrid  { grid-template-columns: 1fr; }
+  .possibilityGrid { grid-template-columns: 1fr; }
+  .coCards { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
   .header { padding: 0 12px; height: auto; flex-direction: column; padding: 10px 12px; }
   .kpiRow { grid-template-columns: 1fr 1fr; }
   .main   { padding: 16px 12px 60px; }
   .modalPanel { width: 100vw; }
+  .actionGrid { grid-template-columns: 1fr; }
+  .recruitGrid { grid-template-columns: 1fr; }
 }

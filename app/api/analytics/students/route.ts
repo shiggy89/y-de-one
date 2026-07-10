@@ -18,6 +18,10 @@ import {
   calcCoOccurrencePairs,
   calcClassFill,
   calcKPI,
+  calcActionPriorityStudents,
+  calcClassRecruitmentOpportunities,
+  calcMonthlyDistribution,
+  calcRevenueImpact,
   DAY_LABEL,
   AttendanceRow,
   UserRow,
@@ -181,8 +185,12 @@ export async function GET(req: Request) {
     };
   });
 
-  const kpi = calcKPI(students);
   const coOccurrence = calcCoOccurrencePairs(contextRecords);
+  const actionStudents = calcActionPriorityStudents(students);
+  const classRecruitment = calcClassRecruitmentOpportunities(students, classFill);
+  const monthlyDistribution = calcMonthlyDistribution(students);
+  const revenueImpact = calcRevenueImpact(students);
+  const kpi = calcKPI(students, actionStudents.length, classRecruitment.length);
 
-  return NextResponse.json({ period, kpi, students, coOccurrence });
+  return NextResponse.json({ period, kpi, students, coOccurrence, actionStudents, classRecruitment, monthlyDistribution, revenueImpact });
 }

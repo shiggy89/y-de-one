@@ -13,6 +13,11 @@ import {
   StudentAnalysisSummary,
   StudentsKPI,
   Period,
+  ActionPriorityStudent,
+  ClassRecruitmentOpportunity,
+  MonthlyDistributionBucket,
+  RevenueImpact,
+  PotentialStars,
 } from "@/lib/studentAnalytics";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -23,6 +28,10 @@ type StudentsResponse = {
   kpi: StudentsKPI;
   students: StudentAnalysisSummary[];
   coOccurrence: CoOccurrencePair[];
+  actionStudents: ActionPriorityStudent[];
+  classRecruitment: ClassRecruitmentOpportunity[];
+  monthlyDistribution: MonthlyDistributionBucket[];
+  revenueImpact: RevenueImpact;
 };
 
 type DetailResponse = {
@@ -178,6 +187,18 @@ function Badge({
   );
 }
 
+// ─── Star Rating ──────────────────────────────────────────────────────────────
+
+function StarRating({ stars, max = 5, size = 12 }: { stars: number; max?: number; size?: number }) {
+  return (
+    <span className={s.starRating} style={{ fontSize: size }}>
+      {Array.from({ length: max }, (_, i) => (
+        <span key={i} style={{ color: i < stars ? "#f59e0b" : "#d1d5db" }}>★</span>
+      ))}
+    </span>
+  );
+}
+
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 
 function Avatar({ src, name, size = 28 }: { src: string | null; name: string; size?: number }) {
@@ -233,11 +254,235 @@ function MiniBarChart({
   );
 }
 
-// ─── Recommendation Card ──────────────────────────────────────────────────────
+// ─── Revenue Impact Banner ────────────────────────────────────────────────────
 
-function RecommendationCard({ rec }: { rec: Recommendation }) {
-  const scoreColor =
-    rec.score >= 70 ? "#16a34a" : rec.score >= 40 ? "#f59e0b" : "#94a3b8";
+function RevenueImpactBanner({ impact }: { impact: RevenueImpact }) {
+  if (impact.targetCount === 0) return null;
+  return (
+    <div className={s.impactBanner}>
+      <span className={s.impactIcon}>💡</span>
+      <span className={s.impactText}>
+        参加履歴分析：ポテンシャル高の
+        <strong>{impact.targetCount}人</strong>
+        があと月2回来た場合
+      </span>
+      <span className={s.impactArrow}>→</span>
+      <span className={s.impactStat}>+{impact.additionalLessons}レッスン</span>
+      <span className={s.impactStat} style={{ color: "#16a34a" }}>
+        +¥{impact.additionalRevenue.toLocaleString()}
+      </span>
+      <span className={s.impactNote}>（1レッスン平均 ¥{impact.avgPricePerLesson.toLocaleString()}で算出）</span>
+    </div>
+  );
+}
+
+// ─── Action Priority Students ─────────────────────────────────────────────────
+
+function ActionStudentsSection({
+  students,
+  onSelectStudent,
+  allStudents,
+}: {
+  students: ActionPriorityStudent[];
+  onSelectStudent: (st: StudentAnalysisSummary) => void;
+  allStudents: StudentAnalysisSummary[];
+}) {
+  if (students.length === 0) return null;
+
+  const STAR_BORDER: Record<number, string> = {
+    5: "#e05080",
+    4: "#f59e0b",
+    3: "#0090e8",
+    2: "#94a3b8",
+    1: "#cbd5e1",
+  };
+
+  return (
+    <section className={s.section}>
+      <h2 className={s.sectionTitle}>
+        今日アプローチすべき生徒
+        <span className={s.sectionSub}>参加履歴から優先度を算出 — 上位{students.length}名</span>
+      </h2>
+      <div className={s.actionGrid}>
+        {students.map((st) => {
+          const full = allStudents.find((a) => a.id === st.id);
+          const borderColor = STAR_BORDER[st.priorityStars] ?? "#e2e8f0";
+          return (
+            <div
+              key={st.id}
+              className={s.actionCard}
+              style={{ borderLeft: `4px solid ${borderColor}` }}
+            >
+              <div className={s.actionCardHeader}>
+                <Avatar src={st.pictureUrl} name={st.name} size={36} />
+                <div className={s.actionCardMeta}>
+                  <div className={s.actionCardName}>{st.name}</div>
+                  <StarRating stars={st.priorityStars} size={13} />
+                </div>
+                <span className={s.actionScore}>{st.priorityScore}pt</span>
+              </div>
+
+              <div className={s.actionCardStats}>
+                <div className={s.actionStat}>
+                  <span className={s.actionStatLabel}>今月</span>
+                  <span className={s.actionStatVal}>{st.currentCount}回</span>
+                </div>
+                <div className={s.actionStat}>
+                  <span className={s.actionStatLabel}>最終参加</span>
+                  <span className={s.actionStatVal}>
+                    {st.daysSinceLastAttendance !== null ? `${st.daysSinceLastAttendance}日前` : "—"}
+                  </span>
+                </div>
+                <div className={s.actionStat}>
+                  <span className={s.actionStatLabel}>平均間隔</span>
+                  <span className={s.actionStatVal}>
+                    {st.avgIntervalDays !== null ? `${st.avgIntervalDays}日` : "—"}
+                  </span>
+                </div>
+              </div>
+
+              {st.topRecommendation && (
+                <div className={s.actionRec}>
+                  <span className={s.actionRecLabel}>おすすめ</span>
+                  <span className={s.actionRecVal}>
+                    {st.topRecommendation.dowLabel}曜 {st.topRecommendation.time}〜 {st.topRecommendation.title}
+                  </span>
+                </div>
+              )}
+
+              <div className={s.actionReasons}>
+                {st.priorityReasons.map((r, i) => (
+                  <div key={i} className={s.actionReason}>
+                    <span className={s.actionReasonDot}>●</span>
+                    {r}
+                  </div>
+                ))}
+              </div>
+
+              <div className={s.actionCardFooter}>
+                <button
+                  className={s.lineBtn}
+                  onClick={(e) => { e.stopPropagation(); }}
+                  title="LINE送信（実装予定）"
+                >
+                  LINE
+                </button>
+                {full && (
+                  <button
+                    className={s.detailBtn}
+                    onClick={() => onSelectStudent(full)}
+                  >
+                    詳細
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+// ─── Class Recruitment Section ────────────────────────────────────────────────
+
+function ClassRecruitmentSection({ opportunities }: { opportunities: ClassRecruitmentOpportunity[] }) {
+  if (opportunities.length === 0) return null;
+  return (
+    <section className={s.section}>
+      <h2 className={s.sectionTitle}>
+        クラス別 集客チャンス
+        <span className={s.sectionSub}>空き席 × おすすめ候補者数で優先順位付け</span>
+      </h2>
+      <div className={s.recruitGrid}>
+        {opportunities.map((op) => (
+          <div key={op.slotId} className={s.recruitCard}>
+            <div className={s.recruitHeader}>
+              <span className={s.recruitDow}>{op.dowLabel}曜 {op.time}</span>
+              <span className={s.recruitSpace}>空き{op.spacesLeft}席</span>
+            </div>
+            <div className={s.recruitTitle}>{op.title}</div>
+            <div className={s.recruitTeacher}>{op.teacher}</div>
+            <div className={s.recruitFill}>
+              <div
+                className={s.recruitFillBar}
+                style={{ width: `${Math.min(100, (op.avgAttendees / 15) * 100)}%` }}
+              />
+            </div>
+            <div className={s.recruitFillLabel}>平均 {op.avgAttendees}人 / 定員15名</div>
+            <div className={s.recruitCandidates}>
+              <span className={s.recruitCandLabel}>候補 {op.candidateCount}名</span>
+              <div className={s.recruitAvatars}>
+                {op.candidates.map((c) => (
+                  <Avatar key={c.id} src={c.pictureUrl} name={c.name} size={22} />
+                ))}
+                {op.candidateCount > op.candidates.length && (
+                  <span className={s.recruitMore}>+{op.candidateCount - op.candidates.length}</span>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─── Monthly Distribution Section ────────────────────────────────────────────
+
+function MonthlyDistributionSection({ buckets }: { buckets: MonthlyDistributionBucket[] }) {
+  const maxCount = Math.max(...buckets.map((b) => b.count), 1);
+  const BUCKET_COLORS: Record<string, string> = {
+    "0":   "#e2e8f0",
+    "1-3": "#f59e0b",
+    "4-6": "#0090e8",
+    "7-9": "#7c3aed",
+    "10+": "#16a34a",
+  };
+
+  return (
+    <section className={s.section}>
+      <h2 className={s.sectionTitle}>
+        月間参加回数 分布
+        <span className={s.sectionSub}>今月の参加回数帯ごとの人数</span>
+      </h2>
+      <div className={s.distCard}>
+        {buckets.map((b) => (
+          <div key={b.key} className={s.distRow}>
+            <span className={s.distLabel}>{b.label}</span>
+            <div className={s.distBarTrack}>
+              <div
+                className={s.distBarFill}
+                style={{
+                  width: `${(b.count / maxCount) * 100}%`,
+                  background: BUCKET_COLORS[b.key] ?? "#0090e8",
+                }}
+              />
+            </div>
+            <span className={s.distCount}>{b.count}人</span>
+            <span className={s.distPct}>{b.pct}%</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ─── Recommendation Card (improved) ──────────────────────────────────────────
+
+function RecommendationCard({
+  rec,
+  currentMonthlyCount,
+}: {
+  rec: Recommendation;
+  currentMonthlyCount: number;
+}) {
+  const stars = rec.score >= 70 ? 5 : rec.score >= 55 ? 4 : rec.score >= 40 ? 3 : rec.score >= 25 ? 2 : 1;
+  const scoreColor = rec.score >= 70 ? "#16a34a" : rec.score >= 40 ? "#f59e0b" : "#94a3b8";
+
+  const expectedFrom = currentMonthlyCount;
+  const expectedTo = currentMonthlyCount + Math.ceil(rec.score / 50);
+
   return (
     <div className={s.recCard}>
       <div className={s.recHeader}>
@@ -245,9 +490,10 @@ function RecommendationCard({ rec }: { rec: Recommendation }) {
           <span className={s.recDow}>{rec.dowLabel}曜</span>
           <span className={s.recTime}>{rec.time}〜{rec.endTime}</span>
         </div>
-        <span className={s.recScore} style={{ color: scoreColor }}>
-          {rec.score}pt
-        </span>
+        <div className={s.recScoreGroup}>
+          <StarRating stars={stars} size={12} />
+          <span className={s.recScore} style={{ color: scoreColor }}>{rec.score}点</span>
+        </div>
       </div>
       <div className={s.recTitle}>{rec.title}</div>
       <div className={s.recTeacher}>{rec.teacher}</div>
@@ -261,11 +507,75 @@ function RecommendationCard({ rec }: { rec: Recommendation }) {
           {r}
         </div>
       ))}
+      {expectedTo > expectedFrom && (
+        <div className={s.recExpect}>
+          期待効果: 月{expectedFrom}回→月{expectedTo}回が期待できます
+        </div>
+      )}
     </div>
   );
 }
 
 // ─── Student Detail Modal ─────────────────────────────────────────────────────
+
+function nextVisitPrediction(lastDate: string | null, avgInterval: number | null): string | null {
+  if (!lastDate || !avgInterval) return null;
+  const d = new Date(lastDate + "T00:00:00");
+  d.setDate(d.getDate() + Math.round(avgInterval));
+  const m = d.getMonth() + 1;
+  const day = d.getDate();
+  return `${m}月${day}日頃`;
+}
+
+function AttendancePossibilitySection({ student }: { student: StudentAnalysisSummary }) {
+  const predicted = nextVisitPrediction(student.lastAttendanceDate, student.avgIntervalDays);
+  const topClass = student.favoriteClasses[0] ?? null;
+  const topDow = student.primaryDow !== null ? DOW_LABEL[student.primaryDow] : null;
+
+  return (
+    <section className={s.modalSection}>
+      <h3 className={s.modalSectionTitle}>参加傾向分析</h3>
+      <div className={s.possibilityGrid}>
+        {topDow && (
+          <div className={s.possibilityItem}>
+            <span className={s.possibilityLabel}>よく参加する曜日</span>
+            <span className={s.possibilityVal}>{topDow}曜日</span>
+          </div>
+        )}
+        {student.primaryTime && (
+          <div className={s.possibilityItem}>
+            <span className={s.possibilityLabel}>よく参加する時間帯</span>
+            <span className={s.possibilityVal}>{student.primaryTime}〜</span>
+          </div>
+        )}
+        {student.favoriteTeacher && (
+          <div className={s.possibilityItem}>
+            <span className={s.possibilityLabel}>よく参加する講師</span>
+            <span className={s.possibilityVal}>{student.favoriteTeacher}先生</span>
+          </div>
+        )}
+        {topClass && (
+          <div className={s.possibilityItem}>
+            <span className={s.possibilityLabel}>よく参加するクラス</span>
+            <span className={s.possibilityVal}>{topClass}</span>
+          </div>
+        )}
+        {student.avgIntervalDays !== null && (
+          <div className={s.possibilityItem}>
+            <span className={s.possibilityLabel}>平均参加間隔</span>
+            <span className={s.possibilityVal}>{student.avgIntervalDays}日ごと</span>
+          </div>
+        )}
+        {predicted && (
+          <div className={s.possibilityItem} style={{ gridColumn: "1/-1" }}>
+            <span className={s.possibilityLabel}>次回来そうな予測日</span>
+            <span className={s.possibilityVal} style={{ color: "#0090e8" }}>{predicted}</span>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
 
 function StudentDetailModal({
   student,
@@ -309,10 +619,7 @@ function StudentDetailModal({
                   color={FREQUENCY_COLOR[student.frequencyType]}
                 />
                 {student.trendType && (
-                  <Badge
-                    label={student.trendType}
-                    color={TREND_COLOR[student.trendType]}
-                  />
+                  <Badge label={student.trendType} color={TREND_COLOR[student.trendType]} />
                 )}
                 {student.behaviorTypes.map((bt) => (
                   <Badge key={bt} label={bt} color={BEHAVIOR_COLOR[bt]} />
@@ -362,7 +669,7 @@ function StudentDetailModal({
                   </span>
                 </div>
                 <div className={s.infoItem}>
-                  <span className={s.infoLabel}>追加参加ポテンシャル</span>
+                  <span className={s.infoLabel}>参加ポテンシャル</span>
                   <span className={s.infoVal}>
                     <Badge
                       label={student.additionalPotential}
@@ -373,9 +680,12 @@ function StudentDetailModal({
               </div>
             </section>
 
+            {/* Attendance Possibility */}
+            <AttendancePossibilitySection student={student} />
+
             {/* Distributions */}
             <section className={s.modalSection}>
-              <h3 className={s.modalSectionTitle}>参加傾向</h3>
+              <h3 className={s.modalSectionTitle}>参加パターン</h3>
               <div className={s.chartGrid}>
                 <div className={s.chartCard}>
                   <h4 className={s.chartTitle}>曜日別</h4>
@@ -437,10 +747,7 @@ function StudentDetailModal({
                           <div className={s.miniBarTrack}>
                             <div
                               className={s.miniBarFill}
-                              style={{
-                                height: `${(item.revenue / max) * 100}%`,
-                                background: "#e05080",
-                              }}
+                              style={{ height: `${(item.revenue / max) * 100}%`, background: "#e05080" }}
                             />
                           </div>
                           <span className={s.miniBarLabel}>{item.label}</span>
@@ -461,7 +768,11 @@ function StudentDetailModal({
                 )}
                 <div className={s.recGrid}>
                   {student.recommendations.map((rec) => (
-                    <RecommendationCard key={rec.slotId} rec={rec} />
+                    <RecommendationCard
+                      key={rec.slotId}
+                      rec={rec}
+                      currentMonthlyCount={student.currentCount}
+                    />
                   ))}
                 </div>
               </section>
@@ -546,7 +857,7 @@ function LoginPage({ onLogin }: { onLogin: (pw: string) => void }) {
     <div className={s.loginPage}>
       <div className={s.loginCard}>
         <div className={s.loginLogo}>Y-de-ONE</div>
-        <p className={s.loginSub}>生徒別 参加分析</p>
+        <p className={s.loginSub}>行動支援ダッシュボード</p>
         <form onSubmit={submit} className={s.loginForm}>
           <input
             type="password"
@@ -597,6 +908,7 @@ export default function StudentsAnalyticsPage() {
   const [selectedStudent, setSelectedStudent] = useState<StudentAnalysisSummary | null>(null);
   const [showCoOccurrence, setShowCoOccurrence] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [expandedTalkScript, setExpandedTalkScript] = useState<string | null>(null);
 
   useEffect(() => {
     const saved = sessionStorage.getItem(SESSION_KEY);
@@ -696,7 +1008,7 @@ export default function StudentsAnalyticsPage() {
           <span className={s.headerDivider}>/</span>
           <Link href="/analytics" className={s.headerNav}>Analytics</Link>
           <span className={s.headerDivider}>/</span>
-          <span className={s.headerTitle}>生徒別 参加分析</span>
+          <span className={s.headerTitle}>行動支援ダッシュボード</span>
         </div>
         <div className={s.headerRight}>
           {/* Period controls */}
@@ -778,7 +1090,10 @@ export default function StudentsAnalyticsPage() {
 
         {data && (
           <>
-            {/* KPI Cards */}
+            {/* Revenue Impact Banner */}
+            <RevenueImpactBanner impact={data.revenueImpact} />
+
+            {/* KPI Cards — Row 1 */}
             <div className={s.kpiRow}>
               <div className={s.kpiCard}>
                 <span className={s.kpiVal}>{kpi!.regularMemberCount}人</span>
@@ -788,13 +1103,9 @@ export default function StudentsAnalyticsPage() {
                 <span className={s.kpiVal}>{kpi!.avgAttendancePerStudent}回</span>
                 <span className={s.kpiLabel}>1人あたり平均参加回数</span>
                 {kpi!.prevPeriodAvg > 0 && (
-                  <span
-                    className={s.kpiSub}
-                    style={{ color: changeRateColor(kpi!.periodChange, 0) }}
-                  >
+                  <span className={s.kpiSub} style={{ color: changeRateColor(kpi!.periodChange, 0) }}>
                     前期 {kpi!.prevPeriodAvg}回
-                    {kpi!.periodChange != null &&
-                      ` (${changeRateText(kpi!.periodChange, 0)})`}
+                    {kpi!.periodChange != null && ` (${changeRateText(kpi!.periodChange, 0)})`}
                   </span>
                 )}
               </div>
@@ -807,22 +1118,44 @@ export default function StudentsAnalyticsPage() {
                 <span className={s.kpiLabel}>総売上</span>
               </div>
               <div className={s.kpiCard}>
-                <span
-                  className={s.kpiVal}
-                  style={{ color: kpi!.dormantCount > 0 ? "#e05080" : "#16a34a" }}
-                >
+                <span className={s.kpiVal} style={{ color: kpi!.dormantCount > 0 ? "#e05080" : "#16a34a" }}>
                   {kpi!.dormantCount}人
                 </span>
                 <span className={s.kpiLabel}>30日以上未参加</span>
               </div>
               <div className={s.kpiCard}>
-                <span
-                  className={s.kpiVal}
-                  style={{ color: kpi!.additionalPotentialCount > 0 ? "#16a34a" : "#94a3b8" }}
-                >
+                <span className={s.kpiVal} style={{ color: kpi!.additionalPotentialCount > 0 ? "#16a34a" : "#94a3b8" }}>
                   {kpi!.additionalPotentialCount}人
                 </span>
-                <span className={s.kpiLabel}>追加参加ポテンシャル（高）</span>
+                <span className={s.kpiLabel}>参加ポテンシャル（高）</span>
+              </div>
+            </div>
+
+            {/* KPI Cards — Row 2 */}
+            <div className={s.kpiRow} style={{ marginTop: -8 }}>
+              <div className={s.kpiCard}>
+                <span className={s.kpiVal} style={{ color: "#f59e0b" }}>{kpi!.lowFreqCount}人</span>
+                <span className={s.kpiLabel}>月1〜3回（低頻度）</span>
+              </div>
+              <div className={s.kpiCard}>
+                <span className={s.kpiVal} style={{ color: "#0090e8" }}>{kpi!.midFreqCount}人</span>
+                <span className={s.kpiLabel}>月4〜6回（中頻度）</span>
+              </div>
+              <div className={s.kpiCard}>
+                <span className={s.kpiVal} style={{ color: "#16a34a" }}>{kpi!.highFreqCount}人</span>
+                <span className={s.kpiLabel}>月7回以上（高頻度）</span>
+              </div>
+              <div className={s.kpiCard}>
+                <span className={s.kpiVal} style={{ color: "#0090e8" }}>{kpi!.almostOneMoreCount}人</span>
+                <span className={s.kpiLabel}>今月あと1回来そう</span>
+              </div>
+              <div className={s.kpiCard}>
+                <span className={s.kpiVal} style={{ color: "#e05080" }}>{kpi!.todayApproachCount}人</span>
+                <span className={s.kpiLabel}>今日アプローチ推奨</span>
+              </div>
+              <div className={s.kpiCard}>
+                <span className={s.kpiVal} style={{ color: "#7c3aed" }}>{kpi!.recruitableClassCount}クラス</span>
+                <span className={s.kpiLabel}>集客チャンスあり</span>
               </div>
             </div>
 
@@ -832,6 +1165,19 @@ export default function StudentsAnalyticsPage() {
                 集計期間: {data.period.from} 〜 {data.period.to.slice(0, 10)} ／ 比較期間: {data.period.prevFrom} 〜 {data.period.prevTo.slice(0, 10)}
               </p>
             )}
+
+            {/* Action Priority Students */}
+            <ActionStudentsSection
+              students={data.actionStudents}
+              allStudents={data.students}
+              onSelectStudent={setSelectedStudent}
+            />
+
+            {/* Class Recruitment */}
+            <ClassRecruitmentSection opportunities={data.classRecruitment} />
+
+            {/* Monthly Distribution */}
+            <MonthlyDistributionSection buckets={data.monthlyDistribution} />
 
             {/* Search + Filter */}
             <div className={s.controlRow}>
@@ -875,7 +1221,7 @@ export default function StudentsAnalyticsPage() {
                   </select>
                 </div>
                 <div className={s.filterRow}>
-                  <label className={s.filterLabel}>追加参加ポテンシャル</label>
+                  <label className={s.filterLabel}>参加ポテンシャル</label>
                   <select
                     className={s.filterSelect}
                     value={filter.potentialLevel}
@@ -924,9 +1270,7 @@ export default function StudentsAnalyticsPage() {
                   <input
                     type="checkbox"
                     checked={filter.dormantOnly}
-                    onChange={(e) =>
-                      setFilter((f) => ({ ...f, dormantOnly: e.target.checked }))
-                    }
+                    onChange={(e) => setFilter((f) => ({ ...f, dormantOnly: e.target.checked }))}
                     className={s.filterCheckbox}
                   />
                 </div>
@@ -953,49 +1297,48 @@ export default function StudentsAnalyticsPage() {
               <section className={s.section}>
                 <h2 className={s.sectionTitle}>
                   クラス間 共起分析
-                  <span className={s.sectionSub}>同じ生徒が参加している組み合わせ</span>
+                  <span className={s.sectionSub}>同じ生徒が複数参加しているクラスの組み合わせ</span>
                 </h2>
                 {data.coOccurrence.length === 0 ? (
-                  <p className={s.empty}>データが不足しています（生徒の参加履歴が少ない可能性があります）</p>
+                  <p className={s.empty}>データが不足しています</p>
                 ) : (
-                  <div className={s.coTable}>
-                    <table className={s.coTableInner}>
-                      <thead>
-                        <tr>
-                          <th>クラスA</th>
-                          <th>クラスB</th>
-                          <th>A参加者数</th>
-                          <th>両方参加</th>
-                          <th>併用率</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.coOccurrence.map((pair, i) => (
-                          <tr key={i}>
-                            <td>{pair.classALabel}</td>
-                            <td>{pair.classBLabel}</td>
-                            <td>{pair.participantsA}人</td>
-                            <td>{pair.both}人</td>
-                            <td>
-                              <span
-                                style={{
-                                  fontWeight: 700,
-                                  color: pair.coRate >= 0.5 ? "#16a34a" : pair.coRate >= 0.3 ? "#f59e0b" : "#94a3b8",
-                                }}
+                  <div className={s.coCards}>
+                    {data.coOccurrence.map((pair, i) => {
+                      const rateColor = pair.coRate >= 0.5 ? "#16a34a" : pair.coRate >= 0.3 ? "#f59e0b" : "#94a3b8";
+                      const isExpanded = expandedTalkScript === `${i}`;
+                      return (
+                        <div key={i} className={`${s.coCard} ${pair.isReferenceOnly ? s.coCardRef : ""}`}>
+                          <div className={s.coFlow}>
+                            <div className={s.coClass}>{pair.classALabel}</div>
+                            <div className={s.coArrow}>
+                              <div
+                                className={s.coRate}
+                                style={{ color: rateColor }}
                               >
                                 {Math.round(pair.coRate * 100)}%
-                              </span>
-                            </td>
-                            <td>
-                              {pair.isReferenceOnly && (
-                                <span className={s.refLabel}>参考値</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                              </div>
+                              <div className={s.coArrowLine} style={{ borderColor: rateColor }}>→</div>
+                            </div>
+                            <div className={s.coClass}>{pair.classBLabel}</div>
+                          </div>
+                          <div className={s.coMeta}>
+                            <span>{pair.participantsA}人中 {pair.both}人が両方参加</span>
+                            {pair.isReferenceOnly && (
+                              <span className={s.refLabel}>参考値</span>
+                            )}
+                          </div>
+                          <button
+                            className={s.coTalkBtn}
+                            onClick={() => setExpandedTalkScript(isExpanded ? null : `${i}`)}
+                          >
+                            おすすめトーク {isExpanded ? "▲" : "▼"}
+                          </button>
+                          {isExpanded && (
+                            <div className={s.coTalkScript}>{pair.talkScript}</div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </section>
@@ -1089,21 +1432,15 @@ export default function StudentsAnalyticsPage() {
                           </td>
                           <td className={s.tdNum}>¥{st.currentRevenue.toLocaleString()}</td>
                           <td className={s.tdDate}>
-                            {st.lastAttendanceDate ?? (
-                              <span className={s.noData}>—</span>
+                            {st.lastAttendanceDate ?? <span className={s.noData}>—</span>}
+                            {st.daysSinceLastAttendance != null && st.daysSinceLastAttendance >= 30 && (
+                              <span
+                                className={s.daysAgoBadge}
+                                style={{ color: st.daysSinceLastAttendance >= 60 ? "#e05080" : "#f59e0b" }}
+                              >
+                                {st.daysSinceLastAttendance}日前
+                              </span>
                             )}
-                            {st.daysSinceLastAttendance != null &&
-                              st.daysSinceLastAttendance >= 30 && (
-                                <span
-                                  className={s.daysAgoBadge}
-                                  style={{
-                                    color:
-                                      st.daysSinceLastAttendance >= 60 ? "#e05080" : "#f59e0b",
-                                  }}
-                                >
-                                  {st.daysSinceLastAttendance}日前
-                                </span>
-                              )}
                           </td>
                           <td className={s.tdDate}>
                             {st.avgIntervalDays != null
@@ -1122,17 +1459,9 @@ export default function StudentsAnalyticsPage() {
                           </td>
                           <td>
                             <div className={s.badgeRow}>
-                              <Badge
-                                label={st.frequencyType}
-                                color={FREQUENCY_COLOR[st.frequencyType]}
-                                small
-                              />
+                              <Badge label={st.frequencyType} color={FREQUENCY_COLOR[st.frequencyType]} small />
                               {st.trendType && (
-                                <Badge
-                                  label={st.trendType}
-                                  color={TREND_COLOR[st.trendType]}
-                                  small
-                                />
+                                <Badge label={st.trendType} color={TREND_COLOR[st.trendType]} small />
                               )}
                               {st.behaviorTypes.slice(0, 1).map((bt) => (
                                 <Badge key={bt} label={bt} color={BEHAVIOR_COLOR[bt]} small />
@@ -1140,17 +1469,20 @@ export default function StudentsAnalyticsPage() {
                             </div>
                           </td>
                           <td>
-                            <Badge
-                              label={`ポテンシャル ${st.additionalPotential}`}
-                              color={POTENTIAL_COLOR[st.additionalPotential]}
-                              small
-                            />
+                            <div className={s.potentialCell}>
+                              <StarRating stars={
+                                st.additionalPotential === "高" ? (st.recommendations.length >= 2 ? 5 : 4)
+                                  : st.additionalPotential === "中" ? 3
+                                  : 1
+                              } size={11} />
+                              <span className={s.potentialLabel} style={{ color: POTENTIAL_COLOR[st.additionalPotential] }}>
+                                {st.additionalPotential}
+                              </span>
+                            </div>
                           </td>
                           <td className={s.tdRec}>
                             {st.recommendations.length > 0 ? (
-                              <span className={s.recCount}>
-                                {st.recommendations.length}件
-                              </span>
+                              <span className={s.recCount}>{st.recommendations.length}件</span>
                             ) : (
                               <span className={s.noData}>—</span>
                             )}
@@ -1158,10 +1490,7 @@ export default function StudentsAnalyticsPage() {
                           <td>
                             <button
                               className={s.detailBtn}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedStudent(st);
-                              }}
+                              onClick={(e) => { e.stopPropagation(); setSelectedStudent(st); }}
                             >
                               詳細
                             </button>
