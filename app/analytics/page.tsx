@@ -6,15 +6,22 @@ import s from "./analytics.module.css";
 // ── Types ────────────────────────────────────────────────────
 type Student = { id: number; name: string; picture_url: string | null };
 type ClassFill = {
-  id: string; day: string; dow: number; title: string; teacher: string; time: string;
-  sessions: number; avgAttendees: number; fillRate: number; students: Student[];
+  id: string; day: string; dow: number; title: string; teacher: string;
+  time: string; endTime: string; sessions: number; avgAttendees: number;
+  fillRate: number; students: Student[];
 };
+type RehearsalSlot = { dow: number; title: string; teacher: string; time: string; endTime: string };
 type RankItem = Student & { count?: number; total?: number; badgeCount?: number; topBadge?: string; classCount?: number; classes?: string[] };
 type ChurnItem = Student & { lastDate: string; daysAgo: number };
 type TrendItem = { week?: string; month?: string; label: string; count: number };
 type AnalyticsData = {
   kpi: { totalAttendance: number; totalRevenue: number; avgFillPct: number; churnRiskCount: number };
   classFill: ClassFill[];
+  rehearsalSlots: RehearsalSlot[];
+  individualByDow: Record<number, number>;
+  isWeeklyView: boolean;
+  classWeek: string | null;
+  classMonth: string;
   rankings: { byAttendance: RankItem[]; byRevenue: RankItem[]; byBadges: RankItem[] };
   churnRisk: ChurnItem[];
   weeklyTrend: TrendItem[];
@@ -24,10 +31,43 @@ type AnalyticsData = {
 
 function getMonths(): string[] {
   const now = new Date();
-  return Array.from({ length: 12 }, (_, i) => {
+  return Array.from({ length: 24 }, (_, i) => {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   });
+}
+
+function getMondayStr(d: Date = new Date()): string {
+  const day = d.getDay();
+  const diff = (day + 6) % 7;
+  const mon = new Date(d);
+  mon.setDate(d.getDate() - diff);
+  return mon.toISOString().split("T")[0];
+}
+
+function addWeeks(weekStr: string, delta: number): string {
+  const d = new Date(weekStr + "T00:00:00");
+  d.setDate(d.getDate() + delta * 7);
+  return d.toISOString().split("T")[0];
+}
+
+function addMonths(monthStr: string, delta: number): string {
+  const [y, m] = monthStr.split("-").map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function formatWeekLabel(weekStr: string): string {
+  const mon = new Date(weekStr + "T00:00:00");
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  const fmt = (d: Date) => `${d.getMonth() + 1}/${d.getDate()}`;
+  return `${mon.getFullYear()}/${fmt(mon)}〜${fmt(sun)}`;
+}
+
+function formatMonthLabel(monthStr: string): string {
+  const [y, m] = monthStr.split("-").map(Number);
+  return `${y}/${m}`;
 }
 
 const SESSION_KEY = "analytics_key";
@@ -122,11 +162,19 @@ function LoginPage({ onLogin }: { onLogin: (pw: string) => void }) {
 // ── Dashboard ─────────────────────────────────────────────────
 export default function AnalyticsPage() {
   const months = getMonths();
+  const currentMonth = months[0];
+  const currentWeek = getMondayStr();
+
   const [authKey, setAuthKey] = useState<string | null>(null);
-  const [month, setMonth] = useState(months[0]);
+  const [month, setMonth] = useState(currentMonth);
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [expandedClass, setExpandedClass] = useState<string | null>(null);
+
+  // Class fill independent navigation
+  const [classViewMode, setClassViewMode] = useState<"week" | "month">("month");
+  const [classWeek, setClassWeek] = useState(currentWeek);
+  const [classMonth, setClassMonth] = useState(currentMonth);
 
   useEffect(() => {
     const saved = sessionStorage.getItem(SESSION_KEY);
@@ -136,10 +184,16 @@ export default function AnalyticsPage() {
   const fetchData = useCallback(async () => {
     if (!authKey) return;
     setLoading(true);
-    const res = await fetch(`/api/analytics?month=${month}`, { headers: { "x-analytics-key": authKey } });
+    const params = new URLSearchParams({ month });
+    if (classViewMode === "week") {
+      params.set("classWeek", classWeek);
+    } else {
+      params.set("classMonth", classMonth);
+    }
+    const res = await fetch(`/api/analytics?${params}`, { headers: { "x-analytics-key": authKey } });
     setData(res.ok ? await res.json() : null);
     setLoading(false);
-  }, [authKey, month]);
+  }, [authKey, month, classViewMode, classWeek, classMonth]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -147,12 +201,20 @@ export default function AnalyticsPage() {
 
   const logout = () => { sessionStorage.removeItem(SESSION_KEY); setAuthKey(null); setData(null); };
 
-  // Group classFill by day of week
+  const switchClassMode = (mode: "week" | "month") => {
+    setClassViewMode(mode);
+    if (mode === "week") setClassWeek(currentWeek);
+    else setClassMonth(currentMonth);
+  };
+
+  // Group classFill by DOW
   const byDow = DOW_ORDER.map((dow) => ({
     dow,
     day: ["日", "月", "火", "水", "木", "金", "土"][dow],
     classes: (data?.classFill ?? []).filter((c) => c.dow === dow),
-  })).filter((d) => d.classes.length > 0);
+    rehearsals: (data?.rehearsalSlots ?? []).filter((r) => r.dow === dow),
+    individualCount: data?.individualByDow?.[dow] ?? 0,
+  })).filter((d) => d.classes.length > 0 || d.rehearsals.length > 0);
 
   return (
     <div className={s.page}>
@@ -164,9 +226,18 @@ export default function AnalyticsPage() {
           <span className={s.headerTitle}>Analytics</span>
         </div>
         <div className={s.headerRight}>
-          <select className={s.monthSelect} value={month} onChange={(e) => setMonth(e.target.value)}>
-            {months.map((m) => <option key={m} value={m}>{m}</option>)}
-          </select>
+          <div className={s.monthNav}>
+            <button
+              className={s.navArrow}
+              onClick={() => setMonth(addMonths(month, -1))}
+            >&#8249;</button>
+            <span className={s.navLabel}>{formatMonthLabel(month)}</span>
+            <button
+              className={s.navArrow}
+              onClick={() => setMonth(addMonths(month, 1))}
+              disabled={month >= currentMonth}
+            >&#8250;</button>
+          </div>
           <button className={s.logoutBtn} onClick={logout}>ログアウト</button>
         </div>
       </header>
@@ -206,11 +277,61 @@ export default function AnalyticsPage() {
 
             {/* ── Class Fill Schedule View ── */}
             <section className={s.section}>
-              <h2 className={s.sectionTitle}>クラス別 充填状況<span className={s.sectionSub}>目標 15人/クラス</span></h2>
+              <div className={s.classSectionHeader}>
+                <h2 className={s.sectionTitle}>
+                  クラス別 充填状況
+                  <span className={s.sectionSub}>目標 15人/クラス</span>
+                </h2>
+                <div className={s.classPeriodControl}>
+                  {/* 週別/月別 tabs */}
+                  <div className={s.viewModeTabs}>
+                    <button
+                      className={`${s.viewModeTab} ${classViewMode === "week" ? s.viewModeTabActive : ""}`}
+                      onClick={() => switchClassMode("week")}
+                    >週別</button>
+                    <button
+                      className={`${s.viewModeTab} ${classViewMode === "month" ? s.viewModeTabActive : ""}`}
+                      onClick={() => switchClassMode("month")}
+                    >月別</button>
+                  </div>
+
+                  {/* Navigation */}
+                  {classViewMode === "week" ? (
+                    <div className={s.periodNav}>
+                      <button className={s.navArrow} onClick={() => setClassWeek(addWeeks(classWeek, -1))}>&#8249;</button>
+                      <span className={s.periodLabel}>{formatWeekLabel(classWeek)}</span>
+                      <button
+                        className={s.navArrow}
+                        onClick={() => setClassWeek(addWeeks(classWeek, 1))}
+                        disabled={classWeek >= currentWeek}
+                      >&#8250;</button>
+                      {classWeek !== currentWeek && (
+                        <button className={s.todayBtn} onClick={() => setClassWeek(currentWeek)}>今週</button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className={s.periodNav}>
+                      <button className={s.navArrow} onClick={() => setClassMonth(addMonths(classMonth, -1))}>&#8249;</button>
+                      <span className={s.periodLabel}>{formatMonthLabel(classMonth)}</span>
+                      <button
+                        className={s.navArrow}
+                        onClick={() => setClassMonth(addMonths(classMonth, 1))}
+                        disabled={classMonth >= currentMonth}
+                      >&#8250;</button>
+                      {classMonth !== currentMonth && (
+                        <button className={s.todayBtn} onClick={() => setClassMonth(currentMonth)}>今月</button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className={s.scheduleGrid}>
-                {byDow.map(({ dow, day, classes }) => (
+                {byDow.map(({ dow, day, classes, rehearsals, individualCount }) => (
                   <div key={dow} className={s.dayCol}>
                     <div className={s.dayHeader}>{day}曜日</div>
+
+                    {/* Regular classes */}
                     {classes.map((c) => {
                       const color = fillColor(c.fillRate);
                       const pct = Math.min(c.fillRate * 100, 100);
@@ -218,7 +339,7 @@ export default function AnalyticsPage() {
                       return (
                         <div key={c.id} className={s.classCard} onClick={() => setExpandedClass(isOpen ? null : c.id)}>
                           <div className={s.classCardHeader}>
-                            <span className={s.classTime}>{c.time}</span>
+                            <span className={s.classTime}>{c.time}〜{c.endTime}</span>
                             <span className={s.classAvg} style={{ color }}>{c.avgAttendees}</span>
                           </div>
                           <div className={s.classTitle}>{c.title}</div>
@@ -243,6 +364,23 @@ export default function AnalyticsPage() {
                         </div>
                       );
                     })}
+
+                    {/* リハーサル cards */}
+                    {rehearsals.map((r) => (
+                      <div key={`rehearsal-${r.dow}-${r.time}`} className={s.rehearsalCard}>
+                        <span className={s.classTime}>{r.time}〜{r.endTime}</span>
+                        <div className={s.rehearsalTitle}>{r.title}</div>
+                        <div className={s.rehearsalBadge}>スケジュール</div>
+                      </div>
+                    ))}
+
+                    {/* 個人レッスンカード */}
+                    {individualCount > 0 && (
+                      <div className={s.individualCard}>
+                        <div className={s.individualTitle}>個人レッスン</div>
+                        <div className={s.individualCount}>{individualCount}<span className={s.individualUnit}>件</span></div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -252,7 +390,6 @@ export default function AnalyticsPage() {
             <section className={s.section}>
               <h2 className={s.sectionTitle}>ランキング<span className={s.sectionSub}>{month}</span></h2>
               <div className={s.rankingGrid}>
-                {/* 出席ランキング */}
                 <div className={s.rankCard}>
                   <h3 className={s.rankTitle}>出席回数</h3>
                   {data.rankings.byAttendance.map((r, i) => (
@@ -266,7 +403,6 @@ export default function AnalyticsPage() {
                   {data.rankings.byAttendance.length === 0 && <p className={s.empty}>データなし</p>}
                 </div>
 
-                {/* 支払いランキング */}
                 <div className={s.rankCard}>
                   <h3 className={s.rankTitle}>支払い金額</h3>
                   {data.rankings.byRevenue.map((r, i) => (
@@ -280,7 +416,6 @@ export default function AnalyticsPage() {
                   {data.rankings.byRevenue.length === 0 && <p className={s.empty}>データなし</p>}
                 </div>
 
-                {/* バッジランキング */}
                 <div className={s.rankCard}>
                   <h3 className={s.rankTitle}>バッジ獲得月数（累計）</h3>
                   {data.rankings.byBadges.map((r, i) => (
