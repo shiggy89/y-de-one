@@ -248,7 +248,7 @@ function CollapsibleSection({
 
 // ─── ② 改善提案エンジン ──────────────────────────────────────────────────────
 
-type ProposalType = "time_change" | "expand" | "merge" | "close" | "consecutive" | "teacher_move" | "recruit";
+type ProposalType = "time_change" | "expand" | "merge" | "close" | "consecutive" | "teacher_move";
 
 type ImprovementProposal = {
   type: ProposalType;
@@ -269,7 +269,6 @@ const PROPOSAL_COLOR: Record<ProposalType, string> = {
   close: "#e05080",
   consecutive: "#0090e8",
   teacher_move: "#7c3aed",
-  recruit: "#0090e8",
 };
 
 function buildImprovementProposals(
@@ -363,9 +362,10 @@ function buildImprovementProposals(
       });
     });
 
-  // 3. Co-occurrence → consecutive scheduling
+  // 3. Co-occurrence → consecutive scheduling (only if NOT already on the same day)
   coOccurrence
     .filter((p) => p.coRate >= 0.5 && p.both >= 3 && !p.isReferenceOnly)
+    .filter((p) => p.classALabel.split(" ")[0] !== p.classBLabel.split(" ")[0])
     .slice(0, 2)
     .forEach((p) => {
       const potentialStudents = Math.round((p.participantsA - p.both) * 0.3);
@@ -373,37 +373,16 @@ function buildImprovementProposals(
         type: "consecutive",
         stars: p.coRate >= 0.7 ? 5 : 4,
         title: `${p.classALabel} + ${p.classBLabel}`,
-        badge: "連続開催推奨",
+        badge: "同日開催を検討",
         currentState: `${Math.round(p.coRate * 100)}%の生徒が両クラスに参加`,
-        headline: "連続開催で相互送客を促進",
-        reason: `${p.participantsA}名中${p.both}名が両方参加 — 同日連続開催で利便性向上`,
+        headline: "同日連続にまとめると生徒の利便性が向上します",
+        reason: `${p.participantsA}名中${p.both}名が両方参加 — スケジュール集約で通いやすくなります`,
         expectedLessons: potentialStudents * PER_MONTH,
         expectedRevenue: potentialStudents * PER_MONTH * avgPrice,
       });
     });
 
-  // 4. Rich recruitment opportunities
-  classRecruitment
-    .filter((r) => r.candidateCount >= 5)
-    .slice(0, 2)
-    .forEach((r) => {
-      const alreadyExpand = proposals.some((p) => p.title.includes(r.title) && p.type === "expand");
-      if (!alreadyExpand) {
-        proposals.push({
-          type: "recruit",
-          stars: r.candidateCount >= 8 ? 5 : 4,
-          title: `${r.dowLabel}曜 ${r.time} ${r.title}`,
-          badge: "参加余地あり",
-          currentState: `空き${r.spacesLeft}席 · 適合候補${r.candidateCount}名`,
-          headline: "既存生徒の参加履歴から参加適性の高い生徒が確認できます",
-          reason: "スケジュール・クラス構成の調整で充填率向上が見込めます",
-          expectedLessons: r.candidateCount * PER_MONTH,
-          expectedRevenue: r.candidateCount * PER_MONTH * avgPrice,
-        });
-      }
-    });
-
-  // 5. Teacher placement: same teacher with high avg elsewhere but low here
+  // 4. Teacher placement: same teacher with high avg elsewhere but low here
   const teacherStats: Record<string, { slots: ClassFillSlot[] }> = {};
   classFill.filter((c) => c.teacher).forEach((c) => {
     if (!teacherStats[c.teacher]) teacherStats[c.teacher] = { slots: [] };
