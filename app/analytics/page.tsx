@@ -7,8 +7,8 @@ import s from "./analytics.module.css";
 type Student = { id: number; name: string; picture_url: string | null };
 type ClassFill = {
   id: string; day: string; dow: number; title: string; teacher: string;
-  time: string; endTime: string; sessions: number; avgAttendees: number;
-  fillRate: number; students: Student[];
+  time: string; endTime: string; color: string; sessions: number;
+  avgAttendees: number; fillRate: number; students: Student[];
 };
 type RehearsalSlot = { dow: number; title: string; teacher: string; time: string; endTime: string };
 type RankItem = Student & { count?: number; total?: number; badgeCount?: number; topBadge?: string; classCount?: number; classes?: string[] };
@@ -336,8 +336,12 @@ export default function AnalyticsPage() {
                       const color = fillColor(c.fillRate);
                       const pct = Math.min(c.fillRate * 100, 100);
                       const isOpen = expandedClass === c.id;
+                      const bgClass = c.color === "pink" ? s.cardPink
+                        : c.color === "blue" ? s.cardBlue
+                        : c.color === "yellow" ? s.cardYellow
+                        : s.classCard;
                       return (
-                        <div key={c.id} className={s.classCard} onClick={() => setExpandedClass(isOpen ? null : c.id)}>
+                        <div key={c.id} className={`${s.classCard} ${bgClass}`} onClick={() => setExpandedClass(isOpen ? null : c.id)}>
                           <div className={s.classCardHeader}>
                             <span className={s.classTime}>{c.time}〜{c.endTime}</span>
                             <span className={s.classAvg} style={{ color }}>{c.avgAttendees}</span>

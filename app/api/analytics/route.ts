@@ -6,28 +6,29 @@ const DAY_LABEL = ["日", "月", "火", "水", "木", "金", "土"];
 const BADGE_ORDER = ["normal", "bronze", "silver", "gold", "platinum", "diamond"];
 
 const CLASS_SLOTS = [
-  { dow: 2, title: "バレエ入門",           teacher: "門馬和樹", time: "13:00", endTime: "14:30" },
-  { dow: 2, title: "プレモダン",           teacher: "門馬和樹", time: "14:30", endTime: "15:05" },
-  { dow: 2, title: "モダンバレエ",         teacher: "青山佳樹", time: "19:30", endTime: "21:00" },
-  { dow: 3, title: "バレエ基礎",           teacher: "門馬和樹", time: "13:00", endTime: "14:30" },
-  { dow: 3, title: "モダンバレエ",         teacher: "門馬和樹", time: "15:00", endTime: "16:30" },
-  { dow: 3, title: "バレエ入門基礎",       teacher: "青山佳樹", time: "19:15", endTime: "20:45" },
-  { dow: 4, title: "バレエ基礎",           teacher: "青山佳樹", time: "13:00", endTime: "14:30" },
-  { dow: 4, title: "ポワント",             teacher: "青山佳樹", time: "14:30", endTime: "15:05" },
-  { dow: 4, title: "モダンバレエ",         teacher: "青山佳樹", time: "15:30", endTime: "17:00" },
-  { dow: 4, title: "モダンバレエ",         teacher: "門馬和樹", time: "19:30", endTime: "21:00" },
-  { dow: 5, title: "バレエ入門",           teacher: "青山佳樹", time: "15:00", endTime: "16:30" },
-  { dow: 5, title: "ポワント",             teacher: "青山佳樹", time: "16:30", endTime: "17:05" },
-  { dow: 6, title: "バレエ入門基礎合同",   teacher: "門馬和樹", time: "12:30", endTime: "14:00" },
-  { dow: 6, title: "モダンバレエ",         teacher: "青山佳樹", time: "14:30", endTime: "16:00" },
-  { dow: 0, title: "バレエ入門",           teacher: "青山佳樹", time: "12:30", endTime: "14:00" },
-  { dow: 0, title: "ポワント+バレエ基礎センター", teacher: "青山佳樹", time: "14:15", endTime: "15:45" },
+  { dow: 2, title: "バレエ入門",           teacher: "門馬和樹", time: "13:00", endTime: "14:30", color: "pink" },
+  { dow: 2, title: "プレモダン",           teacher: "門馬和樹", time: "14:30", endTime: "15:05", color: "blue" },
+  { dow: 2, title: "モダンバレエ",         teacher: "青山佳樹", time: "19:30", endTime: "21:00", color: "blue" },
+  { dow: 3, title: "バレエ基礎",           teacher: "門馬和樹", time: "13:00", endTime: "14:30", color: "pink" },
+  { dow: 3, title: "モダンバレエ",         teacher: "門馬和樹", time: "15:00", endTime: "16:30", color: "blue" },
+  { dow: 3, title: "バレエ入門基礎",       teacher: "青山佳樹", time: "19:15", endTime: "20:45", color: "pink" },
+  { dow: 4, title: "バレエ基礎",           teacher: "青山佳樹", time: "13:00", endTime: "14:30", color: "pink" },
+  { dow: 4, title: "ポワント",             teacher: "青山佳樹", time: "14:30", endTime: "15:05", color: "yellow" },
+  { dow: 4, title: "モダンバレエ",         teacher: "青山佳樹", time: "15:30", endTime: "17:00", color: "blue" },
+  { dow: 4, title: "モダンバレエ",         teacher: "門馬和樹", time: "19:30", endTime: "21:00", color: "blue" },
+  { dow: 5, title: "バレエ入門",           teacher: "青山佳樹", time: "15:00", endTime: "16:30", color: "pink" },
+  { dow: 5, title: "ポワント",             teacher: "青山佳樹", time: "16:30", endTime: "17:05", color: "yellow" },
+  { dow: 6, title: "バレエ入門基礎合同",   teacher: "門馬和樹", time: "12:30", endTime: "14:00", color: "pink" },
+  { dow: 6, title: "モダンバレエ",         teacher: "青山佳樹", time: "14:30", endTime: "16:00", color: "blue" },
+  { dow: 0, title: "バレエ入門",           teacher: "青山佳樹", time: "12:30", endTime: "14:00", color: "pink" },
+  { dow: 0, title: "ポワント+バレエ基礎センター", teacher: "青山佳樹", time: "14:15", endTime: "15:45", color: "yellow" },
 ];
 
 // リハーサル（出席記録なし・スケジュール表示のみ）
+// startDate: その曜日でリハーサルが初めて行われた日付
 const REHEARSAL_SLOTS = [
-  { dow: 6, title: "リハーサル", teacher: "", time: "16:30", endTime: "18:00" },
-  { dow: 0, title: "リハーサル", teacher: "", time: "16:00", endTime: "16:35" },
+  { dow: 6, title: "リハーサル", teacher: "", time: "16:30", endTime: "18:00", startDate: "2026-06-28" },
+  { dow: 0, title: "リハーサル", teacher: "", time: "16:00", endTime: "16:35", startDate: "2026-07-05" },
 ];
 
 function getMondayOfWeek(dateStr: string): string {
@@ -152,11 +153,29 @@ export async function GET(req: Request) {
       teacher: slot.teacher,
       time: slot.time,
       endTime: slot.endTime,
+      color: slot.color,
       sessions,
       avgAttendees: avg,
       fillRate: avg / TARGET,
       students,
     };
+  });
+
+  // ── Rehearsal slots: filter by startDate vs class period ──
+  const activeRehearsals = REHEARSAL_SLOTS.filter((r) => {
+    // The DOW-specific date in the period must be >= startDate
+    if (classWeek) {
+      // Weekly: compute exact date of this DOW in the week
+      const weekMonday = new Date(classFrom + "T00:00:00");
+      const daysFromMon = r.dow === 0 ? 6 : r.dow - 1; // Mon=0…Sun=6
+      const dowDate = new Date(weekMonday);
+      dowDate.setDate(weekMonday.getDate() + daysFromMon);
+      return dowDate.toISOString().split("T")[0] >= r.startDate;
+    } else {
+      // Monthly: show if startDate is within or before classMonth
+      // (i.e., rehearsal started at some point during or before this month)
+      return r.startDate.slice(0, 7) <= classMonth;
+    }
   });
 
   // avgFillPct for KPI (always from main month)
@@ -283,7 +302,7 @@ export async function GET(req: Request) {
   return NextResponse.json({
     kpi: { totalAttendance, totalRevenue, avgFillPct, churnRiskCount: churnRisk.length },
     classFill,
-    rehearsalSlots: REHEARSAL_SLOTS,
+    rehearsalSlots: activeRehearsals,
     individualByDow,
     isWeeklyView: !!classWeek,
     classWeek: classWeek ?? null,

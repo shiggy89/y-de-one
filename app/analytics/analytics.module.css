@@ -373,6 +373,15 @@
   border-color: #cbd5e1;
 }
 
+/* Schedule color variants (matches Schedule.module.css) */
+.cardPink  { background: #f5edf1; border-color: #e8c8d8; }
+.cardBlue  { background: #e4f1fb; border-color: #b8d8f0; }
+.cardYellow { background: #f8f5df; border-color: #e0d8a0; }
+
+.cardPink:hover  { border-color: #d0a0b8; }
+.cardBlue:hover  { border-color: #90c0e0; }
+.cardYellow:hover { border-color: #c8c080; }
+
 .classCardHeader {
   display: flex;
   justify-content: space-between;
