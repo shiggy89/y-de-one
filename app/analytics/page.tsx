@@ -1582,6 +1582,23 @@ export default function AnalyticsPage() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
+  // ── All hooks must be declared before any conditional return ──
+  const ak = analyticsData?.kpi;
+  const sk = studentsData?.kpi;
+  const avgPrice = studentsData?.revenueImpact.avgPricePerLesson ?? 2200;
+
+  const proposals = useMemo(
+    () => analyticsData && studentsData
+      ? buildImprovementProposals(
+          analyticsData.classFill,
+          studentsData.classRecruitment,
+          studentsData.coOccurrence,
+          avgPrice,
+        )
+      : [],
+    [analyticsData, studentsData, avgPrice],
+  );
+
   if (!authKey) return <LoginPage onLogin={setAuthKey} />;
 
   const logout = () => { sessionStorage.removeItem(SESSION_KEY); setAuthKey(null); setAnalyticsData(null); setStudentsData(null); };
@@ -1603,22 +1620,6 @@ export default function AnalyticsPage() {
     const id = idMap[target];
     if (id) setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
   };
-
-  const ak = analyticsData?.kpi;
-  const sk = studentsData?.kpi;
-  const avgPrice = studentsData?.revenueImpact.avgPricePerLesson ?? 2200;
-
-  const proposals = useMemo(
-    () => analyticsData && studentsData
-      ? buildImprovementProposals(
-          analyticsData.classFill,
-          studentsData.classRecruitment,
-          studentsData.coOccurrence,
-          avgPrice,
-        )
-      : [],
-    [analyticsData, studentsData, avgPrice],
-  );
 
   return (
     <div className={s.page}>
