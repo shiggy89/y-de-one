@@ -416,56 +416,11 @@ export default function AdminPanel() {
 
   // サーバーDB管理
   const [serverDbRecords, setServerDbRecords] = useState<ServerDbRecord[]>([]);
-  const [serverDbYearMonth, setServerDbYearMonth] = useState(() => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}`; });
-  const [serverDbAmount, setServerDbAmount] = useState("");
-  const [serverDbReceivedAt, setServerDbReceivedAt] = useState("");
-  const [serverDbNote, setServerDbNote] = useState("");
-  const [serverDbMsg, setServerDbMsg] = useState<string | null>(null);
-  const [serverDbSaving, setServerDbSaving] = useState(false);
 
   const fetchServerDb = async () => {
     const res = await adminFetch("/api/admin/server-db", { cache: "no-store" });
     const data = await res.json();
     setServerDbRecords(data.records ?? []);
-  };
-
-  const handleServerDbSave = async () => {
-    if (!serverDbAmount) { setServerDbMsg("金額を入力してください"); return; }
-    setServerDbSaving(true);
-    setServerDbMsg(null);
-    const res = await adminFetch("/api/admin/server-db", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ year_month: serverDbYearMonth, amount: Number(serverDbAmount), received_at: serverDbReceivedAt || null, note: serverDbNote || null }),
-    });
-    if (res.ok) {
-      setServerDbAmount(""); setServerDbReceivedAt(""); setServerDbNote("");
-      setServerDbMsg("保存しました");
-      await fetchServerDb();
-    } else {
-      const d = await res.json();
-      setServerDbMsg(d.error ?? "保存に失敗しました");
-    }
-    setServerDbSaving(false);
-  };
-
-  const handleServerDbUpdateReceived = async (id: number, received_at: string) => {
-    await adminFetch("/api/admin/server-db", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, received_at }),
-    });
-    await fetchServerDb();
-  };
-
-  const handleServerDbDelete = async (id: number, yearMonth: string) => {
-    if (!confirm(`${yearMonth} のデータを削除しますか？`)) return;
-    setServerDbRecords((prev) => prev.filter((r) => r.id !== id));
-    await adminFetch("/api/admin/server-db", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
   };
 
   // レッスン別出席回数（生徒ソート用）
@@ -1866,42 +1821,7 @@ export default function AdminPanel() {
       {/* ━━━ サーバーDB ━━━ */}
       {tab === "server_db" && (
         <div className={styles.section}>
-          <p className={styles.sectionTitle}>サーバーDB費用を追加</p>
-          <div className={styles.noticeForm}>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: "1 1 120px" }}>
-                <label style={{ fontSize: 12, color: "#666" }}>年月</label>
-                <input
-                  type="month"
-                  className={styles.formInput}
-                  value={serverDbYearMonth}
-                  onChange={(e) => setServerDbYearMonth(e.target.value)}
-                />
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: "1 1 120px" }}>
-                <label style={{ fontSize: 12, color: "#666" }}>金額（円）</label>
-                <input
-                  type="number"
-                  className={styles.formInput}
-                  placeholder="例: 7587"
-                  value={serverDbAmount}
-                  onChange={(e) => setServerDbAmount(e.target.value)}
-                />
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: "1 1 140px" }}>
-                <label style={{ fontSize: 12, color: "#666" }}>受領日</label>
-                <input
-                  type="date"
-                  className={styles.formInput}
-                  value={serverDbReceivedAt}
-                  onChange={(e) => setServerDbReceivedAt(e.target.value)}
-                />
-              </div>
-            </div>
-            {serverDbMsg && <p className={styles.noticeMsg}>{serverDbMsg}</p>}
-          </div>
-
-          <p className={styles.sectionTitle} style={{ marginTop: 24 }}>費用一覧</p>
+          <p className={styles.sectionTitle}>サーバーDB費用</p>
           {serverDbRecords.length === 0 ? (
             <p className={styles.empty}>データがありません</p>
           ) : (
@@ -1922,18 +1842,10 @@ export default function AdminPanel() {
                     <td style={{ padding: "10px 12px", color: "#e05080", fontWeight: 700 }}>
                       ¥{r.amount.toLocaleString()}
                     </td>
-                    <td style={{ padding: "10px 12px" }}>
-                      {r.received_at ? (
-                        <span style={{ color: "#4caf50", fontWeight: 600 }}>
-                          {new Date(r.received_at).toLocaleDateString("ja-JP", { month: "2-digit", day: "2-digit" }).replace("/", "月") + "日"}
-                        </span>
-                      ) : (
-                        <input
-                          type="date"
-                          style={{ border: "1px solid #ddd", borderRadius: 4, padding: "3px 6px", fontSize: 13, color: "#333" }}
-                          onChange={(e) => { if (e.target.value) handleServerDbUpdateReceived(r.id, e.target.value); }}
-                        />
-                      )}
+                    <td style={{ padding: "10px 12px", color: r.received_at ? "#4caf50" : "#bbb", fontWeight: r.received_at ? 600 : 400 }}>
+                      {r.received_at
+                        ? new Date(r.received_at + "T00:00:00").toLocaleDateString("ja-JP", { month: "long", day: "numeric" })
+                        : "未受領"}
                     </td>
                   </tr>
                 ))}
