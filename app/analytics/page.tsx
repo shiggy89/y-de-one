@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import s from "./analytics.module.css";
 import {
   FrequencyType, TrendType, BehaviorType, PotentialLevel,
@@ -116,10 +116,7 @@ function fillColor(rate: number): string {
   return "#e05080";
 }
 
-function calcManagementScore(
-  ak: AnalyticsData["kpi"],
-  sk: StudentsKPI,
-): number {
+function calcManagementScore(ak: AnalyticsData["kpi"], sk: StudentsKPI): number {
   const revenueScore = ak.prevMonthRevenue > 0
     ? Math.min(20, Math.round((ak.totalRevenue / ak.prevMonthRevenue) * 15))
     : 12;
@@ -153,6 +150,14 @@ function nextVisitStatus(nextDate: string | null): { label: string; color: strin
   if (diffDays === 0) return { label: "今日頃", color: "#f59e0b" };
   if (diffDays <= 7) return { label: `${diffDays}日超過`, color: "#f59e0b" };
   return { label: `${diffDays}日超過`, color: "#e05080" };
+}
+
+function getClassHint(c: ClassFillSlot): { text: string; color: string } | null {
+  if (c.sessions < 3) return null;
+  if (c.fillRate >= 0.85) return { text: "増設候補", color: "#16a34a" };
+  if (c.avgAttendees <= 2) return { text: "継続要検討", color: "#e05080" };
+  if (c.avgAttendees <= 5) return { text: "時間変更を検討", color: "#f59e0b" };
+  return null;
 }
 
 // ─── Base UI Components ───────────────────────────────────────────────────────
@@ -241,84 +246,241 @@ function CollapsibleSection({
   );
 }
 
-// ─── ② 今日やること Hero Card ─────────────────────────────────────────────────
+// ─── ② 改善提案エンジン ──────────────────────────────────────────────────────
 
-type TodayAction = { rank: number; stars: number; label: string; detail: string; expectedRevenue: string; color: string };
+type ProposalType = "time_change" | "expand" | "merge" | "close" | "consecutive" | "teacher_move" | "recruit";
 
-function buildTodayActions(
-  actionStudents: ActionPriorityStudent[],
+type ImprovementProposal = {
+  type: ProposalType;
+  stars: number;
+  title: string;
+  badge: string;
+  currentState: string;
+  headline: string;
+  reason?: string;
+  expectedLessons?: number;
+  expectedRevenue?: number;
+};
+
+const PROPOSAL_COLOR: Record<ProposalType, string> = {
+  time_change: "#f59e0b",
+  expand: "#16a34a",
+  merge: "#7c3aed",
+  close: "#e05080",
+  consecutive: "#0090e8",
+  teacher_move: "#7c3aed",
+  recruit: "#0090e8",
+};
+
+function buildImprovementProposals(
+  classFill: ClassFillSlot[],
   classRecruitment: ClassRecruitmentOpportunity[],
-  churnRisk: ChurnItem[],
+  coOccurrence: CoOccurrencePair[],
   avgPrice: number,
-): TodayAction[] {
-  const items: TodayAction[] = [];
-  actionStudents.slice(0, 2).forEach((st, i) => {
-    items.push({
-      rank: i + 1,
-      stars: st.priorityStars,
-      label: `${st.name} さんへ声かけ`,
-      detail: st.priorityReasons[0] ?? "参加履歴からタイミング到来",
-      expectedRevenue: `期待 +¥${(avgPrice * 2).toLocaleString()}`,
-      color: i === 0 ? "#e05080" : "#f59e0b",
-    });
+): ImprovementProposal[] {
+  const PER_MONTH = 4;
+  const proposals: ImprovementProposal[] = [];
+  const recruitMap = new Map(classRecruitment.map((r) => [r.slotId, r]));
+
+  // Best-performing day average (for time-change recommendations)
+  const avgByDow: Record<number, { total: number; count: number }> = {};
+  classFill.forEach((c) => {
+    if (!avgByDow[c.dow]) avgByDow[c.dow] = { total: 0, count: 0 };
+    avgByDow[c.dow].total += c.avgAttendees;
+    avgByDow[c.dow].count++;
   });
-  if (classRecruitment[0]) {
-    const op = classRecruitment[0];
-    items.push({
-      rank: items.length + 1,
-      stars: 4,
-      label: `${op.title}（${op.dowLabel}曜 ${op.time}〜）へ${op.candidateCount}名案内`,
-      detail: `空き${op.spacesLeft}席 · 候補${op.candidateCount}名確認済み`,
-      expectedRevenue: `期待 +${op.candidateCount}レッスン`,
-      color: "#0090e8",
+  const dowAvg = Object.fromEntries(
+    Object.entries(avgByDow).map(([k, v]) => [k, v.total / v.count])
+  );
+
+  // 1. Low-fill classes → time change / close / merge
+  classFill
+    .filter((c) => c.sessions >= 3 && c.avgAttendees <= 5)
+    .forEach((c) => {
+      const bestDow = Object.entries(dowAvg)
+        .map(([dow, avg]) => ({ dow: Number(dow), avg }))
+        .filter((x) => x.dow !== c.dow)
+        .sort((a, b) => b.avg - a.avg)[0];
+
+      if (c.avgAttendees <= 2) {
+        // Very low → merge or close
+        const similar = classFill.find(
+          (x) => x.id !== c.id && x.avgAttendees >= 6 && x.sessions >= 2
+        );
+        proposals.push({
+          type: similar ? "merge" : "close",
+          stars: 5,
+          title: `${DOW_LABEL[c.dow]}曜 ${c.time} ${c.title}`,
+          badge: similar ? "統合候補" : "終了・統合候補",
+          currentState: `平均参加 ${c.avgAttendees}人`,
+          headline: similar
+            ? `${DOW_LABEL[similar.dow]}曜 ${similar.time}との統合を検討`
+            : "クラスの終了または統合を推奨",
+          reason: similar
+            ? `${similar.title}は平均${similar.avgAttendees}人 — 生徒移行でコスト削減`
+            : "参加者が少なく採算が難しい状況です",
+          expectedLessons: 0,
+          expectedRevenue: 0,
+        });
+      } else {
+        // Moderately low → time/day change
+        const gainEstimate = bestDow ? Math.round((bestDow.avg - c.avgAttendees) * 0.4) : 2;
+        proposals.push({
+          type: "time_change",
+          stars: c.avgAttendees <= 3 ? 5 : 4,
+          title: `${DOW_LABEL[c.dow]}曜 ${c.time} ${c.title}`,
+          badge: "時間・曜日変更候補",
+          currentState: `平均参加 ${c.avgAttendees}人`,
+          headline: bestDow
+            ? `${DOW_LABEL[bestDow.dow]}曜への変更を推奨（同曜平均${bestDow.avg.toFixed(1)}人）`
+            : "時間帯・曜日の変更で参加率向上を期待",
+          reason: `充填率${Math.round(c.fillRate * 100)}% — 他曜日と比較して参加率が低い状況です`,
+          expectedLessons: Math.max(0, gainEstimate) * PER_MONTH,
+          expectedRevenue: Math.max(0, gainEstimate) * PER_MONTH * avgPrice,
+        });
+      }
     });
-  }
-  if (churnRisk[0] && items.length < 5) {
-    items.push({
-      rank: items.length + 1,
-      stars: 3,
-      label: `${churnRisk[0].name} さんへ復帰連絡`,
-      detail: `${churnRisk[0].daysAgo}日以上未参加 — 早めのフォローが効果的`,
-      expectedRevenue: "復帰期待",
-      color: "#7c3aed",
+
+  // 2. High-fill classes → expand
+  classFill
+    .filter((c) => c.sessions >= 2 && c.fillRate >= 0.75)
+    .forEach((c) => {
+      const recOp = recruitMap.get(c.id);
+      const candCount = recOp?.candidateCount ?? 0;
+      const expectedStudents = candCount > 0 ? candCount : Math.round(c.avgAttendees * 0.4);
+      proposals.push({
+        type: "expand",
+        stars: c.fillRate >= 0.9 ? 5 : 4,
+        title: `${DOW_LABEL[c.dow]}曜 ${c.time} ${c.title}`,
+        badge: "増設候補",
+        currentState: `充填率 ${Math.round(c.fillRate * 100)}%（平均${c.avgAttendees}人）`,
+        headline: "需要が高いため別曜日・時間での増設を推奨",
+        reason: candCount >= 3
+          ? `参加候補者が${candCount}名確認済み — 増設で受け皿を増やせます`
+          : "充填率が高く新規生徒が入りにくい状況です",
+        expectedLessons: expectedStudents * PER_MONTH,
+        expectedRevenue: expectedStudents * PER_MONTH * avgPrice,
+      });
     });
-  }
-  return items.slice(0, 5);
+
+  // 3. Co-occurrence → consecutive scheduling
+  coOccurrence
+    .filter((p) => p.coRate >= 0.5 && p.both >= 3 && !p.isReferenceOnly)
+    .slice(0, 2)
+    .forEach((p) => {
+      const potentialStudents = Math.round((p.participantsA - p.both) * 0.3);
+      proposals.push({
+        type: "consecutive",
+        stars: p.coRate >= 0.7 ? 5 : 4,
+        title: `${p.classALabel} + ${p.classBLabel}`,
+        badge: "連続開催推奨",
+        currentState: `${Math.round(p.coRate * 100)}%の生徒が両クラスに参加`,
+        headline: "連続開催で相互送客を促進",
+        reason: `${p.participantsA}名中${p.both}名が両方参加 — 同日連続開催で利便性向上`,
+        expectedLessons: potentialStudents * PER_MONTH,
+        expectedRevenue: potentialStudents * PER_MONTH * avgPrice,
+      });
+    });
+
+  // 4. Rich recruitment opportunities
+  classRecruitment
+    .filter((r) => r.candidateCount >= 5)
+    .slice(0, 2)
+    .forEach((r) => {
+      const alreadyExpand = proposals.some((p) => p.title.includes(r.title) && p.type === "expand");
+      if (!alreadyExpand) {
+        proposals.push({
+          type: "recruit",
+          stars: r.candidateCount >= 8 ? 5 : 4,
+          title: `${r.dowLabel}曜 ${r.time} ${r.title}`,
+          badge: "集客チャンス",
+          currentState: `空き${r.spacesLeft}席 · 候補者${r.candidateCount}名`,
+          headline: "既存生徒の参加履歴から参加適性の高い生徒が確認できます",
+          reason: "クラス内容・時間帯のアピールで充填率向上が見込めます",
+          expectedLessons: r.candidateCount * PER_MONTH,
+          expectedRevenue: r.candidateCount * PER_MONTH * avgPrice,
+        });
+      }
+    });
+
+  // 5. Teacher placement: same teacher with high avg elsewhere but low here
+  const teacherStats: Record<string, { slots: ClassFillSlot[] }> = {};
+  classFill.filter((c) => c.teacher).forEach((c) => {
+    if (!teacherStats[c.teacher]) teacherStats[c.teacher] = { slots: [] };
+    teacherStats[c.teacher].slots.push(c);
+  });
+  Object.entries(teacherStats).forEach(([teacher, { slots }]) => {
+    if (slots.length < 2) return;
+    const avgs = slots.map((c) => c.avgAttendees);
+    const maxAvg = Math.max(...avgs);
+    const minAvg = Math.min(...avgs);
+    if (maxAvg >= 8 && minAvg <= 3 && maxAvg - minAvg >= 5) {
+      const lowSlot = slots.find((c) => c.avgAttendees === minAvg)!;
+      const highSlot = slots.find((c) => c.avgAttendees === maxAvg)!;
+      proposals.push({
+        type: "teacher_move",
+        stars: 3,
+        title: `${teacher} 先生の担当クラス`,
+        badge: "講師配置の見直し",
+        currentState: `${DOW_LABEL[lowSlot.dow]}曜${lowSlot.title}: 平均${minAvg}人 / ${DOW_LABEL[highSlot.dow]}曜${highSlot.title}: 平均${maxAvg}人`,
+        headline: `${DOW_LABEL[highSlot.dow]}曜への配置集中で参加率向上を期待`,
+        reason: "同講師でも曜日・時間帯により大きな差があります",
+        expectedLessons: (maxAvg - minAvg) * PER_MONTH,
+        expectedRevenue: (maxAvg - minAvg) * PER_MONTH * avgPrice,
+      });
+    }
+  });
+
+  return proposals
+    .sort((a, b) => b.stars !== a.stars ? b.stars - a.stars : (b.expectedRevenue ?? 0) - (a.expectedRevenue ?? 0))
+    .slice(0, 8);
 }
 
-function TodayActionCard({
-  actions, lineSentCount, announcedCount,
-}: { actions: TodayAction[]; lineSentCount: number; announcedCount: number }) {
-  if (actions.length === 0) return null;
+function ImprovementProposalSection({ proposals }: { proposals: ImprovementProposal[] }) {
+  if (proposals.length === 0) {
+    return (
+      <section className={s.section}>
+        <h2 className={s.sectionTitle}>今月の改善提案 <span className={s.sectionSub}>データ分析から自動生成</span></h2>
+        <p className={s.dataNote}>参加データが3回以上あるクラスから改善提案が自動生成されます</p>
+      </section>
+    );
+  }
   return (
-    <div className={s.todayHero}>
-      <div className={s.todayHeroHeader}>
-        <span className={s.todayHeroIcon}>⚡</span>
-        <span className={s.todayHeroTitle}>今日やること</span>
-        {(lineSentCount > 0 || announcedCount > 0) && (
-          <span className={s.todayHeroDone}>
-            {lineSentCount > 0 && `LINE済み ${lineSentCount}件`}
-            {lineSentCount > 0 && announcedCount > 0 && " · "}
-            {announcedCount > 0 && `案内済み ${announcedCount}件`}
-          </span>
-        )}
-      </div>
-      <div className={s.todayHeroList}>
-        {actions.map((a, i) => (
-          <div key={i} className={s.todayHeroItem} style={{ borderLeftColor: a.color }}>
-            <div className={s.todayHeroRank} style={{ background: a.color }}>{a.rank}</div>
-            <div className={s.todayHeroContent}>
-              <div className={s.todayHeroLabel}>{a.label}</div>
-              <div className={s.todayHeroDetail}>{a.detail}</div>
+    <section className={s.section}>
+      <h2 className={s.sectionTitle}>
+        今月の改善提案
+        <span className={s.sectionSub}>データ分析から自動生成 — {proposals.length}件</span>
+      </h2>
+      <div className={s.proposalList}>
+        {proposals.map((p, i) => {
+          const color = PROPOSAL_COLOR[p.type];
+          return (
+            <div key={i} className={s.proposalCard} style={{ borderLeftColor: color }}>
+              <div className={s.proposalCardHead}>
+                <StarRating stars={p.stars} size={14} />
+                <span className={s.proposalBadge} style={{ background: color + "18", color, borderColor: color + "40" }}>
+                  {p.badge}
+                </span>
+              </div>
+              <div className={s.proposalTitle}>{p.title}</div>
+              <div className={s.proposalCurrent}>{p.currentState}</div>
+              <div className={s.proposalArrow}>↓</div>
+              <div className={s.proposalHeadline}>{p.headline}</div>
+              {p.reason && <div className={s.proposalReason}>{p.reason}</div>}
+              {(p.expectedLessons ?? 0) > 0 && (
+                <div className={s.proposalEffect}>
+                  <span className={s.proposalEffectLabel}>期待</span>
+                  <span className={s.proposalEffectItem}>+{p.expectedLessons}レッスン/月</span>
+                  <span className={s.proposalEffectItem} style={{ color: "#16a34a" }}>
+                    +¥{(p.expectedRevenue ?? 0).toLocaleString()}/月
+                  </span>
+                </div>
+              )}
             </div>
-            <div className={s.todayHeroRight}>
-              <StarRating stars={a.stars} size={11} />
-              <div className={s.todayHeroExpect} style={{ color: a.color }}>{a.expectedRevenue}</div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -361,7 +523,7 @@ function KpiSection({
       drill: "fill" as KpiDrillTarget,
     },
     {
-      val: `${ak.churnRiskCount}人`, label: "チャーンリスク",
+      val: `${ak.churnRiskCount}人`, label: "参加減少傾向",
       color: ak.churnRiskCount > 0 ? "#e05080" : "#16a34a",
       drill: "churn" as KpiDrillTarget,
     },
@@ -373,7 +535,7 @@ function KpiSection({
   ];
   const CARDS2: KpiCard[] = [
     { val: `¥${forecast.toLocaleString()}`, label: "今月予測売上", color: "#7c3aed", drill: "" as KpiDrillTarget },
-    { val: `+¥${revenueImpact.additionalRevenue.toLocaleString()}`, label: "期待追加売上", color: "#16a34a", drill: "potential" as KpiDrillTarget },
+    { val: `+¥${revenueImpact.additionalRevenue.toLocaleString()}`, label: "参加伸び代（推計）", color: "#16a34a", drill: "potential" as KpiDrillTarget },
     {
       val: `${score}点`, label: "経営スコア", color: scoreColor,
       sub: scoreLabel, drill: "" as KpiDrillTarget,
@@ -384,11 +546,11 @@ function KpiSection({
       drill: "potential" as KpiDrillTarget,
     },
     {
-      val: `${sk.todayApproachCount}人`, label: "今日アプローチ推奨",
-      color: "#e05080", drill: "action" as KpiDrillTarget,
+      val: `${sk.todayApproachCount}人`, label: "フォロー候補生徒",
+      color: "#64748b", drill: "action" as KpiDrillTarget,
     },
     {
-      val: `${sk.recruitableClassCount}クラス`, label: "集客チャンスあり",
+      val: `${sk.recruitableClassCount}クラス`, label: "参加機会あり",
       color: "#0090e8", drill: "recruit" as KpiDrillTarget,
     },
   ];
@@ -398,11 +560,11 @@ function KpiSection({
       key={i}
       className={`${s.kpiCard} ${c.drill ? s.kpiCardClickable : ""} ${drillTarget === c.drill && c.drill ? s.kpiCardActive : ""}`}
       onClick={() => c.drill ? onDrill(drillTarget === c.drill ? "" : c.drill) : undefined}
-      title={c.drill ? "クリックしてドリルダウン" : undefined}
+      title={c.drill ? "クリックで詳細へ" : undefined}
     >
-      <span className={s.kpiVal} style={{ color: (c as { color?: string }).color }}>{c.val}</span>
+      <span className={s.kpiVal} style={{ color: c.color }}>{c.val}</span>
       <span className={s.kpiLabel}>{c.label}</span>
-      {(c as { sub?: string }).sub && <span className={s.kpiSub}>{(c as { sub?: string }).sub}</span>}
+      {c.sub && <span className={s.kpiSub}>{c.sub}</span>}
       {c.drill && <span className={s.kpiDrillHint}>{drillTarget === c.drill ? "▲ 閉じる" : "▼ 詳細"}</span>}
     </div>
   );
@@ -415,99 +577,7 @@ function KpiSection({
   );
 }
 
-// ─── ③ 今日アプローチすべき生徒 ──────────────────────────────────────────────
-
-function ActionStudentsSection({
-  students, allStudents, onSelectStudent, lineSent, onToggleLine, avgPrice,
-}: {
-  students: ActionPriorityStudent[];
-  allStudents: StudentAnalysisSummary[];
-  onSelectStudent: (st: StudentAnalysisSummary) => void;
-  lineSent: Set<number>;
-  onToggleLine: (id: number) => void;
-  avgPrice: number;
-}) {
-  const [expandedBreakdown, setExpandedBreakdown] = useState<number | null>(null);
-  if (students.length === 0) return null;
-  const STAR_BORDER: Record<number, string> = { 5: "#e05080", 4: "#f59e0b", 3: "#0090e8", 2: "#94a3b8", 1: "#cbd5e1" };
-
-  return (
-    <section className={s.section} id="section-action">
-      <h2 className={s.sectionTitle}>
-        今日アプローチすべき生徒
-        <span className={s.sectionSub}>参加履歴から優先度を算出 — 上位{students.length}名</span>
-      </h2>
-      <div className={s.actionGrid}>
-        {students.map((st) => {
-          const full = allStudents.find((a) => a.id === st.id);
-          const sent = lineSent.has(st.id);
-          const isBreakdownOpen = expandedBreakdown === st.id;
-          const expectedRev = `+¥${(avgPrice * 2).toLocaleString()}`;
-          return (
-            <div key={st.id} className={`${s.actionCard} ${sent ? s.actionCardSent : ""}`}
-              style={{ borderLeft: `4px solid ${STAR_BORDER[st.priorityStars] ?? "#e2e8f0"}` }}>
-              <div className={s.actionCardHeader}>
-                <Avatar src={st.pictureUrl} name={st.name} size={36} />
-                <div className={s.actionCardMeta}>
-                  <div className={s.actionCardName}>{st.name}</div>
-                  <StarRating stars={st.priorityStars} size={13} />
-                </div>
-                <div className={s.actionCardRight}>
-                  <div className={s.actionExpect} style={{ color: sent ? "#94a3b8" : "#16a34a" }}>{expectedRev}</div>
-                  <button className={s.actionScoreBtn}
-                    onClick={() => setExpandedBreakdown(isBreakdownOpen ? null : st.id)}>
-                    {st.priorityScore}pt {isBreakdownOpen ? "▲" : "▼"}
-                  </button>
-                </div>
-              </div>
-
-              {isBreakdownOpen && (
-                <div className={s.breakdown}>
-                  <div className={s.breakdownTitle}>スコア内訳</div>
-                  {st.scoreBreakdown.map((item, i) => (
-                    <div key={i} className={s.breakdownItem}>
-                      <span className={s.breakdownPts} style={{ color: item.points > 0 ? "#16a34a" : "#e05080" }}>
-                        {item.points > 0 ? `+${item.points}` : item.points}
-                      </span>
-                      <span className={s.breakdownLabel}>{item.label}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className={s.actionCardStats}>
-                <div className={s.actionStat}><span className={s.actionStatLabel}>今月</span><span className={s.actionStatVal}>{st.currentCount}回</span></div>
-                <div className={s.actionStat}><span className={s.actionStatLabel}>最終参加</span><span className={s.actionStatVal}>{st.daysSinceLastAttendance !== null ? `${st.daysSinceLastAttendance}日前` : "—"}</span></div>
-                <div className={s.actionStat}><span className={s.actionStatLabel}>平均間隔</span><span className={s.actionStatVal}>{st.avgIntervalDays !== null ? `${st.avgIntervalDays}日` : "—"}</span></div>
-              </div>
-
-              {st.topRecommendation && (
-                <div className={s.actionRec}>
-                  <span className={s.actionRecLabel}>おすすめ</span>
-                  <span className={s.actionRecVal}>{st.topRecommendation.dowLabel}曜 {st.topRecommendation.time}〜 {st.topRecommendation.title}</span>
-                </div>
-              )}
-
-              <div className={s.actionCardFooter}>
-                <button
-                  className={`${s.lineBtn} ${sent ? s.lineBtnSent : ""}`}
-                  onClick={() => onToggleLine(st.id)}
-                >
-                  {sent ? "✓ LINE済み" : "LINE送信済みにする"}
-                </button>
-                {full && (
-                  <button className={s.detailBtn} onClick={() => onSelectStudent(full)}>詳細</button>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
-// ─── ④ クラス別集客チャンス ───────────────────────────────────────────────────
+// ─── ③ クラス別 参加機会 ──────────────────────────────────────────────────────
 
 function ClassRecruitmentSection({
   opportunities, allStudents, onSelectStudent, announced, onToggleAnnounce, avgPrice,
@@ -525,12 +595,19 @@ function ClassRecruitmentSection({
   return (
     <section className={s.section} id="section-recruit">
       <h2 className={s.sectionTitle}>
-        クラス別 集客チャンス
-        <span className={s.sectionSub}>空き席 × 候補者数で優先順位付け</span>
+        クラス別 参加機会
+        <span className={s.sectionSub}>空き席 × 参加適性で優先順位付け</span>
       </h2>
       <div className={s.recruitGrid}>
         {opportunities.map((op) => {
           const isOpen = expanded === op.slotId;
+          // Improvement hint: lots of candidates → announce; few → consider time change
+          const hint = op.candidateCount >= Math.ceil(op.spacesLeft * 0.5)
+            ? `候補者${op.candidateCount}名への案内で充填可能`
+            : op.spacesLeft >= 8 && op.candidateCount < 3
+              ? "候補者少 — 時間・曜日の変更を検討"
+              : `${op.candidateCount}名へ案内可能`;
+
           return (
             <div key={op.slotId} className={s.recruitCard}>
               <div className={s.recruitHeader}>
@@ -543,6 +620,7 @@ function ClassRecruitmentSection({
                 <div className={s.recruitFillBar} style={{ width: `${Math.min(100, (op.avgAttendees / 15) * 100)}%` }} />
               </div>
               <div className={s.recruitFillLabel}>平均 {op.avgAttendees}人 / 定員15名</div>
+              <div className={s.recruitHint}>→ {hint}</div>
               <button className={s.recruitExpandBtn}
                 onClick={() => setExpanded(isOpen ? null : op.slotId)}>
                 候補 {op.candidateCount}名を{isOpen ? "閉じる ▲" : "見る ▼"}
@@ -555,7 +633,7 @@ function ClassRecruitmentSection({
                     const annKey = `${op.slotId}_${c.id}`;
                     const isAnnounced = announced.has(annKey);
                     const expectedRev = `+¥${avgPrice.toLocaleString()}`;
-                    const participationRate = `参加率 ${Math.round(c.recScore * 0.7)}%`;
+                    const participationRate = `参加適性 ${Math.round(c.recScore * 0.7)}%`;
                     return (
                       <div key={c.id} className={`${s.recruitCandItem} ${isAnnounced ? s.recruitCandAnnounced : ""}`}>
                         <span className={s.recruitCandRank}>#{i + 1}</span>
@@ -595,7 +673,7 @@ function ClassRecruitmentSection({
   );
 }
 
-// ─── ⑤ クラス別充填状況 ──────────────────────────────────────────────────────
+// ─── ④ クラス別充填状況 ──────────────────────────────────────────────────────
 
 type FillSort = "space" | "popular" | "dow";
 
@@ -643,7 +721,7 @@ function ClassFillSection({
       <div className={s.fillSectionHeader}>
         <h2 className={s.sectionTitle}>
           クラス別 充填状況
-          <span className={s.sectionSub}>目標 15人/クラス</span>
+          <span className={s.sectionSub}>目標 15人/クラス — カードに改善ヒント表示</span>
         </h2>
         <div className={s.fillControls}>
           <div className={s.fillSortTabs}>
@@ -692,6 +770,7 @@ function ClassFillSection({
                 const isOpen = expandedClass === c.id;
                 const candCount = recruitMap.get(c.id);
                 const bgClass = c.color === "pink" ? s.cardPink : c.color === "blue" ? s.cardBlue : c.color === "yellow" ? s.cardYellow : s.classCard;
+                const hint = getClassHint(c);
                 return (
                   <div key={c.id} className={`${s.classCard} ${bgClass}`} onClick={() => setExpandedClass(isOpen ? null : c.id)}>
                     {candCount !== undefined && <span className={s.candidateBadge}>候補{candCount}名</span>}
@@ -703,6 +782,11 @@ function ClassFillSection({
                     <div className={s.classTeacher}>{c.teacher}</div>
                     <div className={s.fillTrack}><div className={s.fillBar} style={{ width: `${pct}%`, background: color }} /></div>
                     <div className={s.fillLabel} style={{ color }}>{c.sessions > 0 ? `${c.avgAttendees} / 15人` : "データなし"}</div>
+                    {hint && (
+                      <div className={s.classHint} style={{ color: hint.color, borderColor: hint.color + "40", background: hint.color + "10" }}>
+                        {hint.text}
+                      </div>
+                    )}
                     {isOpen && c.students.length > 0 && (
                       <div className={s.studentAvatars}>
                         {c.students.map((st) => (
@@ -762,6 +846,7 @@ function ClassFillSection({
             const pct = Math.min(c.fillRate * 100, 100);
             const candCount = recruitMap.get(c.id);
             const isOpen = expandedClass === c.id;
+            const hint = getClassHint(c);
             return (
               <div key={c.id} className={s.flatFillCard} onClick={() => setExpandedClass(isOpen ? null : c.id)}>
                 {candCount !== undefined && <span className={s.candidateBadge}>候補{candCount}名</span>}
@@ -772,6 +857,11 @@ function ClassFillSection({
                 <div className={s.classTitle} style={{ fontSize: 12 }}>{c.title}</div>
                 <div className={s.fillTrack}><div className={s.fillBar} style={{ width: `${pct}%`, background: color }} /></div>
                 <div className={s.fillLabel} style={{ color, fontSize: 10 }}>{c.sessions > 0 ? `${c.avgAttendees} / 15人` : "データなし"}</div>
+                {hint && (
+                  <div className={s.classHint} style={{ color: hint.color, borderColor: hint.color + "40", background: hint.color + "10", fontSize: 9 }}>
+                    {hint.text}
+                  </div>
+                )}
                 {isOpen && c.students.length > 0 && (
                   <div className={s.studentAvatars}>
                     {c.students.map((st) => (
@@ -791,46 +881,72 @@ function ClassFillSection({
   );
 }
 
-// ─── ⑥ チャーンリスク（改善版） ──────────────────────────────────────────────
+// ─── ⑤ 参加減少傾向（教室改善指標） ─────────────────────────────────────────
 
-function ChurnRiskSection({
-  churnRisk, studentsData, lineSent, onToggleLine, avgPrice,
+function ChurnInsightSection({
+  churnRisk, studentsData,
 }: {
   churnRisk: ChurnItem[];
   studentsData: StudentsData | null;
-  lineSent: Set<number>;
-  onToggleLine: (id: number) => void;
-  avgPrice: number;
 }) {
   if (churnRisk.length === 0) return null;
   const studentMap = new Map((studentsData?.students ?? []).map((st) => [st.id, st]));
 
+  const severe = churnRisk.filter((c) => c.daysAgo >= 60);
+  const moderate = churnRisk.filter((c) => c.daysAgo >= 30 && c.daysAgo < 60);
+
+  // Aggregate behavior patterns of churned students
+  const churnStudents = churnRisk.map((c) => studentMap.get(c.id)).filter(Boolean) as StudentAnalysisSummary[];
+  const behaviorCounts: Record<string, number> = {};
+  churnStudents.flatMap((st) => st.behaviorTypes).forEach((b) => { behaviorCounts[b] = (behaviorCounts[b] ?? 0) + 1; });
+  const topBehavior = Object.entries(behaviorCounts).sort((a, b) => b[1] - a[1])[0];
+
+  const insights: string[] = [];
+  if (severe.length >= 2) insights.push(`⚠️ 60日以上未参加が${severe.length}名 — 特定クラスへの集中した離脱がないか確認推奨`);
+  if (topBehavior && topBehavior[1] >= 2) {
+    const msg = topBehavior[0] === "固定クラス型"
+      ? "特定クラスの内容・時間帯を見直し推奨"
+      : topBehavior[0] === "曜日固定型"
+        ? "特定曜日のクラス構成を見直し推奨"
+        : "参加パターンを分析して対応クラスを改善推奨";
+    insights.push(`📌 離脱生徒に「${topBehavior[0]}」が多い（${topBehavior[1]}名）— ${msg}`);
+  }
+  if (moderate.length >= 2) insights.push(`💡 ${moderate.length}名が30〜60日未参加 — 発表会・イベント等の機会提供で復帰を促せます`);
+
   return (
     <section className={s.section} id="section-churn">
       <h2 className={s.sectionTitle}>
-        チャーンリスク
-        <span className={s.sectionSub}>30日以上未参加 — 危険度順</span>
+        参加減少傾向の生徒
+        <span className={s.sectionSub}>教室改善の指標として分析 — {churnRisk.length}名</span>
       </h2>
+
+      {insights.length > 0 && (
+        <div className={s.churnInsightBox}>
+          <div className={s.churnInsightTitle}>クラス改善の観点</div>
+          {insights.map((txt, i) => (
+            <div key={i} className={s.churnInsightPattern}>{txt}</div>
+          ))}
+        </div>
+      )}
+
       <div className={s.churnNewGrid}>
         {churnRisk.map((c) => {
           const st = studentMap.get(c.id);
-          const sent = lineSent.has(c.id);
           const overdueDays = st?.avgIntervalDays ? Math.max(0, c.daysAgo - st.avgIntervalDays) : null;
           const dangerColor = c.daysAgo >= 60 ? "#e05080" : "#f59e0b";
           const topRec = st?.recommendations[0];
-          const expectedRev = `+¥${(avgPrice * 4).toLocaleString()}`;
 
           return (
-            <div key={c.id} className={`${s.churnNewCard} ${sent ? s.churnCardSent : ""}`}>
+            <div key={c.id} className={s.churnNewCard}>
               <div className={s.churnNewHeader}>
-                <Avatar src={c.picture_url} name={c.name} size={40} />
+                <Avatar src={c.picture_url} name={c.name} size={36} />
                 <div className={s.churnNewInfo}>
                   <div className={s.churnNewName}>{c.name}</div>
                   <div className={s.churnDangerBadge} style={{ background: dangerColor + "20", color: dangerColor, borderColor: dangerColor + "40" }}>
                     {c.daysAgo}日未参加
                   </div>
+                  {st?.frequencyType && <Badge label={st.frequencyType} color={FREQUENCY_COLOR[st.frequencyType]} small />}
                 </div>
-                <div className={s.churnExpect} style={{ color: sent ? "#94a3b8" : "#16a34a" }}>{expectedRev}</div>
               </div>
 
               <div className={s.churnStatRow}>
@@ -854,15 +970,10 @@ function ChurnRiskSection({
 
               {topRec && (
                 <div className={s.churnRecRow}>
-                  <span className={s.churnRecLabel}>おすすめ</span>
+                  <span className={s.churnRecLabel}>参加傾向クラス</span>
                   <span className={s.churnRecVal}>{topRec.dowLabel}曜 {topRec.time}〜 {topRec.title}</span>
                 </div>
               )}
-
-              <button className={`${s.churnLineBtn} ${sent ? s.churnLineBtnSent : ""}`}
-                onClick={() => onToggleLine(c.id)}>
-                {sent ? "✓ LINE済み" : "LINE送信済みにする"}
-              </button>
             </div>
           );
         })}
@@ -871,7 +982,7 @@ function ChurnRiskSection({
   );
 }
 
-// ─── 売上インパクトバナー ─────────────────────────────────────────────────────
+// ─── ⑥ 生徒参加分析 ─────────────────────────────────────────────────────────
 
 function RevenueImpactBanner({ impact }: { impact: RevenueImpact }) {
   const [expanded, setExpanded] = useState(false);
@@ -881,7 +992,7 @@ function RevenueImpactBanner({ impact }: { impact: RevenueImpact }) {
       <div className={s.impactTop}>
         <span className={s.impactIcon}>💡</span>
         <span className={s.impactTitle}>
-          参加ポテンシャル高 <strong>{impact.targetCount}名</strong> が月+2回来た場合の売上予測
+          参加ポテンシャル高 <strong>{impact.targetCount}名</strong> が月+2回参加した場合の売上予測
         </span>
         <button className={s.impactToggle} onClick={() => setExpanded((v) => !v)}>
           {expanded ? "▲ 閉じる" : "▼ 計算式"}
@@ -908,6 +1019,55 @@ function RevenueImpactBanner({ impact }: { impact: RevenueImpact }) {
       </div>
       {expanded && <div className={s.impactFormula}>計算式: {impact.formula}</div>}
     </div>
+  );
+}
+
+const FREQ_ORDER: FrequencyType[] = ["高頻度", "中頻度", "低頻度", "休眠"];
+
+function AttendanceInsightSection({
+  students, monthlyDistribution, revenueImpact,
+}: {
+  students: StudentAnalysisSummary[];
+  monthlyDistribution: MonthlyDistributionBucket[];
+  revenueImpact: RevenueImpact;
+}) {
+  const byFreq = students.reduce((acc, st) => {
+    acc[st.frequencyType] = (acc[st.frequencyType] ?? 0) + 1;
+    return acc;
+  }, {} as Record<FrequencyType, number>);
+
+  return (
+    <section className={s.section}>
+      <h2 className={s.sectionTitle}>
+        生徒参加分析
+        <span className={s.sectionSub}>参加頻度・ポテンシャル分布</span>
+      </h2>
+
+      <div className={s.attendanceGrid}>
+        {FREQ_ORDER.map((freq) => {
+          const count = byFreq[freq] ?? 0;
+          const pct = students.length > 0 ? Math.round((count / students.length) * 100) : 0;
+          const color = FREQUENCY_COLOR[freq];
+          const insight = freq === "高頻度"
+            ? "教室の核となる生徒"
+            : freq === "中頻度"
+              ? "頻度向上の余地あり"
+              : freq === "低頻度"
+                ? "クラス構成の見直しで改善可"
+                : "参加機会・環境の再検討";
+          return (
+            <div key={freq} className={s.attendanceCard} style={{ borderLeftColor: color }}>
+              <div className={s.attendanceFreqBadge} style={{ color, background: color + "18" }}>{freq}</div>
+              <div className={s.attendanceCount} style={{ color }}>{count}<span className={s.attendanceUnit}>人</span></div>
+              <div className={s.attendancePct}>{pct}%</div>
+              <div className={s.attendanceInsight}>{insight}</div>
+            </div>
+          );
+        })}
+      </div>
+
+      <RevenueImpactBanner impact={revenueImpact} />
+    </section>
   );
 }
 
@@ -1031,36 +1191,117 @@ function StudentTable({
   );
 }
 
-// ─── ⑩ 今日の営業成果 ────────────────────────────────────────────────────────
+// ─── ⑧ 個別フォロー候補（折りたたみ内） ──────────────────────────────────────
 
-function SalesResultsSection({
-  lineSentCount, announcedCount, avgPrice,
-}: { lineSentCount: number; announcedCount: number; avgPrice: number }) {
-  const total = lineSentCount + announcedCount;
-  const estimatedRev = lineSentCount * avgPrice * 2;
+function FollowCandidatesSection({
+  students, allStudents, onSelectStudent, followDone, onToggleFollow, avgPrice,
+}: {
+  students: ActionPriorityStudent[];
+  allStudents: StudentAnalysisSummary[];
+  onSelectStudent: (st: StudentAnalysisSummary) => void;
+  followDone: Set<number>;
+  onToggleFollow: (id: number) => void;
+  avgPrice: number;
+}) {
+  const [expandedBreakdown, setExpandedBreakdown] = useState<number | null>(null);
+  if (students.length === 0) return <p className={s.dataNote}>フォロー候補生徒がいません</p>;
+  const STAR_BORDER: Record<number, string> = { 5: "#e05080", 4: "#f59e0b", 3: "#0090e8", 2: "#94a3b8", 1: "#cbd5e1" };
 
   return (
-    <section className={s.section}>
-      <h2 className={s.sectionTitle}>
-        今日の営業成果
-        <span className={s.sectionSub}>本日のアクション結果</span>
-      </h2>
+    <div>
+      <p className={s.dataNote} style={{ marginBottom: 12 }}>
+        参加履歴から個別フォローが効果的な生徒の一覧です。先生のご判断でご活用ください。
+      </p>
+      <div className={s.actionGrid}>
+        {students.map((st) => {
+          const full = allStudents.find((a) => a.id === st.id);
+          const done = followDone.has(st.id);
+          const isBreakdownOpen = expandedBreakdown === st.id;
+          const expectedRev = `+¥${(avgPrice * 2).toLocaleString()}`;
+          return (
+            <div key={st.id} className={`${s.actionCard} ${done ? s.actionCardSent : ""}`}
+              style={{ borderLeft: `4px solid ${STAR_BORDER[st.priorityStars] ?? "#e2e8f0"}` }}>
+              <div className={s.actionCardHeader}>
+                <Avatar src={st.pictureUrl} name={st.name} size={36} />
+                <div className={s.actionCardMeta}>
+                  <div className={s.actionCardName}>{st.name}</div>
+                  <StarRating stars={st.priorityStars} size={13} />
+                </div>
+                <div className={s.actionCardRight}>
+                  <div className={s.actionExpect} style={{ color: done ? "#94a3b8" : "#16a34a" }}>{expectedRev}</div>
+                  <button className={s.actionScoreBtn}
+                    onClick={() => setExpandedBreakdown(isBreakdownOpen ? null : st.id)}>
+                    {st.priorityScore}pt {isBreakdownOpen ? "▲" : "▼"}
+                  </button>
+                </div>
+              </div>
+
+              {isBreakdownOpen && (
+                <div className={s.breakdown}>
+                  <div className={s.breakdownTitle}>スコア内訳</div>
+                  {st.scoreBreakdown.map((item, i) => (
+                    <div key={i} className={s.breakdownItem}>
+                      <span className={s.breakdownPts} style={{ color: item.points > 0 ? "#16a34a" : "#e05080" }}>
+                        {item.points > 0 ? `+${item.points}` : item.points}
+                      </span>
+                      <span className={s.breakdownLabel}>{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className={s.actionCardStats}>
+                <div className={s.actionStat}><span className={s.actionStatLabel}>今月</span><span className={s.actionStatVal}>{st.currentCount}回</span></div>
+                <div className={s.actionStat}><span className={s.actionStatLabel}>最終参加</span><span className={s.actionStatVal}>{st.daysSinceLastAttendance !== null ? `${st.daysSinceLastAttendance}日前` : "—"}</span></div>
+                <div className={s.actionStat}><span className={s.actionStatLabel}>平均間隔</span><span className={s.actionStatVal}>{st.avgIntervalDays !== null ? `${st.avgIntervalDays}日` : "—"}</span></div>
+              </div>
+
+              {st.topRecommendation && (
+                <div className={s.actionRec}>
+                  <span className={s.actionRecLabel}>おすすめ</span>
+                  <span className={s.actionRecVal}>{st.topRecommendation.dowLabel}曜 {st.topRecommendation.time}〜 {st.topRecommendation.title}</span>
+                </div>
+              )}
+
+              <div className={s.actionCardFooter}>
+                <button
+                  className={`${s.lineBtn} ${done ? s.lineBtnSent : ""}`}
+                  onClick={() => onToggleFollow(st.id)}
+                >
+                  {done ? "✓ フォロー済み" : "フォロー済みにする"}
+                </button>
+                {full && (
+                  <button className={s.detailBtn} onClick={() => onSelectStudent(full)}>詳細</button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function FollowResultsSection({
+  followDoneCount, announcedCount, avgPrice,
+}: { followDoneCount: number; announcedCount: number; avgPrice: number }) {
+  const total = followDoneCount + announcedCount;
+  if (total === 0) return null;
+  const estimatedRev = followDoneCount * avgPrice * 2;
+
+  return (
+    <div style={{ marginTop: 24 }}>
+      <h3 className={s.rankTitle} style={{ marginBottom: 12 }}>フォロー成果（本日）</h3>
       <div className={s.salesFunnel}>
         <div className={s.salesStep}>
           <span className={s.salesStepVal} style={{ color: total > 0 ? "#0090e8" : "#94a3b8" }}>{total}件</span>
-          <span className={s.salesStepLabel}>LINE送信 / 案内</span>
+          <span className={s.salesStepLabel}>フォロー済み / 案内済み</span>
         </div>
         <div className={s.salesArrow}>→</div>
         <div className={s.salesStep}>
           <span className={s.salesStepVal} style={{ color: "#94a3b8" }}>—</span>
           <span className={s.salesStepLabel}>参加予定</span>
-          <span className={s.salesStepNote}>次回来店時に確認</span>
-        </div>
-        <div className={s.salesArrow}>→</div>
-        <div className={s.salesStep}>
-          <span className={s.salesStepVal} style={{ color: "#94a3b8" }}>—</span>
-          <span className={s.salesStepLabel}>実際参加</span>
-          <span className={s.salesStepNote}>来店後に記録</span>
+          <span className={s.salesStepNote}>次回来校時に確認</span>
         </div>
         <div className={s.salesArrow}>→</div>
         <div className={s.salesStep}>
@@ -1068,10 +1309,10 @@ function SalesResultsSection({
             {estimatedRev > 0 ? `+¥${estimatedRev.toLocaleString()}` : "—"}
           </span>
           <span className={s.salesStepLabel}>追加売上（推定）</span>
-          <span className={s.salesStepNote}>{lineSentCount}名 × 2回 × 単価</span>
+          <span className={s.salesStepNote}>{followDoneCount}名 × 2回 × 単価</span>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -1282,7 +1523,7 @@ function LoginPage({ onLogin }: { onLogin: (pw: string) => void }) {
     <div className={s.loginPage}>
       <div className={s.loginCard}>
         <div className={s.loginLogo}>Y-de-ONE</div>
-        <p className={s.loginSub}>経営ダッシュボード</p>
+        <p className={s.loginSub}>教室改善分析</p>
         <form onSubmit={submit} className={s.loginForm}>
           <input type="password" className={s.loginInput} placeholder="パスワード" value={pw}
             onChange={(e) => setPw(e.target.value)} autoFocus />
@@ -1313,7 +1554,7 @@ export default function AnalyticsPage() {
   const [studentsData, setStudentsData] = useState<StudentsData | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const [lineSent, setLineSent] = useState<Set<number>>(new Set());
+  const [followDone, setFollowDone] = useState<Set<number>>(new Set());
   const [announced, setAnnounced] = useState<Set<string>>(new Set());
   const [drillTarget, setDrillTarget] = useState<KpiDrillTarget>("");
   const [selectedStudent, setSelectedStudent] = useState<StudentAnalysisSummary | null>(null);
@@ -1345,8 +1586,8 @@ export default function AnalyticsPage() {
 
   const logout = () => { sessionStorage.removeItem(SESSION_KEY); setAuthKey(null); setAnalyticsData(null); setStudentsData(null); };
 
-  const toggleLineSent = (id: number) => {
-    setLineSent((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  const toggleFollowDone = (id: number) => {
+    setFollowDone((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   };
   const toggleAnnounced = (key: string) => {
     setAnnounced((prev) => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next; });
@@ -1357,7 +1598,7 @@ export default function AnalyticsPage() {
     if (!target) return;
     const idMap: Partial<Record<KpiDrillTarget, string>> = {
       churn: "section-churn", fill: "section-fill",
-      action: "section-action", recruit: "section-recruit",
+      action: "section-follow", recruit: "section-recruit",
     };
     const id = idMap[target];
     if (id) setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
@@ -1366,9 +1607,18 @@ export default function AnalyticsPage() {
   const ak = analyticsData?.kpi;
   const sk = studentsData?.kpi;
   const avgPrice = studentsData?.revenueImpact.avgPricePerLesson ?? 2200;
-  const todayActions = studentsData && analyticsData
-    ? buildTodayActions(studentsData.actionStudents, studentsData.classRecruitment, analyticsData.churnRisk, avgPrice)
-    : [];
+
+  const proposals = useMemo(
+    () => analyticsData && studentsData
+      ? buildImprovementProposals(
+          analyticsData.classFill,
+          studentsData.classRecruitment,
+          studentsData.coOccurrence,
+          avgPrice,
+        )
+      : [],
+    [analyticsData, studentsData, avgPrice],
+  );
 
   return (
     <div className={s.page}>
@@ -1376,7 +1626,7 @@ export default function AnalyticsPage() {
         <div className={s.headerLeft}>
           <span className={s.headerLogo}>Y-de-ONE</span>
           <span className={s.headerDivider}>/</span>
-          <span className={s.headerTitle}>経営ダッシュボード</span>
+          <span className={s.headerTitle}>教室改善分析</span>
         </div>
         <div className={s.headerRight}>
           <div className={s.monthNav}>
@@ -1394,13 +1644,6 @@ export default function AnalyticsPage() {
 
         {(analyticsData || studentsData) && (
           <>
-            {/* ② 今日やること */}
-            <TodayActionCard
-              actions={todayActions}
-              lineSentCount={lineSent.size}
-              announcedCount={announced.size}
-            />
-
             {/* ① 経営サマリー KPI */}
             {ak && sk && (
               <KpiSection
@@ -1412,22 +1655,10 @@ export default function AnalyticsPage() {
               />
             )}
 
-            {/* 売上インパクト */}
-            {studentsData && <RevenueImpactBanner impact={studentsData.revenueImpact} />}
+            {/* ② 今月の改善提案 */}
+            <ImprovementProposalSection proposals={proposals} />
 
-            {/* ③ 今日アプローチすべき生徒 */}
-            {studentsData && (
-              <ActionStudentsSection
-                students={studentsData.actionStudents}
-                allStudents={studentsData.students}
-                onSelectStudent={setSelectedStudent}
-                lineSent={lineSent}
-                onToggleLine={toggleLineSent}
-                avgPrice={avgPrice}
-              />
-            )}
-
-            {/* ④ クラス別集客チャンス */}
+            {/* ③ クラス別 参加機会 */}
             {studentsData && (
               <ClassRecruitmentSection
                 opportunities={studentsData.classRecruitment}
@@ -1439,7 +1670,7 @@ export default function AnalyticsPage() {
               />
             )}
 
-            {/* ⑤ クラス別充填状況 */}
+            {/* ④ クラス別 充填状況 */}
             {analyticsData && (
               <ClassFillSection
                 classFill={analyticsData.classFill}
@@ -1456,37 +1687,39 @@ export default function AnalyticsPage() {
               />
             )}
 
-            {/* ⑥ チャーンリスク */}
+            {/* ⑤ 参加減少傾向（教室改善指標） */}
             {analyticsData && (
-              <ChurnRiskSection
+              <ChurnInsightSection
                 churnRisk={analyticsData.churnRisk}
                 studentsData={studentsData}
-                lineSent={lineSent}
-                onToggleLine={toggleLineSent}
-                avgPrice={avgPrice}
               />
             )}
 
-            {/* ⑦ 出席推移（折りたたみ） */}
-            {analyticsData && (
-              <CollapsibleSection title="出席推移" sub="週別・月別の参加傾向" defaultOpen={false} id="section-trend">
-                <div className={s.trendGrid}>
-                  <div className={s.trendCard}>
-                    <h3 className={s.trendTitle}>週別（過去12週）</h3>
-                    <BarTrend items={analyticsData.weeklyTrend} color="#0090e8" />
-                  </div>
-                  <div className={s.trendCard}>
-                    <h3 className={s.trendTitle}>月別（過去12ヶ月）</h3>
-                    <BarTrend items={analyticsData.monthlyTrend} color="#e05080" />
-                  </div>
-                </div>
-              </CollapsibleSection>
+            {/* ⑥ 生徒参加分析 */}
+            {studentsData && (
+              <AttendanceInsightSection
+                students={studentsData.students}
+                monthlyDistribution={studentsData.monthlyDistribution}
+                revenueImpact={studentsData.revenueImpact}
+              />
             )}
 
-            {/* ⑧ 詳細分析（折りたたみ） */}
-            <CollapsibleSection title="詳細分析" sub="ランキング・分布・生徒テーブル" defaultOpen={false} id="section-detail">
+            {/* ⑦ 詳細分析（折りたたみ） */}
+            <CollapsibleSection title="詳細分析" sub="出席推移・ランキング・共起分析・生徒テーブル" defaultOpen={false} id="section-detail">
               {analyticsData && (
                 <>
+                  {/* 出席推移 */}
+                  <div className={s.trendGrid} style={{ marginBottom: 24 }}>
+                    <div className={s.trendCard}>
+                      <h3 className={s.trendTitle}>週別（過去12週）</h3>
+                      <BarTrend items={analyticsData.weeklyTrend} color="#0090e8" />
+                    </div>
+                    <div className={s.trendCard}>
+                      <h3 className={s.trendTitle}>月別（過去12ヶ月）</h3>
+                      <BarTrend items={analyticsData.monthlyTrend} color="#e05080" />
+                    </div>
+                  </div>
+
                   {/* ランキング */}
                   <div className={s.rankingGrid} style={{ marginBottom: 24 }}>
                     <div className={s.rankCard}>
@@ -1524,7 +1757,7 @@ export default function AnalyticsPage() {
                     </div>
                   </div>
 
-                  {/* 複数クラス掛け持ち */}
+                  {/* 複数クラス */}
                   {analyticsData.multiClass.multiStudents.length > 0 && (
                     <div style={{ marginBottom: 24 }}>
                       <h3 className={s.rankTitle} style={{ marginBottom: 10 }}>
@@ -1603,12 +1836,31 @@ export default function AnalyticsPage() {
               )}
             </CollapsibleSection>
 
-            {/* ⑩ 今日の営業成果 */}
-            <SalesResultsSection
-              lineSentCount={lineSent.size}
-              announcedCount={announced.size}
-              avgPrice={avgPrice}
-            />
+            {/* ⑧ 個別フォロー候補（折りたたみ・デフォルト閉） */}
+            <CollapsibleSection
+              title="個別フォロー候補"
+              sub={`参加履歴から算出 — ${studentsData?.actionStudents.length ?? 0}名 · 先生の判断でご活用ください`}
+              defaultOpen={false}
+              id="section-follow"
+            >
+              {studentsData && (
+                <>
+                  <FollowCandidatesSection
+                    students={studentsData.actionStudents}
+                    allStudents={studentsData.students}
+                    onSelectStudent={setSelectedStudent}
+                    followDone={followDone}
+                    onToggleFollow={toggleFollowDone}
+                    avgPrice={avgPrice}
+                  />
+                  <FollowResultsSection
+                    followDoneCount={followDone.size}
+                    announcedCount={announced.size}
+                    avgPrice={avgPrice}
+                  />
+                </>
+              )}
+            </CollapsibleSection>
           </>
         )}
 

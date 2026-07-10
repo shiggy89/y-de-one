@@ -565,6 +565,62 @@
 .groundsRecReasons { display: flex; flex-wrap: wrap; gap: 4px; }
 .groundsTag      { font-size: 10px; color: #475569; background: #e8f4fd; border-radius: 4px; padding: 2px 6px; font-weight: 600; }
 
+/* ━━━ Star Rating ━━━ */
+.starRating { display: inline-flex; gap: 1px; line-height: 1; }
+
+/* ━━━ ② 改善提案 ━━━ */
+.proposalList { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.proposalCard {
+  background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;
+  border-left: 4px solid #f59e0b; padding: 16px;
+  display: flex; flex-direction: column; gap: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.proposalCardHead { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.proposalBadge {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 20px; border: 1px solid; white-space: nowrap;
+}
+.proposalTitle { font-size: 13px; font-weight: 700; color: #1e293b; }
+.proposalCurrent { font-size: 12px; color: #64748b; }
+.proposalArrow { font-size: 16px; color: #94a3b8; line-height: 1; }
+.proposalHeadline { font-size: 13px; font-weight: 700; color: #0f172a; line-height: 1.5; }
+.proposalReason { font-size: 11px; color: #475569; line-height: 1.5; }
+.proposalEffect { display: flex; align-items: center; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
+.proposalEffectLabel { font-size: 10px; color: #94a3b8; font-weight: 600; }
+.proposalEffectItem { font-size: 12px; font-weight: 800; color: #0f172a; }
+
+/* ━━━ ⑤ Churn Insight ━━━ */
+.churnInsightBox {
+  background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px;
+  padding: 14px 16px; margin-bottom: 16px;
+}
+.churnInsightTitle { font-size: 12px; font-weight: 800; color: #92400e; margin-bottom: 8px; }
+.churnInsightPattern { font-size: 12px; color: #78350f; line-height: 1.7; }
+
+/* ━━━ ⑥ Attendance Insight ━━━ */
+.attendanceGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.attendanceCard {
+  background: #fff; border-radius: 10px; border: 1px solid #e2e8f0;
+  border-left: 4px solid #94a3b8; padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.attendanceFreqBadge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; display: inline-block; align-self: flex-start; }
+.attendanceCount { font-size: 28px; font-weight: 900; line-height: 1.1; }
+.attendanceUnit { font-size: 14px; font-weight: 400; color: #64748b; margin-left: 2px; }
+.attendancePct { font-size: 12px; color: #94a3b8; font-weight: 600; }
+.attendanceInsight { font-size: 11px; color: #475569; margin-top: 4px; line-height: 1.5; }
+
+/* ━━━ Class Hint Badge ━━━ */
+.classHint {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 20px; border: 1px solid; display: inline-block;
+  align-self: flex-start; margin-top: 2px;
+}
+
+/* ━━━ Recruit Hint ━━━ */
+.recruitHint { font-size: 11px; color: #0090e8; font-weight: 600; padding: 4px 0; }
+
 /* ━━━ Misc ━━━ */
 .dataNote { font-size: 12px; color: #94a3b8; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin: 0; }
 .empty    { text-align: center; color: #94a3b8; font-size: 13px; padding: 16px 0; }
@@ -591,6 +647,8 @@
   .infoGrid { grid-template-columns: 1fr; }
   .fillSectionHeader { flex-direction: column; }
   .todayHeroItem { flex-wrap: wrap; }
+  .attendanceGrid { grid-template-columns: repeat(2, 1fr); }
+  .proposalList { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
   .kpiRow { grid-template-columns: 1fr 1fr; }
