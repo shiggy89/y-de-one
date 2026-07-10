@@ -1,0 +1,293 @@
+/* ━━━ ログイン画面 ━━━ */
+.loginPage {
+  min-height: 100vh;
+  background: #f5f7fb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+
+.loginCard {
+  background: #fff;
+  border-radius: 16px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.loginTitle {
+  font-size: 28px;
+  font-weight: 900;
+  color: #e05080;
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+
+.loginSub {
+  font-size: 13px;
+  color: #888;
+  margin: 0 0 16px;
+}
+
+.loginForm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.loginInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.loginInput:focus {
+  border-color: #e05080;
+}
+
+.loginError {
+  font-size: 13px;
+  color: #e05080;
+  margin: 0;
+  text-align: center;
+}
+
+.loginBtn {
+  padding: 13px;
+  background: #e05080;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.loginBtn:hover {
+  background: #c03060;
+}
+
+.loginBtn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* ━━━ ダッシュボード ━━━ */
+.page {
+  min-height: 100vh;
+  background: #f5f7fb;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+
+.header {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.headerLogo {
+  font-size: 18px;
+  font-weight: 900;
+  color: #e05080;
+  letter-spacing: 0.04em;
+}
+
+.headerTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #888;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.monthSelect {
+  padding: 7px 12px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  outline: none;
+}
+
+.monthSelect:focus {
+  border-color: #0090e8;
+}
+
+.logoutBtn {
+  padding: 7px 16px;
+  background: none;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.logoutBtn:hover {
+  border-color: #e05080;
+  color: #e05080;
+}
+
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.loadingMsg {
+  text-align: center;
+  color: #aaa;
+  font-size: 14px;
+  padding: 48px 0;
+}
+
+.emptyMsg {
+  text-align: center;
+  color: #aaa;
+  font-size: 14px;
+  padding: 48px 0;
+}
+
+/* ━━━ サマリーカード ━━━ */
+.summaryCards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.summaryCard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.summaryValue {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0090e8;
+  line-height: 1;
+}
+
+.summaryLabel {
+  font-size: 12px;
+  color: #888;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ━━━ グラフグリッド ━━━ */
+.chartsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.chartCard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px 24px 28px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.chartTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #888;
+  margin: 0 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+  letter-spacing: 0.04em;
+}
+
+/* ━━━ 棒グラフ ━━━ */
+.barChart {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.barRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.barLabel {
+  font-size: 12px;
+  color: #555;
+  width: 96px;
+  flex-shrink: 0;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.barTrack {
+  flex: 1;
+  background: #f2f2f2;
+  border-radius: 6px;
+  height: 16px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: linear-gradient(90deg, #e05080, #f07090);
+  border-radius: 6px;
+  transition: width 0.5s ease;
+  min-width: 4px;
+}
+
+.barCount {
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+  width: 28px;
+  text-align: right;
+  flex-shrink: 0;
+}
