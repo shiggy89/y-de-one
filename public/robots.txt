@@ -6,5 +6,6 @@ Disallow: /admin
 Disallow: /mypage
 Disallow: /register
 Disallow: /contact/thanks
+Disallow: /analytics
 
 Sitemap: https://y-de-one.com/sitemap.xml
