@@ -1898,9 +1898,6 @@ export default function AdminPanel() {
                 />
               </div>
             </div>
-            <button className={styles.noticePostBtn} style={{ marginTop: 8 }} onClick={handleServerDbSave} disabled={serverDbSaving}>
-              {serverDbSaving ? "保存中..." : "追加・更新する"}
-            </button>
             {serverDbMsg && <p className={styles.noticeMsg}>{serverDbMsg}</p>}
           </div>
 
@@ -1914,7 +1911,6 @@ export default function AdminPanel() {
                   <th style={{ padding: "8px 12px", color: "#666", fontWeight: 600 }}>年月</th>
                   <th style={{ padding: "8px 12px", color: "#666", fontWeight: 600 }}>金額</th>
                   <th style={{ padding: "8px 12px", color: "#666", fontWeight: 600 }}>受領日</th>
-                  <th style={{ padding: "8px 12px" }}></th>
                 </tr>
               </thead>
               <tbody>
@@ -1938,9 +1934,6 @@ export default function AdminPanel() {
                           onChange={(e) => { if (e.target.value) handleServerDbUpdateReceived(r.id, e.target.value); }}
                         />
                       )}
-                    </td>
-                    <td style={{ padding: "10px 12px", textAlign: "right" }}>
-                      <button className={styles.noticeDeleteBtn} onClick={() => handleServerDbDelete(r.id, r.year_month)}>削除</button>
                     </td>
                   </tr>
                 ))}
