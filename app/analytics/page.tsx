@@ -19,6 +19,7 @@ type AnalyticsData = {
   classFill: ClassFill[];
   rehearsalSlots: RehearsalSlot[];
   individualByDow: Record<number, number>;
+  individualStudentsByDow: Record<number, Student[]>;
   isWeeklyView: boolean;
   classWeek: string | null;
   classMonth: string;
@@ -170,6 +171,7 @@ export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(false);
   const [expandedClass, setExpandedClass] = useState<string | null>(null);
+  const [expandedExtra, setExpandedExtra] = useState<string | null>(null);
 
   // Class fill independent navigation
   const [classViewMode, setClassViewMode] = useState<"week" | "month">("month");
@@ -214,6 +216,7 @@ export default function AnalyticsPage() {
     classes: (data?.classFill ?? []).filter((c) => c.dow === dow),
     rehearsals: (data?.rehearsalSlots ?? []).filter((r) => r.dow === dow),
     individualCount: data?.individualByDow?.[dow] ?? 0,
+    individualStudents: data?.individualStudentsByDow?.[dow] ?? [],
   })).filter((d) => d.classes.length > 0 || d.rehearsals.length > 0);
 
   return (
@@ -327,7 +330,7 @@ export default function AnalyticsPage() {
               </div>
 
               <div className={s.scheduleGrid}>
-                {byDow.map(({ dow, day, classes, rehearsals, individualCount }) => (
+                {byDow.map(({ dow, day, classes, rehearsals, individualCount, individualStudents }) => (
                   <div key={dow} className={s.dayCol}>
                     <div className={s.dayHeader}>{day}曜日</div>
 
@@ -369,22 +372,54 @@ export default function AnalyticsPage() {
                       );
                     })}
 
-                    {/* リハーサル cards */}
-                    {rehearsals.map((r) => (
-                      <div key={`rehearsal-${r.dow}-${r.time}`} className={s.rehearsalCard}>
-                        <span className={s.classTime}>{r.time}〜{r.endTime}</span>
-                        <div className={s.rehearsalTitle}>{r.title}</div>
-                        <div className={s.rehearsalBadge}>スケジュール</div>
-                      </div>
-                    ))}
+                    {/* リハーサルカード */}
+                    {rehearsals.map((r) => {
+                      const rKey = `rehearsal-${r.dow}`;
+                      const isOpen = expandedExtra === rKey;
+                      return (
+                        <div
+                          key={rKey}
+                          className={s.rehearsalCard}
+                          onClick={() => setExpandedExtra(isOpen ? null : rKey)}
+                        >
+                          <div className={s.extraCardHeader}>
+                            <span className={s.classTime}>{r.time}〜{r.endTime}</span>
+                            <span className={s.rehearsalBadge}>スケジュール</span>
+                          </div>
+                          <div className={s.rehearsalTitle}>{r.title}</div>
+                          {isOpen && (
+                            <div className={s.extraNote}>出席記録なし</div>
+                          )}
+                        </div>
+                      );
+                    })}
 
                     {/* 個人レッスンカード */}
-                    {individualCount > 0 && (
-                      <div className={s.individualCard}>
-                        <div className={s.individualTitle}>個人レッスン</div>
-                        <div className={s.individualCount}>{individualCount}<span className={s.individualUnit}>件</span></div>
-                      </div>
-                    )}
+                    {individualCount > 0 && (() => {
+                      const iKey = `individual-${dow}`;
+                      const isOpen = expandedExtra === iKey;
+                      return (
+                        <div
+                          className={s.individualCard}
+                          onClick={() => setExpandedExtra(isOpen ? null : iKey)}
+                        >
+                          <div className={s.extraCardHeader}>
+                            <div className={s.individualTitle}>個人レッスン</div>
+                            <div className={s.individualCount}>{individualCount}<span className={s.individualUnit}>件</span></div>
+                          </div>
+                          {isOpen && individualStudents.length > 0 && (
+                            <div className={s.studentAvatars}>
+                              {individualStudents.map((st) => (
+                                <div key={st.id} className={s.studentAvatar}>
+                                  <Avatar src={st.picture_url} name={st.name} size={32} />
+                                  <span className={s.studentName}>{st.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>

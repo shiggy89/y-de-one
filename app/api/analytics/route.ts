@@ -204,14 +204,28 @@ export async function GET(req: Request) {
     Math.max(1, monthClassFill.filter((c) => c.sessions > 0).length) * 100
   );
 
-  // ── 個人レッスン件数 per DOW (class period) ─────
+  // ── 個人レッスン件数・生徒一覧 per DOW (class period) ────
   const individualByDow: Record<number, number> = {};
+  const individualStudentsDow: Record<number, Map<number, { id: number; name: string; picture_url: string | null }>> = {};
   classRecordsAll
     .filter((r) => r.lesson_type === "個人")
     .forEach((r) => {
       const dow = new Date(r.lesson_date + "T00:00:00").getDay();
       individualByDow[dow] = (individualByDow[dow] ?? 0) + 1;
+      if (!individualStudentsDow[dow]) individualStudentsDow[dow] = new Map();
+      if (!individualStudentsDow[dow].has(r.student_id)) {
+        const u = userMap.get(r.student_id);
+        if (u) individualStudentsDow[dow].set(r.student_id, {
+          id: r.student_id,
+          name: u.name ?? "名前なし",
+          picture_url: u.line_picture_url ?? null,
+        });
+      }
     });
+  const individualStudentsByDow: Record<number, { id: number; name: string; picture_url: string | null }[]> = {};
+  Object.entries(individualStudentsDow).forEach(([dow, map]) => {
+    individualStudentsByDow[Number(dow)] = Array.from(map.values());
+  });
 
   // ── Rankings ─────────────────────────────────────
   const attCount = new Map<number, number>();
@@ -304,6 +318,7 @@ export async function GET(req: Request) {
     classFill,
     rehearsalSlots: activeRehearsals,
     individualByDow,
+    individualStudentsByDow,
     isWeeklyView: !!classWeek,
     classWeek: classWeek ?? null,
     classMonth,

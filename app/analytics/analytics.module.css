@@ -465,13 +465,27 @@
 
 /* ━━━ Rehearsal Card ━━━ */
 .rehearsalCard {
-  background: #f8fafc;
-  border: 1.5px dashed #cbd5e1;
+  background: #ebebeb;
+  border: 1px solid #c8c8c8;
   border-radius: 10px;
   padding: 10px 12px;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.rehearsalCard:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-color: #a8a8a8;
+}
+
+.extraCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
 }
 
 .rehearsalTitle {
@@ -487,30 +501,46 @@
   color: #94a3b8;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.extraNote {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #d0d0d0;
+  text-align: center;
 }
 
 /* ━━━ Individual Lesson Card ━━━ */
 .individualCard {
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
   border-radius: 10px;
   padding: 10px 12px;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.individualCard:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-color: #81c784;
 }
 
 .individualTitle {
   font-size: 11px;
   font-weight: 700;
-  color: #1e40af;
+  color: #2e7d32;
 }
 
 .individualCount {
   font-size: 18px;
   font-weight: 800;
-  color: #0090e8;
+  color: #388e3c;
   line-height: 1;
 }
 
