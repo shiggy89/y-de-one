@@ -26,7 +26,9 @@ type User = {
   is_admin: boolean;
 };
 
-type Tab = "attendance" | "ledger" | "users" | "message" | "direct" | "report" | "hp_news" | "blog" | "lesson_info" | "analytics";
+type Tab = "attendance" | "ledger" | "users" | "message" | "direct" | "server_db" | "report" | "hp_news" | "blog" | "lesson_info" | "analytics";
+
+type ServerDbRecord = { id: number; year_month: string; amount: number; received_at: string | null; note: string | null };
 
 type HpNewsRecord = { id: number; title: string; content: string; category: string | null; published_at: string };
 
@@ -129,7 +131,7 @@ export default function AdminPanel() {
   const [tab, setTab] = useState<Tab>(() => {
     if (typeof window !== "undefined") {
       const hash = window.location.hash.replace("#", "") as Tab;
-      const valid: Tab[] = ["attendance", "ledger", "users", "message", "direct", "report", "hp_news", "blog", "lesson_info", "analytics"];
+      const valid: Tab[] = ["attendance", "ledger", "users", "message", "direct", "server_db", "report", "hp_news", "blog", "lesson_info", "analytics"];
       if (valid.includes(hash)) return hash;
     }
     return "attendance";
@@ -412,6 +414,60 @@ export default function AdminPanel() {
   const [directMsg, setDirectMsg] = useState<string | null>(null);
   const [directError, setDirectError] = useState<string | null>(null);
 
+  // サーバーDB管理
+  const [serverDbRecords, setServerDbRecords] = useState<ServerDbRecord[]>([]);
+  const [serverDbYearMonth, setServerDbYearMonth] = useState(() => { const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}`; });
+  const [serverDbAmount, setServerDbAmount] = useState("");
+  const [serverDbReceivedAt, setServerDbReceivedAt] = useState("");
+  const [serverDbNote, setServerDbNote] = useState("");
+  const [serverDbMsg, setServerDbMsg] = useState<string | null>(null);
+  const [serverDbSaving, setServerDbSaving] = useState(false);
+
+  const fetchServerDb = async () => {
+    const res = await adminFetch("/api/admin/server-db", { cache: "no-store" });
+    const data = await res.json();
+    setServerDbRecords(data.records ?? []);
+  };
+
+  const handleServerDbSave = async () => {
+    if (!serverDbAmount) { setServerDbMsg("金額を入力してください"); return; }
+    setServerDbSaving(true);
+    setServerDbMsg(null);
+    const res = await adminFetch("/api/admin/server-db", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ year_month: serverDbYearMonth, amount: Number(serverDbAmount), received_at: serverDbReceivedAt || null, note: serverDbNote || null }),
+    });
+    if (res.ok) {
+      setServerDbAmount(""); setServerDbReceivedAt(""); setServerDbNote("");
+      setServerDbMsg("保存しました");
+      await fetchServerDb();
+    } else {
+      const d = await res.json();
+      setServerDbMsg(d.error ?? "保存に失敗しました");
+    }
+    setServerDbSaving(false);
+  };
+
+  const handleServerDbUpdateReceived = async (id: number, received_at: string) => {
+    await adminFetch("/api/admin/server-db", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, received_at }),
+    });
+    await fetchServerDb();
+  };
+
+  const handleServerDbDelete = async (id: number, yearMonth: string) => {
+    if (!confirm(`${yearMonth} のデータを削除しますか？`)) return;
+    setServerDbRecords((prev) => prev.filter((r) => r.id !== id));
+    await adminFetch("/api/admin/server-db", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+  };
+
   // レッスン別出席回数（生徒ソート用）
   const [lessonCounts, setLessonCounts] = useState<Record<number, number>>({});
 
@@ -612,6 +668,7 @@ export default function AdminPanel() {
     if (tab === "hp_news" && isAdmin) fetchHpNews();
     if (tab === "blog" && isAdmin) { fetchBlogList(); fetchCategories(); setBlogView("list"); }
     if (tab === "lesson_info" && isAdmin) fetchLessonInfo();
+    if (tab === "server_db" && isAdmin) fetchServerDb();
   }, [tab, isAdmin, isSuperAdmin]);
 
   useEffect(() => {
@@ -942,6 +999,7 @@ export default function AdminPanel() {
           <button className={`${styles.tab} ${tab === "blog" ? styles.active : ""}`} onClick={() => changeTab("blog")}>ブログ</button>
           {/* <button className={`${styles.tab} ${tab === "message" ? styles.active : ""}`} onClick={() => changeTab("message")}>メッセージ</button> */}
           <button className={`${styles.tab} ${tab === "direct" ? styles.active : ""}`} onClick={() => changeTab("direct")}>個別メッセージ</button>
+          <button className={`${styles.tab} ${tab === "server_db" ? styles.active : ""}`} onClick={() => changeTab("server_db")}>サーバーDB</button>
           {isSuperAdmin && (
             <button className={`${styles.tab} ${tab === "analytics" ? styles.active : ""}`} onClick={() => changeTab("analytics")}>分析</button>
           )}
@@ -1801,6 +1859,93 @@ export default function AdminPanel() {
 
           {directMsg && directTargets.length === 0 && (
             <p className={styles.successMsg}>{directMsg}</p>
+          )}
+        </div>
+      )}
+
+      {/* ━━━ サーバーDB ━━━ */}
+      {tab === "server_db" && (
+        <div className={styles.section}>
+          <p className={styles.sectionTitle}>サーバーDB費用を追加</p>
+          <div className={styles.noticeForm}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: "1 1 120px" }}>
+                <label style={{ fontSize: 12, color: "#666" }}>年月</label>
+                <input
+                  type="month"
+                  className={styles.formInput}
+                  value={serverDbYearMonth}
+                  onChange={(e) => setServerDbYearMonth(e.target.value)}
+                />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: "1 1 120px" }}>
+                <label style={{ fontSize: 12, color: "#666" }}>金額（円）</label>
+                <input
+                  type="number"
+                  className={styles.formInput}
+                  placeholder="例: 7587"
+                  value={serverDbAmount}
+                  onChange={(e) => setServerDbAmount(e.target.value)}
+                />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, flex: "1 1 140px" }}>
+                <label style={{ fontSize: 12, color: "#666" }}>受領日</label>
+                <input
+                  type="date"
+                  className={styles.formInput}
+                  value={serverDbReceivedAt}
+                  onChange={(e) => setServerDbReceivedAt(e.target.value)}
+                />
+              </div>
+            </div>
+            <button className={styles.noticePostBtn} style={{ marginTop: 8 }} onClick={handleServerDbSave} disabled={serverDbSaving}>
+              {serverDbSaving ? "保存中..." : "追加・更新する"}
+            </button>
+            {serverDbMsg && <p className={styles.noticeMsg}>{serverDbMsg}</p>}
+          </div>
+
+          <p className={styles.sectionTitle} style={{ marginTop: 24 }}>費用一覧</p>
+          {serverDbRecords.length === 0 ? (
+            <p className={styles.empty}>データがありません</p>
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+              <thead>
+                <tr style={{ borderBottom: "2px solid #eee", textAlign: "left" }}>
+                  <th style={{ padding: "8px 12px", color: "#666", fontWeight: 600 }}>年月</th>
+                  <th style={{ padding: "8px 12px", color: "#666", fontWeight: 600 }}>金額</th>
+                  <th style={{ padding: "8px 12px", color: "#666", fontWeight: 600 }}>受領日</th>
+                  <th style={{ padding: "8px 12px" }}></th>
+                </tr>
+              </thead>
+              <tbody>
+                {serverDbRecords.map((r) => (
+                  <tr key={r.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
+                    <td style={{ padding: "10px 12px", fontWeight: 600 }}>
+                      {r.year_month.split("-").map(Number).join("年")}月
+                    </td>
+                    <td style={{ padding: "10px 12px", color: "#e05080", fontWeight: 700 }}>
+                      ¥{r.amount.toLocaleString()}
+                    </td>
+                    <td style={{ padding: "10px 12px" }}>
+                      {r.received_at ? (
+                        <span style={{ color: "#4caf50", fontWeight: 600 }}>
+                          {new Date(r.received_at).toLocaleDateString("ja-JP", { month: "2-digit", day: "2-digit" }).replace("/", "月") + "日"}
+                        </span>
+                      ) : (
+                        <input
+                          type="date"
+                          style={{ border: "1px solid #ddd", borderRadius: 4, padding: "3px 6px", fontSize: 13, color: "#333" }}
+                          onChange={(e) => { if (e.target.value) handleServerDbUpdateReceived(r.id, e.target.value); }}
+                        />
+                      )}
+                    </td>
+                    <td style={{ padding: "10px 12px", textAlign: "right" }}>
+                      <button className={styles.noticeDeleteBtn} onClick={() => handleServerDbDelete(r.id, r.year_month)}>削除</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       )}
