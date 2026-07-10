@@ -227,6 +227,15 @@ export default function AnalyticsPage() {
           <span className={s.headerLogo}>Y-de-ONE</span>
           <span className={s.headerDivider}>/</span>
           <span className={s.headerTitle}>Analytics</span>
+          <span className={s.headerDivider}>|</span>
+          <a
+            href="/analytics/students"
+            style={{ fontSize: 12, color: "#64748b", textDecoration: "none", fontWeight: 600, letterSpacing: "0.04em" }}
+            onMouseOver={(e) => { (e.target as HTMLAnchorElement).style.color = "#e2e8f0"; }}
+            onMouseOut={(e) => { (e.target as HTMLAnchorElement).style.color = "#64748b"; }}
+          >
+            生徒別参加分析 →
+          </a>
         </div>
         <div className={s.headerRight}>
           <div className={s.monthNav}>
