@@ -70,7 +70,7 @@ export async function GET(req: Request) {
   const [
     { data: monthRows },
     { data: allUsers },
-    { data: trendRows },
+    { data: trendRows },   // includes price_paid for prevMonthRevenue
     { data: allBadges },
     { data: classRows },
   ] = await Promise.all([
@@ -84,7 +84,7 @@ export async function GET(req: Request) {
       .select("id, name, line_picture_url, status"),
     supabaseAdmin
       .from("attendances")
-      .select("student_id, lesson_date")
+      .select("student_id, lesson_date, price_paid")
       .gte("lesson_date", trendFrom)
       .lt("lesson_date", toDate),
     supabaseAdmin
@@ -113,6 +113,12 @@ export async function GET(req: Request) {
   // ── KPI ──────────────────────────────────────────
   const totalAttendance = monthClassRecords.length;
   const totalRevenue = records.reduce((s, r) => s + (r.price_paid ?? 0), 0);
+
+  // Previous month revenue (from trendRows which covers 12 months)
+  const prevMonthStr = m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, "0")}`;
+  const prevMonthRevenue = (trends ?? [])
+    .filter((r) => r.lesson_date >= `${prevMonthStr}-01` && r.lesson_date < from)
+    .reduce((s, r) => s + ((r as { price_paid?: number }).price_paid ?? 0), 0);
 
   // ── Class Fill (class period) ─────────────────────
   const slotSessions = new Map<string, Set<string>>();
@@ -314,7 +320,7 @@ export async function GET(req: Request) {
     : 0;
 
   return NextResponse.json({
-    kpi: { totalAttendance, totalRevenue, avgFillPct, churnRiskCount: churnRisk.length },
+    kpi: { totalAttendance, totalRevenue, prevMonthRevenue, avgFillPct, churnRiskCount: churnRisk.length },
     classFill,
     rehearsalSlots: activeRehearsals,
     individualByDow,
