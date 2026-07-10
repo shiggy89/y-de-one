@@ -6,7 +6,7 @@ import {
   FrequencyType, TrendType, BehaviorType, PotentialLevel,
   Recommendation, CoOccurrencePair, StudentAnalysisSummary, StudentsKPI, Period,
   ActionPriorityStudent, ClassRecruitmentOpportunity, MonthlyDistributionBucket,
-  RevenueImpact, ScoreBreakdownItem, RecruitmentCandidate,
+  RevenueImpact, RecruitmentCandidate,
 } from "@/lib/studentAnalytics";
 
 // ─── Raw API Types ─────────────────────────────────────────────────────────────
@@ -393,10 +393,10 @@ function buildImprovementProposals(
           type: "recruit",
           stars: r.candidateCount >= 8 ? 5 : 4,
           title: `${r.dowLabel}曜 ${r.time} ${r.title}`,
-          badge: "集客チャンス",
-          currentState: `空き${r.spacesLeft}席 · 候補者${r.candidateCount}名`,
+          badge: "参加余地あり",
+          currentState: `空き${r.spacesLeft}席 · 適合候補${r.candidateCount}名`,
           headline: "既存生徒の参加履歴から参加適性の高い生徒が確認できます",
-          reason: "クラス内容・時間帯のアピールで充填率向上が見込めます",
+          reason: "スケジュール・クラス構成の調整で充填率向上が見込めます",
           expectedLessons: r.candidateCount * PER_MONTH,
           expectedRevenue: r.candidateCount * PER_MONTH * avgPrice,
         });
@@ -486,7 +486,7 @@ function ImprovementProposalSection({ proposals }: { proposals: ImprovementPropo
 
 // ─── ① 経営サマリー KPI ───────────────────────────────────────────────────────
 
-type KpiDrillTarget = "" | "churn" | "fill" | "action" | "recruit" | "potential" | "lowfreq" | "highfreq";
+type KpiDrillTarget = "" | "churn" | "fill" | "recruit" | "potential" | "lowfreq" | "highfreq";
 type KpiCard = { val: string; label: string; drill: KpiDrillTarget; color?: string; sub?: string };
 
 function KpiSection({
@@ -546,10 +546,6 @@ function KpiSection({
       drill: "potential" as KpiDrillTarget,
     },
     {
-      val: `${sk.todayApproachCount}人`, label: "フォロー候補生徒",
-      color: "#64748b", drill: "action" as KpiDrillTarget,
-    },
-    {
       val: `${sk.recruitableClassCount}クラス`, label: "参加機会あり",
       color: "#0090e8", drill: "recruit" as KpiDrillTarget,
     },
@@ -580,13 +576,11 @@ function KpiSection({
 // ─── ③ クラス別 参加機会 ──────────────────────────────────────────────────────
 
 function ClassRecruitmentSection({
-  opportunities, allStudents, onSelectStudent, announced, onToggleAnnounce, avgPrice,
+  opportunities, allStudents, onSelectStudent, avgPrice,
 }: {
   opportunities: ClassRecruitmentOpportunity[];
   allStudents: StudentAnalysisSummary[];
   onSelectStudent: (st: StudentAnalysisSummary) => void;
-  announced: Set<string>;
-  onToggleAnnounce: (key: string) => void;
   avgPrice: number;
 }) {
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -603,10 +597,10 @@ function ClassRecruitmentSection({
           const isOpen = expanded === op.slotId;
           // Improvement hint: lots of candidates → announce; few → consider time change
           const hint = op.candidateCount >= Math.ceil(op.spacesLeft * 0.5)
-            ? `候補者${op.candidateCount}名への案内で充填可能`
+            ? `適合候補${op.candidateCount}名（充填余地あり）`
             : op.spacesLeft >= 8 && op.candidateCount < 3
               ? "候補者少 — 時間・曜日の変更を検討"
-              : `${op.candidateCount}名へ案内可能`;
+              : `参加適性の高い候補 ${op.candidateCount}名`;
 
           return (
             <div key={op.slotId} className={s.recruitCard}>
@@ -630,12 +624,9 @@ function ClassRecruitmentSection({
                   {op.candidates.map((c, i) => {
                     const full = allStudents.find((a) => a.id === c.id);
                     const recStars = c.recScore >= 70 ? 5 : c.recScore >= 55 ? 4 : c.recScore >= 40 ? 3 : c.recScore >= 25 ? 2 : 1;
-                    const annKey = `${op.slotId}_${c.id}`;
-                    const isAnnounced = announced.has(annKey);
-                    const expectedRev = `+¥${avgPrice.toLocaleString()}`;
                     const participationRate = `参加適性 ${Math.round(c.recScore * 0.7)}%`;
                     return (
-                      <div key={c.id} className={`${s.recruitCandItem} ${isAnnounced ? s.recruitCandAnnounced : ""}`}>
+                      <div key={c.id} className={s.recruitCandItem}>
                         <span className={s.recruitCandRank}>#{i + 1}</span>
                         <Avatar src={c.pictureUrl} name={c.name} size={28} />
                         <div className={s.recruitCandInfo}>
@@ -646,20 +637,11 @@ function ClassRecruitmentSection({
                           ))}
                           <div className={s.recruitCandMeta}>
                             <span className={s.recruitCandExpect}>{participationRate}</span>
-                            <span className={s.recruitCandExpect} style={{ color: "#16a34a" }}>{expectedRev}</span>
                           </div>
                         </div>
-                        <div className={s.recruitCandActions}>
-                          <button
-                            className={`${s.recruitCandAnnounceBtn} ${isAnnounced ? s.recruitCandAnnouncedBtn : ""}`}
-                            onClick={() => onToggleAnnounce(annKey)}
-                          >
-                            {isAnnounced ? "✓ 案内済み" : "案内済みに"}
-                          </button>
-                          {full && (
-                            <button className={s.recruitCandDetailBtn} onClick={() => onSelectStudent(full)}>詳細</button>
-                          )}
-                        </div>
+                        {full && (
+                          <button className={s.recruitCandDetailBtn} onClick={() => onSelectStudent(full)}>詳細</button>
+                        )}
                       </div>
                     );
                   })}
@@ -911,7 +893,7 @@ function ChurnInsightSection({
         : "参加パターンを分析して対応クラスを改善推奨";
     insights.push(`📌 離脱生徒に「${topBehavior[0]}」が多い（${topBehavior[1]}名）— ${msg}`);
   }
-  if (moderate.length >= 2) insights.push(`💡 ${moderate.length}名が30〜60日未参加 — 発表会・イベント等の機会提供で復帰を促せます`);
+  if (moderate.length >= 2) insights.push(`💡 ${moderate.length}名が30〜60日未参加 — 発表会・イベント等の開催タイミングで自然な復帰が期待できます`);
 
   return (
     <section className={s.section} id="section-churn">
@@ -1191,131 +1173,6 @@ function StudentTable({
   );
 }
 
-// ─── ⑧ 個別フォロー候補（折りたたみ内） ──────────────────────────────────────
-
-function FollowCandidatesSection({
-  students, allStudents, onSelectStudent, followDone, onToggleFollow, avgPrice,
-}: {
-  students: ActionPriorityStudent[];
-  allStudents: StudentAnalysisSummary[];
-  onSelectStudent: (st: StudentAnalysisSummary) => void;
-  followDone: Set<number>;
-  onToggleFollow: (id: number) => void;
-  avgPrice: number;
-}) {
-  const [expandedBreakdown, setExpandedBreakdown] = useState<number | null>(null);
-  if (students.length === 0) return <p className={s.dataNote}>フォロー候補生徒がいません</p>;
-  const STAR_BORDER: Record<number, string> = { 5: "#e05080", 4: "#f59e0b", 3: "#0090e8", 2: "#94a3b8", 1: "#cbd5e1" };
-
-  return (
-    <div>
-      <p className={s.dataNote} style={{ marginBottom: 12 }}>
-        参加履歴から個別フォローが効果的な生徒の一覧です。先生のご判断でご活用ください。
-      </p>
-      <div className={s.actionGrid}>
-        {students.map((st) => {
-          const full = allStudents.find((a) => a.id === st.id);
-          const done = followDone.has(st.id);
-          const isBreakdownOpen = expandedBreakdown === st.id;
-          const expectedRev = `+¥${(avgPrice * 2).toLocaleString()}`;
-          return (
-            <div key={st.id} className={`${s.actionCard} ${done ? s.actionCardSent : ""}`}
-              style={{ borderLeft: `4px solid ${STAR_BORDER[st.priorityStars] ?? "#e2e8f0"}` }}>
-              <div className={s.actionCardHeader}>
-                <Avatar src={st.pictureUrl} name={st.name} size={36} />
-                <div className={s.actionCardMeta}>
-                  <div className={s.actionCardName}>{st.name}</div>
-                  <StarRating stars={st.priorityStars} size={13} />
-                </div>
-                <div className={s.actionCardRight}>
-                  <div className={s.actionExpect} style={{ color: done ? "#94a3b8" : "#16a34a" }}>{expectedRev}</div>
-                  <button className={s.actionScoreBtn}
-                    onClick={() => setExpandedBreakdown(isBreakdownOpen ? null : st.id)}>
-                    {st.priorityScore}pt {isBreakdownOpen ? "▲" : "▼"}
-                  </button>
-                </div>
-              </div>
-
-              {isBreakdownOpen && (
-                <div className={s.breakdown}>
-                  <div className={s.breakdownTitle}>スコア内訳</div>
-                  {st.scoreBreakdown.map((item, i) => (
-                    <div key={i} className={s.breakdownItem}>
-                      <span className={s.breakdownPts} style={{ color: item.points > 0 ? "#16a34a" : "#e05080" }}>
-                        {item.points > 0 ? `+${item.points}` : item.points}
-                      </span>
-                      <span className={s.breakdownLabel}>{item.label}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <div className={s.actionCardStats}>
-                <div className={s.actionStat}><span className={s.actionStatLabel}>今月</span><span className={s.actionStatVal}>{st.currentCount}回</span></div>
-                <div className={s.actionStat}><span className={s.actionStatLabel}>最終参加</span><span className={s.actionStatVal}>{st.daysSinceLastAttendance !== null ? `${st.daysSinceLastAttendance}日前` : "—"}</span></div>
-                <div className={s.actionStat}><span className={s.actionStatLabel}>平均間隔</span><span className={s.actionStatVal}>{st.avgIntervalDays !== null ? `${st.avgIntervalDays}日` : "—"}</span></div>
-              </div>
-
-              {st.topRecommendation && (
-                <div className={s.actionRec}>
-                  <span className={s.actionRecLabel}>おすすめ</span>
-                  <span className={s.actionRecVal}>{st.topRecommendation.dowLabel}曜 {st.topRecommendation.time}〜 {st.topRecommendation.title}</span>
-                </div>
-              )}
-
-              <div className={s.actionCardFooter}>
-                <button
-                  className={`${s.lineBtn} ${done ? s.lineBtnSent : ""}`}
-                  onClick={() => onToggleFollow(st.id)}
-                >
-                  {done ? "✓ フォロー済み" : "フォロー済みにする"}
-                </button>
-                {full && (
-                  <button className={s.detailBtn} onClick={() => onSelectStudent(full)}>詳細</button>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function FollowResultsSection({
-  followDoneCount, announcedCount, avgPrice,
-}: { followDoneCount: number; announcedCount: number; avgPrice: number }) {
-  const total = followDoneCount + announcedCount;
-  if (total === 0) return null;
-  const estimatedRev = followDoneCount * avgPrice * 2;
-
-  return (
-    <div style={{ marginTop: 24 }}>
-      <h3 className={s.rankTitle} style={{ marginBottom: 12 }}>フォロー成果（本日）</h3>
-      <div className={s.salesFunnel}>
-        <div className={s.salesStep}>
-          <span className={s.salesStepVal} style={{ color: total > 0 ? "#0090e8" : "#94a3b8" }}>{total}件</span>
-          <span className={s.salesStepLabel}>フォロー済み / 案内済み</span>
-        </div>
-        <div className={s.salesArrow}>→</div>
-        <div className={s.salesStep}>
-          <span className={s.salesStepVal} style={{ color: "#94a3b8" }}>—</span>
-          <span className={s.salesStepLabel}>参加予定</span>
-          <span className={s.salesStepNote}>次回来校時に確認</span>
-        </div>
-        <div className={s.salesArrow}>→</div>
-        <div className={s.salesStep}>
-          <span className={s.salesStepVal} style={{ color: estimatedRev > 0 ? "#16a34a" : "#94a3b8" }}>
-            {estimatedRev > 0 ? `+¥${estimatedRev.toLocaleString()}` : "—"}
-          </span>
-          <span className={s.salesStepLabel}>追加売上（推定）</span>
-          <span className={s.salesStepNote}>{followDoneCount}名 × 2回 × 単価</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── 生徒詳細モーダル ─────────────────────────────────────────────────────────
 
 type DetailTab = "overview" | "pattern" | "analysis";
@@ -1554,8 +1411,6 @@ export default function AnalyticsPage() {
   const [studentsData, setStudentsData] = useState<StudentsData | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const [followDone, setFollowDone] = useState<Set<number>>(new Set());
-  const [announced, setAnnounced] = useState<Set<string>>(new Set());
   const [drillTarget, setDrillTarget] = useState<KpiDrillTarget>("");
   const [selectedStudent, setSelectedStudent] = useState<StudentAnalysisSummary | null>(null);
 
@@ -1603,19 +1458,11 @@ export default function AnalyticsPage() {
 
   const logout = () => { sessionStorage.removeItem(SESSION_KEY); setAuthKey(null); setAnalyticsData(null); setStudentsData(null); };
 
-  const toggleFollowDone = (id: number) => {
-    setFollowDone((prev) => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
-  };
-  const toggleAnnounced = (key: string) => {
-    setAnnounced((prev) => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next; });
-  };
-
   const handleDrill = (target: KpiDrillTarget) => {
     setDrillTarget(target);
     if (!target) return;
     const idMap: Partial<Record<KpiDrillTarget, string>> = {
-      churn: "section-churn", fill: "section-fill",
-      action: "section-follow", recruit: "section-recruit",
+      churn: "section-churn", fill: "section-fill", recruit: "section-recruit",
     };
     const id = idMap[target];
     if (id) setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
@@ -1665,8 +1512,6 @@ export default function AnalyticsPage() {
                 opportunities={studentsData.classRecruitment}
                 allStudents={studentsData.students}
                 onSelectStudent={setSelectedStudent}
-                announced={announced}
-                onToggleAnnounce={toggleAnnounced}
                 avgPrice={avgPrice}
               />
             )}
@@ -1837,31 +1682,6 @@ export default function AnalyticsPage() {
               )}
             </CollapsibleSection>
 
-            {/* ⑧ 個別フォロー候補（折りたたみ・デフォルト閉） */}
-            <CollapsibleSection
-              title="個別フォロー候補"
-              sub={`参加履歴から算出 — ${studentsData?.actionStudents.length ?? 0}名 · 先生の判断でご活用ください`}
-              defaultOpen={false}
-              id="section-follow"
-            >
-              {studentsData && (
-                <>
-                  <FollowCandidatesSection
-                    students={studentsData.actionStudents}
-                    allStudents={studentsData.students}
-                    onSelectStudent={setSelectedStudent}
-                    followDone={followDone}
-                    onToggleFollow={toggleFollowDone}
-                    avgPrice={avgPrice}
-                  />
-                  <FollowResultsSection
-                    followDoneCount={followDone.size}
-                    announcedCount={announced.size}
-                    avgPrice={avgPrice}
-                  />
-                </>
-              )}
-            </CollapsibleSection>
           </>
         )}
 
