@@ -181,8 +181,6 @@
   min-width: 600px;
   border: 1px solid #a8a8a8;
   background: #fff;
-  border-radius: 4px;
-  overflow: hidden;
 }
 
 .dayHeaderRow {
@@ -193,12 +191,13 @@
 }
 
 .dayHeaderCell {
-  text-align: center;
-  padding: 6px 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: #555;
   border-right: 1px solid #a8a8a8;
+  text-align: center;
+  color: #666;
+  line-height: 1;
+  padding: 6px 0;
+  font-size: 20px;
+  font-weight: 600;
 }
 .dayHeaderCell:last-child { border-right: none; }
 
@@ -214,52 +213,40 @@
 }
 .dayCol:last-child { border-right: none; }
 
-/* ─── Slot Block ────────────────────────────────────────────────────────────── */
+/* ─── Slot Block ─────────────────────────────────────────────────────── */
 
 .slotBlock {
   position: absolute;
   left: 3px;
   right: 3px;
+  box-sizing: border-box;
   border: 1px solid #bcbcbc;
-  border-radius: 3px;
+  border-radius: 2px;
   padding: 4px 4px 3px;
   text-align: center;
   overflow: hidden;
   cursor: pointer;
-  transition: box-shadow 0.15s, transform 0.1s;
-  box-sizing: border-box;
+  transition: box-shadow 0.15s;
 }
 .slotBlock:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
-.slotBlockSelected {
-  box-shadow: 0 0 0 2px #e05080;
-  z-index: 10;
-}
+.slotBlockSelected { box-shadow: 0 0 0 2px #e05080; z-index: 10; }
 
-.slotTime  { font-size: 11px; line-height: 1.2; margin: 0 0 1px; color: #555; }
-.slotTitle { font-size: 12px; font-weight: 600; line-height: 1.2; margin: 0 0 2px; }
-.slotStat  { font-size: 11px; font-weight: 700; line-height: 1.2; margin: 0; }
-.slotNoData { font-size: 10px; color: #bbb; margin: 0; }
+/* class colors — same as Schedule.module.css */
+.pink   { background: #f5edf1; }
+.blue   { background: #e4f1fb; }
+.yellow { background: #f8f5df; }
+.gray   { background: #ebebeb; }
 
-/* ─── Legend ────────────────────────────────────────────────────────────────── */
+.slotTime    { font-size: 15px; line-height: 1.1; margin: 0 0 2px; color: #555; }
+.slotTitle   { font-size: 17px; line-height: 1.1; margin: 0 0 2px; white-space: pre-line; }
+.slotTeacher { font-size: 14px; line-height: 1.1; margin: 0 0 2px; color: #555; }
+.slotStat    { font-size: 13px; font-weight: 700; line-height: 1.2; margin: 0; color: #e05080; }
 
-.legendWrap { margin-top: 12px; }
-
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 16px;
+.statNote {
+  margin-top: 8px;
   font-size: 12px;
-  color: #555;
-}
-
-.legendItem { display: flex; align-items: center; gap: 6px; }
-
-.legendSwatch {
-  width: 16px;
-  height: 16px;
-  border-radius: 3px;
-  border: 1px solid #bcbcbc;
-  flex-shrink: 0;
+  color: #94a3b8;
+  text-align: right;
 }
 
 /* ─── Detail Panel ──────────────────────────────────────────────────────────── */

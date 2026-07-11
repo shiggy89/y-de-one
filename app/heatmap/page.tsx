@@ -5,7 +5,7 @@ import s from "./heatmap.module.css";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Tab = "class" | "teacher" | "time";
+type Tab = "class" | "time";
 type PeriodMode = "week" | "month";
 
 type HeatmapSlot = {
@@ -37,6 +37,10 @@ const TOTAL_MIN = END_MIN - START_MIN;
 const MORIMANE = "門馬和樹";
 const AOYAMA = "青山佳樹";
 
+const COLOR_CLASS: Record<string, string> = {
+  pink: s.pink, blue: s.blue, yellow: s.yellow, gray: s.gray,
+};
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function toMin(t: string) {
@@ -45,11 +49,12 @@ function toMin(t: string) {
 }
 
 function blockStyle(start: string, end: string) {
-  const top = ((toMin(start) - START_MIN) / TOTAL_MIN) * 100;
-  const dur = toMin(end) - toMin(start);
-  const h = (dur / TOTAL_MIN) * 100;
-  const minH = dur <= 40 ? 10 : dur <= 60 ? 14 : 5;
-  return { top: `${top}%`, height: `${Math.max(minH, h - 0.5)}%` };
+  const baseTop = ((toMin(start) - START_MIN) / TOTAL_MIN) * 100;
+  const duration = toMin(end) - toMin(start);
+  const baseHeight = (duration / TOTAL_MIN) * 100;
+  const minH = duration <= 40 ? 10 : duration <= 60 ? 14 : 2;
+  const height = Math.max(minH, Math.min(baseHeight - 0.5, 100 - baseTop));
+  return { top: `${baseTop}%`, height: `${height}%` };
 }
 
 function getMondayStr(d = new Date()) {
@@ -92,40 +97,6 @@ function getMonths() {
   });
 }
 
-// ─── Color ────────────────────────────────────────────────────────────────────
-
-function classColor(avg: number, sessions: number): string {
-  if (sessions === 0) return "#f0f0f0";
-  if (avg < 2) return "#fef9c3";
-  if (avg < 4) return "#fde047";
-  if (avg < 6) return "#86efac";
-  if (avg < 9) return "#22c55e";
-  return "#15803d";
-}
-
-function classTextColor(avg: number, sessions: number): string {
-  if (sessions === 0) return "#aaa";
-  return avg >= 9 ? "#fff" : "#333";
-}
-
-function teacherBg(tc: Record<string, number>, sessions: number): string {
-  if (sessions === 0) return "#f0f0f0";
-  const total = Object.values(tc).reduce((s, v) => s + v, 0);
-  if (total === 0) return "#f0f0f0";
-  if ((tc[MORIMANE] ?? 0) / total >= 0.7) return "#fce7f3";
-  if ((tc[AOYAMA] ?? 0) / total >= 0.7) return "#dbeafe";
-  return "#ede9fe";
-}
-
-function teacherBorder(tc: Record<string, number>, sessions: number): string {
-  if (sessions === 0) return "#d1d5db";
-  const total = Object.values(tc).reduce((s, v) => s + v, 0);
-  if (total === 0) return "#d1d5db";
-  if ((tc[MORIMANE] ?? 0) / total >= 0.7) return "#e05080";
-  if ((tc[AOYAMA] ?? 0) / total >= 0.7) return "#0090e8";
-  return "#7c3aed";
-}
-
 // ─── Login ────────────────────────────────────────────────────────────────────
 
 function LoginPage({ onLogin }: { onLogin: (k: string) => void }) {
@@ -165,50 +136,35 @@ function LoginPage({ onLogin }: { onLogin: (k: string) => void }) {
 // ─── Slot Block ───────────────────────────────────────────────────────────────
 
 function SlotBlock({
-  slot, tab, selected, onSelect,
+  slot, mode, selected, onSelect,
 }: {
   slot: HeatmapSlot;
-  tab: Tab;
+  mode: PeriodMode;
   selected: boolean;
   onSelect: (slot: HeatmapSlot | null) => void;
 }) {
-  const bg = tab === "teacher" ? teacherBg(slot.teacherCounts, slot.sessions) : classColor(slot.avgAttendees, slot.sessions);
-  const border = tab === "teacher" ? teacherBorder(slot.teacherCounts, slot.sessions) : "#bcbcbc";
-  const textColor = tab === "teacher" ? "#333" : classTextColor(slot.avgAttendees, slot.sessions);
-
-  const total = Object.values(slot.teacherCounts).reduce((s, v) => s + v, 0);
-  const moRatio = total > 0 ? Math.round(((slot.teacherCounts[MORIMANE] ?? 0) / total) * 100) : 0;
-  const aoRatio = total > 0 ? Math.round(((slot.teacherCounts[AOYAMA] ?? 0) / total) * 100) : 0;
+  const colorClass = COLOR_CLASS[slot.color] ?? s.pink;
+  const stat = slot.sessions > 0
+    ? (mode === "week" ? `${slot.count}人` : `avg ${slot.avgAttendees}人`)
+    : null;
 
   return (
     <div
-      className={`${s.slotBlock} ${selected ? s.slotBlockSelected : ""}`}
-      style={{ ...blockStyle(slot.time, slot.endTime), background: bg, borderColor: border }}
+      className={`${s.slotBlock} ${colorClass} ${selected ? s.slotBlockSelected : ""}`}
+      style={blockStyle(slot.time, slot.endTime)}
       onClick={() => onSelect(selected ? null : slot)}
     >
-      <p className={s.slotTime} style={{ color: textColor }}>{slot.time}</p>
-      <p className={s.slotTitle} style={{ color: textColor }}>{slot.title}</p>
-      {slot.sessions > 0 ? (
-        tab === "teacher" ? (
-          <p className={s.slotStat}>
-            {moRatio > 0 && <span style={{ color: "#e05080" }}>門{moRatio}%</span>}
-            {aoRatio > 0 && <span style={{ color: "#0090e8" }}> 青{aoRatio}%</span>}
-          </p>
-        ) : (
-          <p className={s.slotStat} style={{ color: textColor }}>
-            avg {slot.avgAttendees}
-          </p>
-        )
-      ) : (
-        <p className={s.slotNoData}>—</p>
-      )}
+      <p className={s.slotTime}>{slot.time}-{slot.endTime}</p>
+      <p className={s.slotTitle}>{slot.title}</p>
+      {slot.dominantTeacher && <p className={s.slotTeacher}>{slot.dominantTeacher}</p>}
+      {stat && <p className={s.slotStat}>{stat}</p>}
     </div>
   );
 }
 
 // ─── Detail Panel ─────────────────────────────────────────────────────────────
 
-function DetailPanel({ slot, onClose }: { slot: HeatmapSlot; onClose: () => void }) {
+function DetailPanel({ slot, mode, onClose }: { slot: HeatmapSlot; mode: PeriodMode; onClose: () => void }) {
   const total = Object.values(slot.teacherCounts).reduce((s, v) => s + v, 0);
   const teachers = Object.entries(slot.teacherCounts).sort((a, b) => b[1] - a[1]);
 
@@ -227,8 +183,10 @@ function DetailPanel({ slot, onClose }: { slot: HeatmapSlot; onClose: () => void
           <span className={s.detailStatLabel}>回開講</span>
         </div>
         <div className={s.detailStat}>
-          <span className={s.detailStatVal}>{slot.avgAttendees}</span>
-          <span className={s.detailStatLabel}>平均参加</span>
+          <span className={s.detailStatVal}>
+            {mode === "week" ? slot.count : slot.avgAttendees}
+          </span>
+          <span className={s.detailStatLabel}>{mode === "week" ? "参加人数" : "平均参加"}</span>
         </div>
         <div className={s.detailStat}>
           <span className={s.detailStatVal}>{slot.students.length}</span>
@@ -240,7 +198,7 @@ function DetailPanel({ slot, onClose }: { slot: HeatmapSlot; onClose: () => void
           {teachers.map(([name, count]) => (
             <div key={name} className={s.detailTeacherRow}>
               <span className={s.detailTeacherName}
-                style={{ color: name === MORIMANE ? "#e05080" : "#0090e8" }}>
+                style={{ color: name === MORIMANE ? "#e05080" : name === AOYAMA ? "#0090e8" : "#555" }}>
                 {name}
               </span>
               <div className={s.detailTeacherBar}>
@@ -248,7 +206,7 @@ function DetailPanel({ slot, onClose }: { slot: HeatmapSlot; onClose: () => void
                   className={s.detailTeacherFill}
                   style={{
                     width: `${(count / total) * 100}%`,
-                    background: name === MORIMANE ? "#e05080" : "#0090e8",
+                    background: name === MORIMANE ? "#e05080" : name === AOYAMA ? "#0090e8" : "#94a3b8",
                   }}
                 />
               </div>
@@ -271,10 +229,10 @@ function DetailPanel({ slot, onClose }: { slot: HeatmapSlot; onClose: () => void
 // ─── Schedule Board ───────────────────────────────────────────────────────────
 
 function ScheduleBoard({
-  slots, tab, selectedKey, onSelect,
+  slots, mode, selectedKey, onSelect,
 }: {
   slots: HeatmapSlot[];
-  tab: Tab;
+  mode: PeriodMode;
   selectedKey: string | null;
   onSelect: (slot: HeatmapSlot | null) => void;
 }) {
@@ -297,7 +255,7 @@ function ScheduleBoard({
                 <SlotBlock
                   key={slot.key}
                   slot={slot}
-                  tab={tab}
+                  mode={mode}
                   selected={selectedKey === slot.key}
                   onSelect={onSelect}
                 />
@@ -306,48 +264,9 @@ function ScheduleBoard({
           ))}
         </div>
       </div>
-    </div>
-  );
-}
-
-// ─── Legend ───────────────────────────────────────────────────────────────────
-
-function ClassLegend() {
-  const items = [
-    { bg: "#f0f0f0", label: "データなし" },
-    { bg: "#fef9c3", label: "〜1人" },
-    { bg: "#fde047", label: "2〜3人" },
-    { bg: "#86efac", label: "4〜5人" },
-    { bg: "#22c55e", label: "6〜8人" },
-    { bg: "#15803d", label: "9人以上" },
-  ];
-  return (
-    <div className={s.legend}>
-      {items.map(item => (
-        <div key={item.label} className={s.legendItem}>
-          <div className={s.legendSwatch} style={{ background: item.bg }} />
-          <span>{item.label}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function TeacherLegend() {
-  const items = [
-    { bg: "#fce7f3", border: "#e05080", label: "門馬主体（70%以上）" },
-    { bg: "#dbeafe", border: "#0090e8", label: "青山主体（70%以上）" },
-    { bg: "#ede9fe", border: "#7c3aed", label: "混合" },
-    { bg: "#f0f0f0", border: "#d1d5db", label: "データなし" },
-  ];
-  return (
-    <div className={s.legend}>
-      {items.map(item => (
-        <div key={item.label} className={s.legendItem}>
-          <div className={s.legendSwatch} style={{ background: item.bg, borderColor: item.border }} />
-          <span>{item.label}</span>
-        </div>
-      ))}
+      <p className={s.statNote}>
+        {mode === "week" ? "数値 = その週の参加人数" : "数値 = 月間の1回あたり平均参加人数"}
+      </p>
     </div>
   );
 }
@@ -452,8 +371,6 @@ export default function HeatmapPage() {
   const periodLabel = mode === "week" ? fmtWeek(week) : fmtMonth(month);
   const isPresent = mode === "week" ? week >= currentWeek : month >= currentMonth;
 
-  const handleSelect = (slot: HeatmapSlot | null) => setSelectedSlot(slot);
-
   return (
     <div className={s.page}>
       {/* Header */}
@@ -498,7 +415,7 @@ export default function HeatmapPage() {
 
       {/* Tabs */}
       <div className={s.tabs}>
-        {([["class", "クラス別"], ["teacher", "先生別"], ["time", "時間帯別"]] as [Tab, string][]).map(([key, label]) => (
+        {([["class", "クラス別"], ["time", "時間帯別"]] as [Tab, string][]).map(([key, label]) => (
           <button key={key}
             className={`${s.tab} ${tab === key ? s.tabActive : ""}`}
             onClick={() => { setTab(key); setSelectedSlot(null); }}>
@@ -511,19 +428,13 @@ export default function HeatmapPage() {
       <main className={s.main}>
         {loading && <div className={s.loadingBar}><div className={s.loadingFill} /></div>}
 
-        {data && tab !== "time" && (
-          <>
-            <ScheduleBoard
-              slots={data.slots}
-              tab={tab}
-              selectedKey={selectedSlot?.key ?? null}
-              onSelect={handleSelect}
-            />
-            <div className={s.legendWrap}>
-              {tab === "class" && <ClassLegend />}
-              {tab === "teacher" && <TeacherLegend />}
-            </div>
-          </>
+        {data && tab === "class" && (
+          <ScheduleBoard
+            slots={data.slots}
+            mode={mode}
+            selectedKey={selectedSlot?.key ?? null}
+            onSelect={slot => setSelectedSlot(slot)}
+          />
         )}
 
         {data && tab === "time" && <TimeDist data={data.timeDistribution} />}
@@ -535,7 +446,7 @@ export default function HeatmapPage() {
 
       {/* Detail Panel */}
       {selectedSlot && (
-        <DetailPanel slot={selectedSlot} onClose={() => setSelectedSlot(null)} />
+        <DetailPanel slot={selectedSlot} mode={mode} onClose={() => setSelectedSlot(null)} />
       )}
     </div>
   );
