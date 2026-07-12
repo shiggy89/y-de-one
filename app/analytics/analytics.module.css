@@ -203,7 +203,7 @@
 
 .axisBar {
   position: relative;
-  height: 56px; /* icon 36px + label 12px + 8px padding */
+  height: 72px; /* icon 52px + label 12px + 8px padding */
 }
 
 .axisItem {
@@ -217,8 +217,8 @@
 }
 
 .axisIcon {
-  width: 36px;
-  height: 36px;
+  width: 52px;
+  height: 52px;
   object-fit: contain;
 }
 
