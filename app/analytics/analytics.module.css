@@ -70,3 +70,174 @@
 .main { padding: 40px 20px; max-width: 960px; margin: 0 auto; }
 
 .placeholder { text-align: center; color: #94a3b8; font-size: 16px; }
+
+/* ── Dashboard ── */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.monthSelect {
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #334155;
+  background: #fff;
+  cursor: pointer;
+}
+
+.urgentBadge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e05080;
+  background: #fdf2f6;
+  border: 1px solid #f9a8c4;
+  border-radius: 20px;
+  padding: 3px 12px;
+  margin: 0;
+}
+
+.loadingMsg {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 14px;
+  padding: 48px 0;
+}
+
+.emptyMsg {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 14px;
+  padding: 48px 0;
+}
+
+/* ── Student List ── */
+
+.studentList {
+  display: flex;
+  flex-direction: column;
+}
+
+.studentRow {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  column-gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f1f5f9;
+  align-items: start;
+}
+
+.avatarWrap {
+  padding-top: 2px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatarFallback {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e2e8f0;
+}
+
+.studentBody {
+  min-width: 0;
+}
+
+.studentMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.studentName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.countLabel {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.nextHint {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #e05080;
+  white-space: nowrap;
+}
+
+.nextHintIcon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+/* ── Badge Bar ── */
+
+.barGroup {
+  position: relative;
+  height: 44px; /* 12px bar + 4px gap + 22px icon + 6px bottom */
+}
+
+.barTrack {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: linear-gradient(90deg, #e05080 0%, #f472b6 100%);
+  border-radius: 6px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.thresholdMark {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.thresholdLine {
+  width: 2px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: 0 0 0 0.5px rgba(100, 116, 139, 0.4);
+}
+
+.thresholdIcon {
+  width: 22px;
+  height: 22px;
+  margin-top: 4px;
+  object-fit: contain;
+}
