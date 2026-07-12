@@ -48,13 +48,33 @@ function toMin(t: string) {
   return h * 60 + m;
 }
 
-function blockStyle(start: string, end: string) {
+function blockStyle(start: string, end: string, colIdx = 0, numCols = 1): React.CSSProperties {
   const baseTop = ((toMin(start) - START_MIN) / TOTAL_MIN) * 100;
   const duration = toMin(end) - toMin(start);
   const baseHeight = (duration / TOTAL_MIN) * 100;
   const minH = duration <= 40 ? 10 : duration <= 60 ? 14 : 2;
   const height = Math.max(minH, Math.min(baseHeight - 0.5, 100 - baseTop));
-  return { top: `${baseTop}%`, height: `${height}%` };
+  const leftPct = (colIdx / numCols) * 100;
+  const rightPct = ((numCols - colIdx - 1) / numCols) * 100;
+  return {
+    top: `${baseTop}%`,
+    height: `${height}%`,
+    left: numCols === 1 ? 3 : `calc(${leftPct}% + 2px)`,
+    right: numCols === 1 ? 3 : `calc(${rightPct}% + 2px)`,
+  };
+}
+
+function getOverlapLayout(slots: HeatmapSlot[]): Map<string, { col: number; total: number }> {
+  const map = new Map<string, { col: number; total: number }>();
+  for (const slot of slots) {
+    const sMin = toMin(slot.time);
+    const eMin = toMin(slot.endTime);
+    const concurrent = slots
+      .filter(o => toMin(o.time) < eMin && toMin(o.endTime) > sMin)
+      .sort((a, b) => toMin(a.time) - toMin(b.time) || a.key.localeCompare(b.key));
+    map.set(slot.key, { col: concurrent.indexOf(slot), total: concurrent.length });
+  }
+  return map;
 }
 
 function getMondayStr(d = new Date()) {
@@ -136,12 +156,14 @@ function LoginPage({ onLogin }: { onLogin: (k: string) => void }) {
 // ─── Slot Block ───────────────────────────────────────────────────────────────
 
 function SlotBlock({
-  slot, mode, selected, onSelect,
+  slot, mode, selected, onSelect, colIdx, numCols,
 }: {
   slot: HeatmapSlot;
   mode: PeriodMode;
   selected: boolean;
   onSelect: (slot: HeatmapSlot | null) => void;
+  colIdx: number;
+  numCols: number;
 }) {
   const colorClass = COLOR_CLASS[slot.color] ?? s.pink;
   const stat = slot.sessions > 0
@@ -151,7 +173,7 @@ function SlotBlock({
   return (
     <div
       className={`${s.slotBlock} ${colorClass} ${selected ? s.slotBlockSelected : ""}`}
-      style={blockStyle(slot.time, slot.endTime)}
+      style={blockStyle(slot.time, slot.endTime, colIdx, numCols)}
       onClick={() => onSelect(selected ? null : slot)}
     >
       <p className={s.slotTime}>{slot.time}-{slot.endTime}</p>
@@ -249,19 +271,27 @@ function ScheduleBoard({
           ))}
         </div>
         <div className={s.dayColumns}>
-          {DOW_ORDER.map(dow => (
+          {DOW_ORDER.map(dow => {
+            const daySlots = byDow.get(dow) ?? [];
+            const layout = getOverlapLayout(daySlots);
+            return (
             <div key={dow} className={s.dayCol}>
-              {(byDow.get(dow) ?? []).map(slot => (
+              {daySlots.map(slot => {
+                const { col, total } = layout.get(slot.key) ?? { col: 0, total: 1 };
+                return (
                 <SlotBlock
                   key={slot.key}
                   slot={slot}
                   mode={mode}
                   selected={selectedKey === slot.key}
                   onSelect={onSelect}
+                  colIdx={col}
+                  numCols={total}
                 />
-              ))}
+              );})}
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       <p className={s.statNote}>
