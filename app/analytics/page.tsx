@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import s from "./analytics.module.css";
 
 const SESSION_KEY = "analytics_key";
+const DISPLAY_MAX = 40;
 
 const BADGE_THRESHOLDS = [
   { badge: "bronze",   min: 4  },
@@ -28,6 +29,28 @@ type Student = {
   nextBadge: { badge: string; remaining: number; isContinuation: boolean } | null;
 };
 
+type SortKey = "next_badge" | "count_desc" | "count_asc" | "name";
+
+const SORT_OPTIONS: { value: SortKey; label: string }[] = [
+  { value: "next_badge", label: "次バッジまで順" },
+  { value: "count_desc", label: "多い順" },
+  { value: "count_asc", label: "少ない順" },
+  { value: "name",       label: "名前順" },
+];
+
+function sortStudents(students: Student[], key: SortKey): Student[] {
+  return [...students].sort((a, b) => {
+    if (key === "next_badge") {
+      const aRem = a.nextBadge?.remaining ?? Infinity;
+      const bRem = b.nextBadge?.remaining ?? Infinity;
+      return aRem !== bRem ? aRem - bRem : b.count - a.count;
+    }
+    if (key === "count_desc") return b.count - a.count;
+    if (key === "count_asc")  return a.count - b.count;
+    return a.name.localeCompare(b.name, "ja");
+  });
+}
+
 function getCurrentMonth() {
   const now = new Date();
   const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
@@ -37,37 +60,50 @@ function getCurrentMonth() {
 function getAvailableMonths(): string[] {
   const now = new Date();
   const jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  const months: string[] = [];
-  for (let i = 0; i < 6; i++) {
+  return Array.from({ length: 6 }, (_, i) => {
     const d = new Date(jst.getUTCFullYear(), jst.getUTCMonth() - i, 1);
-    months.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
-  }
-  return months;
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  });
 }
 
-function BadgeBar({ count, displayMax }: { count: number; displayMax: number }) {
-  const thresholds = BADGE_THRESHOLDS.filter((t) => t.min <= displayMax);
-  const fillPct = Math.min((count / displayMax) * 100, 100);
+function BadgeAxisHeader() {
+  return (
+    <div className={s.axisRow}>
+      <div />
+      <div className={s.axisBar}>
+        {BADGE_THRESHOLDS.map(({ badge, min }) => (
+          <div
+            key={badge}
+            className={s.axisItem}
+            style={{ left: `${(min / DISPLAY_MAX) * 100}%` }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/images/badges/badge-${badge}.png`} alt={badge} className={s.axisIcon} />
+            <span className={s.axisLabel}>{min}回</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BadgeBar({ count }: { count: number }) {
+  const fillPct = Math.min((count / DISPLAY_MAX) * 100, 100);
 
   return (
     <div className={s.barGroup}>
       <div className={s.barTrack}>
         <div className={s.barFill} style={{ width: `${fillPct}%` }} />
       </div>
-      {thresholds.map(({ badge, min }) => {
-        const pct = (min / displayMax) * 100;
-        return (
-          <div key={badge} className={s.thresholdMark} style={{ left: `${pct}%` }}>
-            <div className={s.thresholdLine} />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`/images/badges/badge-${badge}.png`}
-              alt={badge}
-              className={s.thresholdIcon}
-            />
-          </div>
-        );
-      })}
+      {BADGE_THRESHOLDS.map(({ badge, min }) => (
+        <div
+          key={badge}
+          className={s.thresholdMark}
+          style={{ left: `${(min / DISPLAY_MAX) * 100}%` }}
+        >
+          <div className={s.thresholdLine} />
+        </div>
+      ))}
     </div>
   );
 }
@@ -81,6 +117,7 @@ export default function AnalyticsPage() {
   const [month, setMonth] = useState(getCurrentMonth());
   const [students, setStudents] = useState<Student[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
+  const [sortKey, setSortKey] = useState<SortKey>("next_badge");
 
   const months = getAvailableMonths();
 
@@ -113,13 +150,7 @@ export default function AnalyticsPage() {
     });
     if (res.ok) {
       const data = await res.json();
-      const sorted = [...(data.students as Student[])].sort((a, b) => {
-        const aRem = a.nextBadge?.remaining ?? Infinity;
-        const bRem = b.nextBadge?.remaining ?? Infinity;
-        if (aRem !== bRem) return aRem - bRem;
-        return b.count - a.count;
-      });
-      setStudents(sorted);
+      setStudents(data.students as Student[]);
     }
     setDataLoading(false);
   }, [authKey, month]);
@@ -131,12 +162,8 @@ export default function AnalyticsPage() {
     setAuthKey(null);
   };
 
-  const displayMax = (() => {
-    const max = Math.max(0, ...students.map((st) => st.count));
-    if (max > 20) return 40;
-    if (max > 12) return 20;
-    return 12;
-  })();
+  const sorted = sortStudents(students, sortKey);
+  const urgentCount = students.filter((st) => st.nextBadge && st.nextBadge.remaining <= 2).length;
 
   if (!authKey) {
     return (
@@ -163,8 +190,6 @@ export default function AnalyticsPage() {
     );
   }
 
-  const urgentCount = students.filter((st) => st.nextBadge && st.nextBadge.remaining <= 2).length;
-
   return (
     <div className={s.page}>
       <header className={s.header}>
@@ -183,6 +208,15 @@ export default function AnalyticsPage() {
               <option key={m} value={m}>{m}</option>
             ))}
           </select>
+          <select
+            className={s.monthSelect}
+            value={sortKey}
+            onChange={(e) => setSortKey(e.target.value as SortKey)}
+          >
+            {SORT_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
           {!dataLoading && urgentCount > 0 && (
             <p className={s.urgentBadge}>あと1〜2回でバッジ達成 {urgentCount}名</p>
           )}
@@ -192,7 +226,8 @@ export default function AnalyticsPage() {
 
         {!dataLoading && (
           <div className={s.studentList}>
-            {students.map((st) => (
+            <BadgeAxisHeader />
+            {sorted.map((st) => (
               <div key={st.id} className={s.studentRow}>
                 <div className={s.avatarWrap}>
                   {st.pictureUrl ? (
@@ -208,6 +243,7 @@ export default function AnalyticsPage() {
                     <span className={s.countLabel}>{st.count}回</span>
                     {st.nextBadge && (
                       <span className={s.nextHint}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={`/images/badges/badge-${st.nextBadge.badge}.png`}
                           alt=""
@@ -220,11 +256,11 @@ export default function AnalyticsPage() {
                       </span>
                     )}
                   </div>
-                  <BadgeBar count={st.count} displayMax={displayMax} />
+                  <BadgeBar count={st.count} />
                 </div>
               </div>
             ))}
-            {students.length === 0 && (
+            {sorted.length === 0 && (
               <p className={s.emptyMsg}>この月の会員データはありません</p>
             )}
           </div>

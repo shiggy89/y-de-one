@@ -192,11 +192,48 @@
   vertical-align: middle;
 }
 
+/* ── Badge Axis Header ── */
+
+.axisRow {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  column-gap: 12px;
+  margin-bottom: 12px;
+}
+
+.axisBar {
+  position: relative;
+  height: 56px; /* icon 36px + label 12px + 8px padding */
+}
+
+.axisItem {
+  position: absolute;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.axisIcon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.axisLabel {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
 /* ── Badge Bar ── */
 
 .barGroup {
   position: relative;
-  height: 44px; /* 12px bar + 4px gap + 22px icon + 6px bottom */
+  height: 18px; /* 12px bar + 6px bottom breathing room */
 }
 
 .barTrack {
@@ -221,8 +258,7 @@
   position: absolute;
   top: 0;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   transform: translateX(-50%);
   pointer-events: none;
   z-index: 2;
@@ -233,11 +269,4 @@
   height: 12px;
   background: rgba(255, 255, 255, 0.75);
   box-shadow: 0 0 0 0.5px rgba(100, 116, 139, 0.4);
-}
-
-.thresholdIcon {
-  width: 22px;
-  height: 22px;
-  margin-top: 4px;
-  object-fit: contain;
 }
