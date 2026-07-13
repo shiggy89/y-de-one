@@ -1,3 +1,5 @@
+/* ── Login ── */
+
 .loginPage {
   min-height: 100vh;
   display: flex;
@@ -28,7 +30,6 @@
   outline: none;
 }
 .loginInput:focus { border-color: #e05080; }
-
 .loginError { font-size: 12px; color: #e05080; margin: 0; }
 
 .loginBtn {
@@ -43,6 +44,8 @@
 }
 .loginBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* ── Layout ── */
+
 .page { min-height: 100vh; background: #f8fafc; font-family: "Noto Sans JP", sans-serif; }
 
 .header {
@@ -53,9 +56,28 @@
   height: 52px;
   background: #fff;
   border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .logo { font-size: 16px; font-weight: 800; color: #e05080; }
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.monthSelect {
+  padding: 5px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  font-size: 13px;
+  color: #334155;
+  background: #fff;
+  cursor: pointer;
+}
 
 .logoutBtn {
   padding: 4px 12px;
@@ -67,53 +89,96 @@
   cursor: pointer;
 }
 
-.main { padding: 40px 20px; max-width: 960px; margin: 0 auto; }
+.main { padding: 20px; max-width: 960px; margin: 0 auto; }
 
-.placeholder { text-align: center; color: #94a3b8; font-size: 16px; }
+/* ── KPI Cards ── */
 
-/* ── Dashboard ── */
-
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
+.kpiRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 24px;
 }
 
-.monthSelect {
-  padding: 6px 12px;
+@media (max-width: 600px) {
+  .kpiRow { grid-template-columns: repeat(2, 1fr); }
+}
+
+.kpiCard {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kpiHighlight {
+  border-color: #f9a8c4;
+  background: #fdf2f6;
+}
+
+.kpiLabel {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.kpiValue {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+/* ── Section ── */
+
+.section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  margin: 0;
+  letter-spacing: 0.03em;
+}
+
+.sortSelect {
+  padding: 4px 10px;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: 7px;
+  font-size: 12px;
   color: #334155;
   background: #fff;
   cursor: pointer;
-}
-
-.urgentBadge {
-  font-size: 12px;
-  font-weight: 600;
-  color: #e05080;
-  background: #fdf2f6;
-  border: 1px solid #f9a8c4;
-  border-radius: 20px;
-  padding: 3px 12px;
-  margin: 0;
 }
 
 .loadingMsg {
   text-align: center;
   color: #94a3b8;
   font-size: 14px;
-  padding: 48px 0;
+  padding: 48px 16px;
 }
 
 .emptyMsg {
   text-align: center;
   color: #94a3b8;
-  font-size: 14px;
-  padding: 48px 0;
+  font-size: 13px;
+  padding: 48px 16px;
 }
 
 /* ── Student List ── */
@@ -123,87 +188,19 @@
   flex-direction: column;
 }
 
-.studentRow {
-  display: grid;
-  grid-template-columns: 40px 1fr;
-  column-gap: 12px;
-  padding: 14px 0;
-  border-bottom: 1px solid #f1f5f9;
-  align-items: start;
-}
-
-.avatarWrap {
-  padding-top: 2px;
-}
-
-.avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-}
-
-.avatarFallback {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #e2e8f0;
-}
-
-.studentBody {
-  min-width: 0;
-}
-
-.studentMeta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-}
-
-.studentName {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.countLabel {
-  font-size: 13px;
-  color: #64748b;
-}
-
-.nextHint {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  font-weight: 600;
-  color: #e05080;
-  white-space: nowrap;
-}
-
-.nextHintIcon {
-  width: 14px;
-  height: 14px;
-  object-fit: contain;
-  vertical-align: middle;
-}
-
 /* ── Badge Axis Header ── */
 
 .axisRow {
   display: grid;
-  grid-template-columns: 40px 1fr;
+  grid-template-columns: 52px 1fr;
   column-gap: 12px;
-  margin-bottom: 12px;
+  padding: 12px 16px 0;
+  margin-bottom: 4px;
 }
 
 .axisBar {
   position: relative;
-  height: 80px; /* icon 60px + label 12px + 8px padding */
+  height: 80px;
 }
 
 .axisItem {
@@ -235,11 +232,112 @@
   white-space: nowrap;
 }
 
-/* ── Badge Bar ── */
+/* ── Student Card ── */
 
+.studentCard {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.studentCard:last-child { border-bottom: none; }
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  column-gap: 12px;
+  align-items: start;
+}
+
+.avatarWrap { padding-top: 2px; }
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.avatarFallback {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.cardBody { min-width: 0; }
+
+/* 1行目 */
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.studentName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.countLabel {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.revenuePill {
+  font-size: 11px;
+  font-weight: 600;
+  color: #92400e;
+  background: #fef3c7;
+  padding: 1px 7px;
+  border-radius: 10px;
+}
+
+.lastVisitPill {
+  font-size: 11px;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 1px 7px;
+  border-radius: 10px;
+}
+
+.lastVisitPill[data-old="true"] {
+  color: #dc2626;
+  background: #fee2e2;
+  font-weight: 600;
+}
+
+.nextHint {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #e05080;
+  white-space: nowrap;
+}
+
+.nextHintIcon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+/* 2行目: バッジバー */
 .barGroup {
   position: relative;
-  height: 18px; /* 12px bar + 6px bottom breathing room */
+  height: 18px;
 }
 
 .barTrack {
@@ -277,186 +375,38 @@
   box-shadow: 0 0 0 0.5px rgba(100, 116, 139, 0.4);
 }
 
-/* ── Tabs ── */
-
-.tabs {
+/* 3行目: 行動パターンタグ */
+.cardTags {
   display: flex;
-  gap: 4px;
-  margin-bottom: 20px;
-  border-bottom: 2px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
 }
 
-.tab {
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #64748b;
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: color 0.15s, border-color 0.15s;
-}
-
-.tab:hover { color: #334155; }
-
-.tabActive {
-  color: #e05080;
-  border-bottom-color: #e05080;
-}
-
-/* ── Revenue Ranking ── */
-
-.revenueList {
-  display: flex;
-  flex-direction: column;
-}
-
-.revenueRow {
-  display: grid;
-  grid-template-columns: 32px 40px 1fr;
-  column-gap: 10px;
-  padding: 12px 0;
-  border-bottom: 1px solid #f1f5f9;
-  align-items: center;
-}
-
-.rank {
-  font-size: 13px;
-  font-weight: 700;
-  color: #94a3b8;
-  text-align: right;
-}
-
-.rankTop { color: #e05080; }
-
-.revenueBody { min-width: 0; }
-
-.revenueMeta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-.revenueAmount {
-  font-size: 14px;
-  font-weight: 700;
-  color: #1e293b;
-  white-space: nowrap;
-  margin-left: 8px;
-}
-
-.revenueBarTrack {
-  height: 8px;
-  background: #e2e8f0;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.revenueBarFill {
-  height: 100%;
-  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
-  border-radius: 4px;
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* ── Patterns ── */
-
-.patternsWrap {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-.patternSection {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 20px;
-}
-
-.patternTitle {
-  font-size: 14px;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0 0 4px;
-}
-
-.patternNote {
+.tagDay {
   font-size: 11px;
-  color: #94a3b8;
-  margin: 0 0 14px;
-}
-
-.hbarRow {
-  display: grid;
-  grid-template-columns: 140px 1fr 36px;
-  align-items: center;
-  gap: 10px;
-  padding: 5px 0;
-}
-
-.hbarLabel {
-  font-size: 12px;
-  color: #334155;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.hbarTrack {
-  height: 10px;
+  color: #475569;
   background: #f1f5f9;
-  border-radius: 5px;
-  overflow: hidden;
-}
-
-.hbarFill {
-  height: 100%;
-  border-radius: 5px;
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hbarCount {
-  font-size: 12px;
-  color: #64748b;
-  text-align: right;
-}
-
-/* ── Interval Stats ── */
-
-.intervalRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 7px 0;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.intervalName {
-  flex: 1;
-  font-size: 13px;
-  color: #1e293b;
-}
-
-.intervalDays {
-  font-size: 13px;
-  font-weight: 700;
   padding: 2px 8px;
   border-radius: 10px;
-  white-space: nowrap;
 }
 
-.intervalDays[data-level="great"] { color: #16a34a; background: #dcfce7; }
-.intervalDays[data-level="good"]  { color: #0090e8; background: #e0f2fe; }
-.intervalDays[data-level="warn"]  { color: #d97706; background: #fef3c7; }
-.intervalDays[data-level="alert"] { color: #dc2626; background: #fee2e2; }
-
-.intervalVisits {
+.tagLesson {
   font-size: 11px;
-  color: #94a3b8;
-  white-space: nowrap;
+  color: #be185d;
+  background: #fdf2f6;
+  padding: 2px 8px;
+  border-radius: 10px;
 }
+
+.tagInterval {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.tagInterval[data-level="great"] { color: #16a34a; background: #dcfce7; }
+.tagInterval[data-level="good"]  { color: #0090e8; background: #e0f2fe; }
+.tagInterval[data-level="warn"]  { color: #d97706; background: #fef3c7; }
+.tagInterval[data-level="alert"] { color: #dc2626; background: #fee2e2; }
