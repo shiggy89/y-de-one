@@ -203,7 +203,7 @@
 
 .axisBar {
   position: relative;
-  height: 72px; /* icon 52px + label 12px + 8px padding */
+  height: 80px; /* icon 60px + label 12px + 8px padding */
 }
 
 .axisItem {
@@ -219,6 +219,12 @@
 .axisIcon {
   width: 52px;
   height: 52px;
+  object-fit: contain;
+}
+
+.axisIconLg {
+  width: 60px;
+  height: 60px;
   object-fit: contain;
 }
 
@@ -269,4 +275,188 @@
   height: 12px;
   background: rgba(255, 255, 255, 0.75);
   box-shadow: 0 0 0 0.5px rgba(100, 116, 139, 0.4);
+}
+
+/* ── Tabs ── */
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.tab {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tab:hover { color: #334155; }
+
+.tabActive {
+  color: #e05080;
+  border-bottom-color: #e05080;
+}
+
+/* ── Revenue Ranking ── */
+
+.revenueList {
+  display: flex;
+  flex-direction: column;
+}
+
+.revenueRow {
+  display: grid;
+  grid-template-columns: 32px 40px 1fr;
+  column-gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
+  align-items: center;
+}
+
+.rank {
+  font-size: 13px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-align: right;
+}
+
+.rankTop { color: #e05080; }
+
+.revenueBody { min-width: 0; }
+
+.revenueMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.revenueAmount {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+  margin-left: 8px;
+}
+
+.revenueBarTrack {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.revenueBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b 0%, #fbbf24 100%);
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Patterns ── */
+
+.patternsWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.patternSection {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.patternTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 4px;
+}
+
+.patternNote {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 0 0 14px;
+}
+
+.hbarRow {
+  display: grid;
+  grid-template-columns: 140px 1fr 36px;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+.hbarLabel {
+  font-size: 12px;
+  color: #334155;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hbarTrack {
+  height: 10px;
+  background: #f1f5f9;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.hbarFill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hbarCount {
+  font-size: 12px;
+  color: #64748b;
+  text-align: right;
+}
+
+/* ── Interval Stats ── */
+
+.intervalRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.intervalName {
+  flex: 1;
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.intervalDays {
+  font-size: 13px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.intervalDays[data-level="great"] { color: #16a34a; background: #dcfce7; }
+.intervalDays[data-level="good"]  { color: #0090e8; background: #e0f2fe; }
+.intervalDays[data-level="warn"]  { color: #d97706; background: #fef3c7; }
+.intervalDays[data-level="alert"] { color: #dc2626; background: #fee2e2; }
+
+.intervalVisits {
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
 }

@@ -24,18 +24,33 @@ type Student = {
   name: string;
   pictureUrl: string | null;
   count: number;
+  revenue: number;
   currentBadge: string | null;
   lastMonthBadge: string | null;
   nextBadge: { badge: string; remaining: number; isContinuation: boolean } | null;
 };
 
 type SortKey = "next_badge" | "count_desc" | "count_asc" | "name";
+type Tab = "badge" | "revenue" | "patterns";
+
+type PatternData = {
+  lessonFreq: { title: string; count: number }[];
+  teacherFreq: { teacher: string; count: number }[];
+  dayFreq: { day: string; count: number }[];
+  intervalStats: { id: number; name: string; avgInterval: number; visitCount: number }[];
+};
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: "next_badge", label: "次バッジまで順" },
   { value: "count_desc", label: "多い順" },
   { value: "count_asc", label: "少ない順" },
   { value: "name",       label: "名前順" },
+];
+
+const TABS: { value: Tab; label: string }[] = [
+  { value: "badge",    label: "バッジ進捗" },
+  { value: "revenue",  label: "売り上げランキング" },
+  { value: "patterns", label: "行動パターン" },
 ];
 
 function sortStudents(students: Student[], key: SortKey): Student[] {
@@ -66,6 +81,8 @@ function getAvailableMonths(): string[] {
   });
 }
 
+// ── コンポーネント ──────────────────────────────────────────
+
 function BadgeAxisHeader() {
   return (
     <div className={s.axisRow}>
@@ -78,7 +95,11 @@ function BadgeAxisHeader() {
             style={{ left: `${(min / DISPLAY_MAX) * 100}%` }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/images/badges/badge-${badge}.png`} alt={badge} className={s.axisIcon} />
+            <img
+              src={`/images/badges/badge-${badge}.png`}
+              alt={badge}
+              className={badge === "diamond" ? s.axisIconLg : s.axisIcon}
+            />
             <span className={s.axisLabel}>{min}回</span>
           </div>
         ))}
@@ -89,7 +110,6 @@ function BadgeAxisHeader() {
 
 function BadgeBar({ count }: { count: number }) {
   const fillPct = Math.min((count / DISPLAY_MAX) * 100, 100);
-
   return (
     <div className={s.barGroup}>
       <div className={s.barTrack}>
@@ -108,6 +128,29 @@ function BadgeBar({ count }: { count: number }) {
   );
 }
 
+function HBar({ label, count, max, color }: { label: string; count: number; max: number; color: string }) {
+  const pct = max > 0 ? (count / max) * 100 : 0;
+  return (
+    <div className={s.hbarRow}>
+      <span className={s.hbarLabel}>{label}</span>
+      <div className={s.hbarTrack}>
+        <div className={s.hbarFill} style={{ width: `${pct}%`, background: color }} />
+      </div>
+      <span className={s.hbarCount}>{count}</span>
+    </div>
+  );
+}
+
+function Avatar({ src, name }: { src: string | null; name: string }) {
+  if (src) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={src} alt="" className={s.avatar} />;
+  }
+  return <div className={s.avatarFallback}>{name.charAt(0)}</div>;
+}
+
+// ── メインページ ──────────────────────────────────────────
+
 export default function AnalyticsPage() {
   const [authKey, setAuthKey] = useState<string | null>(null);
   const [pw, setPw] = useState("");
@@ -115,9 +158,12 @@ export default function AnalyticsPage() {
   const [loginLoading, setLoginLoading] = useState(false);
 
   const [month, setMonth] = useState(getCurrentMonth());
+  const [tab, setTab] = useState<Tab>("badge");
   const [students, setStudents] = useState<Student[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("next_badge");
+  const [patterns, setPatterns] = useState<PatternData | null>(null);
+  const [patternsLoading, setPatternsLoading] = useState(false);
 
   const months = getAvailableMonths();
 
@@ -157,6 +203,25 @@ export default function AnalyticsPage() {
 
   useEffect(() => { fetchStudents(); }, [fetchStudents]);
 
+  const fetchPatterns = useCallback(async () => {
+    if (!authKey) return;
+    setPatternsLoading(true);
+    const res = await fetch(`/api/analytics/patterns?month=${month}`, {
+      headers: { "x-analytics-key": authKey },
+    });
+    if (res.ok) {
+      setPatterns(await res.json());
+    }
+    setPatternsLoading(false);
+  }, [authKey, month]);
+
+  useEffect(() => {
+    if (tab === "patterns") fetchPatterns();
+  }, [tab, fetchPatterns]);
+
+  // 月が変わったらパターンキャッシュをリセット
+  useEffect(() => { setPatterns(null); }, [month]);
+
   const logout = () => {
     sessionStorage.removeItem(SESSION_KEY);
     setAuthKey(null);
@@ -164,6 +229,8 @@ export default function AnalyticsPage() {
 
   const sorted = sortStudents(students, sortKey);
   const urgentCount = students.filter((st) => st.nextBadge && st.nextBadge.remaining <= 2).length;
+  const revenueSorted = [...students].sort((a, b) => b.revenue - a.revenue).filter(st => st.revenue > 0);
+  const maxRevenue = revenueSorted[0]?.revenue ?? 1;
 
   if (!authKey) {
     return (
@@ -198,6 +265,7 @@ export default function AnalyticsPage() {
       </header>
 
       <main className={s.main}>
+        {/* ツールバー */}
         <div className={s.toolbar}>
           <select
             className={s.monthSelect}
@@ -208,34 +276,47 @@ export default function AnalyticsPage() {
               <option key={m} value={m}>{m}</option>
             ))}
           </select>
-          <select
-            className={s.monthSelect}
-            value={sortKey}
-            onChange={(e) => setSortKey(e.target.value as SortKey)}
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
-          {!dataLoading && urgentCount > 0 && (
-            <p className={s.urgentBadge}>あと1〜2回でバッジ達成 {urgentCount}名</p>
+          {tab === "badge" && (
+            <>
+              <select
+                className={s.monthSelect}
+                value={sortKey}
+                onChange={(e) => setSortKey(e.target.value as SortKey)}
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+              {!dataLoading && urgentCount > 0 && (
+                <p className={s.urgentBadge}>あと1〜2回でバッジ達成 {urgentCount}名</p>
+              )}
+            </>
           )}
+        </div>
+
+        {/* タブ */}
+        <div className={s.tabs}>
+          {TABS.map((t) => (
+            <button
+              key={t.value}
+              className={`${s.tab} ${tab === t.value ? s.tabActive : ""}`}
+              onClick={() => setTab(t.value)}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
 
         {dataLoading && <p className={s.loadingMsg}>読み込み中...</p>}
 
-        {!dataLoading && (
+        {/* バッジ進捗タブ */}
+        {!dataLoading && tab === "badge" && (
           <div className={s.studentList}>
             <BadgeAxisHeader />
             {sorted.map((st) => (
               <div key={st.id} className={s.studentRow}>
                 <div className={s.avatarWrap}>
-                  {st.pictureUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={st.pictureUrl} alt="" className={s.avatar} />
-                  ) : (
-                    <div className={s.avatarFallback} />
-                  )}
+                  <Avatar src={st.pictureUrl} name={st.name} />
                 </div>
                 <div className={s.studentBody}>
                   <div className={s.studentMeta}>
@@ -264,6 +345,123 @@ export default function AnalyticsPage() {
               <p className={s.emptyMsg}>この月の会員データはありません</p>
             )}
           </div>
+        )}
+
+        {/* 売り上げランキングタブ */}
+        {!dataLoading && tab === "revenue" && (
+          <div className={s.revenueList}>
+            {revenueSorted.length === 0 && (
+              <p className={s.emptyMsg}>この月の売り上げデータはありません</p>
+            )}
+            {revenueSorted.map((st, idx) => (
+              <div key={st.id} className={s.revenueRow}>
+                <span className={`${s.rank} ${idx < 3 ? s.rankTop : ""}`}>#{idx + 1}</span>
+                <div className={s.avatarWrap}>
+                  <Avatar src={st.pictureUrl} name={st.name} />
+                </div>
+                <div className={s.revenueBody}>
+                  <div className={s.revenueMeta}>
+                    <span className={s.studentName}>{st.name}</span>
+                    <span className={s.revenueAmount}>¥{st.revenue.toLocaleString()}</span>
+                  </div>
+                  <div className={s.revenueBarTrack}>
+                    <div
+                      className={s.revenueBarFill}
+                      style={{ width: `${(st.revenue / maxRevenue) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* 行動パターンタブ */}
+        {tab === "patterns" && (
+          <>
+            {patternsLoading && <p className={s.loadingMsg}>読み込み中...</p>}
+            {!patternsLoading && patterns && (
+              <div className={s.patternsWrap}>
+
+                {/* レッスン別 */}
+                <section className={s.patternSection}>
+                  <h3 className={s.patternTitle}>よく出るレッスン</h3>
+                  {patterns.lessonFreq.length === 0
+                    ? <p className={s.emptyMsg}>データなし</p>
+                    : patterns.lessonFreq.map(({ title, count }) => (
+                        <HBar
+                          key={title}
+                          label={title}
+                          count={count}
+                          max={patterns.lessonFreq[0].count}
+                          color="linear-gradient(90deg, #e05080, #f472b6)"
+                        />
+                      ))
+                  }
+                </section>
+
+                {/* 先生別 */}
+                <section className={s.patternSection}>
+                  <h3 className={s.patternTitle}>先生別</h3>
+                  {patterns.teacherFreq.length === 0
+                    ? <p className={s.emptyMsg}>データなし</p>
+                    : patterns.teacherFreq.map(({ teacher, count }) => (
+                        <HBar
+                          key={teacher}
+                          label={teacher}
+                          count={count}
+                          max={patterns.teacherFreq[0].count}
+                          color="linear-gradient(90deg, #0090e8, #38bdf8)"
+                        />
+                      ))
+                  }
+                </section>
+
+                {/* 曜日別 */}
+                <section className={s.patternSection}>
+                  <h3 className={s.patternTitle}>曜日別</h3>
+                  {(() => {
+                    const maxDay = Math.max(...patterns.dayFreq.map(d => d.count), 1);
+                    return patterns.dayFreq.map(({ day, count }) => (
+                      <HBar
+                        key={day}
+                        label={day}
+                        count={count}
+                        max={maxDay}
+                        color="linear-gradient(90deg, #7c3aed, #a78bfa)"
+                      />
+                    ));
+                  })()}
+                </section>
+
+                {/* 出席間隔 */}
+                <section className={s.patternSection}>
+                  <h3 className={s.patternTitle}>出席間隔（過去6ヶ月）</h3>
+                  <p className={s.patternNote}>来店日の間隔の平均。数字が小さいほど頻繁に通っている。</p>
+                  {patterns.intervalStats.length === 0
+                    ? <p className={s.emptyMsg}>データなし（2回以上来店した生徒のみ表示）</p>
+                    : patterns.intervalStats.map(({ id, name, avgInterval, visitCount }) => (
+                        <div key={id} className={s.intervalRow}>
+                          <span className={s.intervalName}>{name}</span>
+                          <span
+                            className={s.intervalDays}
+                            data-level={
+                              avgInterval <= 4 ? "great" :
+                              avgInterval <= 7 ? "good" :
+                              avgInterval <= 14 ? "warn" : "alert"
+                            }
+                          >
+                            {avgInterval}日
+                          </span>
+                          <span className={s.intervalVisits}>{visitCount}回来店</span>
+                        </div>
+                      ))
+                  }
+                </section>
+
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

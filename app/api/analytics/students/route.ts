@@ -59,7 +59,7 @@ export async function GET(req: Request) {
         .order("name"),
       supabaseAdmin
         .from("attendances")
-        .select("student_id, lesson_type, lesson_title, lesson_time")
+        .select("student_id, lesson_type, lesson_title, lesson_time, price_paid")
         .gte("lesson_date", monthStart)
         .lt("lesson_date", nextM),
       supabaseAdmin
@@ -69,9 +69,11 @@ export async function GET(req: Request) {
     ]);
 
     const countMap = new Map<number, number>();
+    const revenueMap = new Map<number, number>();
     for (const a of attendances ?? []) {
       const c = calcLessonCount(a.lesson_type, a.lesson_title, a.lesson_time);
       countMap.set(a.student_id, (countMap.get(a.student_id) ?? 0) + c);
+      revenueMap.set(a.student_id, (revenueMap.get(a.student_id) ?? 0) + (a.price_paid ?? 0));
     }
 
     const lastBadgeMap = new Map<number, string>();
@@ -113,6 +115,7 @@ export async function GET(req: Request) {
         name: u.mypage_name ?? u.name ?? "—",
         pictureUrl: (u.mypage_picture_url ?? u.line_picture_url) as string | null,
         count,
+        revenue: revenueMap.get(u.id) ?? 0,
         currentBadge,
         lastMonthBadge,
         nextBadge,
