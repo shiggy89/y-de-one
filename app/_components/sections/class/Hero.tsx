@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 
 type Props = {
 	title: string
-	subtitle: ReactNode
+	subtitle?: ReactNode
 	lead?: ReactNode
 	noTitleSpace?: boolean
 }

@@ -23,7 +23,7 @@ const NAV_ITEMS: NavItem[] = [
     children: [
       { label: "大人バレエクラス", href: "/class" },
       { label: "モダンバレエクラス", href: "/modern-ballet" },
-      { label: "埼玉クラス（門馬和樹クラス）", href: "/saitama" },
+      { label: "埼玉クラス（大宮・朝霞）", href: "/saitama" },
       { label: "ダウン症の方向けクラス", href: "/down-syndrome" },
     ],
   },
