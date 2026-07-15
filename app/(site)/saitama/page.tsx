@@ -13,6 +13,7 @@ export default function SaitamaPage() {
       <Hero
         title="埼玉エリアで バレエを楽しみたい方へ"
         noTitleSpace
+        alwaysBreak
       />
       <SaitamaContent />
     </>
