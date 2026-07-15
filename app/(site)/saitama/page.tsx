@@ -11,7 +11,7 @@ export default function SaitamaPage() {
   return (
     <>
       <Hero
-        title="埼玉エリアで バレエを楽しみたい方へ"
+        title="大人バレエ教室Y-de-ONE 埼玉クラス（大宮・朝霞）"
         noTitleSpace
         alwaysBreak
       />
