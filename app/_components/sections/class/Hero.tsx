@@ -4,14 +4,15 @@ import styles from "./Hero.module.css";
 import type { ReactNode } from "react";
 
 type Props = {
-	title: string
+	title: ReactNode
 	subtitle?: ReactNode
 	lead?: ReactNode
 	noTitleSpace?: boolean
 	alwaysBreak?: boolean
 }
 export default function Hero({ title, subtitle, lead, noTitleSpace, alwaysBreak }: Props) {
-	const [titleFirst = title, titleSecond = ""] = title.split(" ");
+	const titleParts = typeof title === 'string' ? title.split(" ") : null;
+	const [titleFirst = "", titleSecond = ""] = titleParts ?? [];
 
 	return (
 		<section className={styles.pageHero}>
@@ -39,13 +40,17 @@ export default function Hero({ title, subtitle, lead, noTitleSpace, alwaysBreak 
 					height={500}
 				/>
 				<h2 className={styles.title}>
-					<span className={styles.titleTop}>{titleFirst}</span>
-					{titleSecond && (
+					{titleParts ? (
 						<>
-							{alwaysBreak ? <br /> : <br className={styles.mobileBreak} />}
-							<span className={`${styles.titleBottom} ${noTitleSpace ? styles.titleBottomNoSpace : ""}`}>{titleSecond}</span>
+							<span className={styles.titleTop}>{titleFirst}</span>
+							{titleSecond && (
+								<>
+									{alwaysBreak ? <br /> : <br className={styles.mobileBreak} />}
+									<span className={`${styles.titleBottom} ${noTitleSpace ? styles.titleBottomNoSpace : ""}`}>{titleSecond}</span>
+								</>
+							)}
 						</>
-					)}
+					) : title}
 					<br />
 					{ subtitle }
 				</h2>

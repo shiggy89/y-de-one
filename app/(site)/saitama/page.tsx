@@ -11,9 +11,8 @@ export default function SaitamaPage() {
   return (
     <>
       <Hero
-        title="大人バレエ教室Y-de-ONE 埼玉クラス（大宮・朝霞）"
+        title={<>大人バレエ教室 Y-de-ONE<br />埼玉クラス<br />（大宮・朝霞）</>}
         noTitleSpace
-        alwaysBreak
       />
       <SaitamaContent />
     </>
