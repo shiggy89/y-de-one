@@ -300,7 +300,6 @@ export default function AnalyticsPage() {
 
           {!dataLoading && (
             <div className={s.studentList}>
-              <BadgeAxisHeader />
 
               {sorted.map((st) => (
                 <div key={st.id} className={s.studentCard}>
