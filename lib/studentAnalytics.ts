@@ -36,8 +36,8 @@ export const CLASS_SLOTS = [
   { dow: 5, title: "ポワント",                 teacher: "青山佳樹", time: "16:30", endTime: "17:05", color: "yellow" },
   { dow: 6, title: "バレエ入門基礎合同",       teacher: "門馬和樹", time: "12:30", endTime: "14:00", color: "pink"   },
   { dow: 6, title: "モダンバレエ",             teacher: "青山佳樹", time: "14:30", endTime: "16:00", color: "blue"   },
-  { dow: 0, title: "バレエ入門",               teacher: "青山佳樹", time: "12:30", endTime: "14:00", color: "pink"   },
-  { dow: 0, title: "ポワント+バレエ基礎センター", teacher: "青山佳樹", time: "14:15", endTime: "15:45", color: "yellow" },
+  { dow: 0, title: "バレエ入門基礎合同",       teacher: "青山佳樹", time: "12:30", endTime: "14:00", color: "pink"   },
+  { dow: 0, title: "ポワント",                 teacher: "青山佳樹", time: "14:00", endTime: "14:35", color: "yellow" },
 ] as const;
 
 export type ClassSlot = (typeof CLASS_SLOTS)[number];

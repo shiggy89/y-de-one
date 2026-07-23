@@ -86,7 +86,7 @@ const LESSON_FEES_ONLY = [2800, 5400, 7800, 9600, 11800, 14000, 16200, 17600];
 
 function isStandardLesson(lessonType: string, lessonTitle: string | null | undefined): boolean {
   if (lessonTitle === "90分リハーサル") return true;
-  if (lessonTitle === "35分リハーサル" || lessonTitle === "120分リハーサル") return false;
+  if (lessonTitle === "30分リハーサル" || lessonTitle === "35分リハーサル" || lessonTitle === "120分リハーサル") return false;
   if (lessonType !== "通常" && lessonType !== "祝日") return false;
   if (lessonTitle === "ポワント" || lessonTitle === "プレモダン" || lessonTitle === "特別レッスン") return false;
   if (lessonTitle === "バレエ基礎センター" || lessonTitle === "リハーサル") return false;
@@ -95,7 +95,7 @@ function isStandardLesson(lessonType: string, lessonTitle: string | null | undef
 
 function calcLessonFee(countThisMonth: number, lessonType: string, privateMinutes = 15, lessonTitle?: string): number {
   if (lessonType === "個人") return 2500 * (privateMinutes / 15);
-  if (lessonTitle === "35分リハーサル") return 1100;
+  if (lessonTitle === "30分リハーサル" || lessonTitle === "35分リハーサル") return 1100;
   if (lessonTitle === "120分リハーサル") return 3000;
   if (lessonType === "祝日") {
     if (lessonTitle === "特別レッスン") return 3000;
@@ -154,7 +154,7 @@ export default function AdminPanel() {
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [holidayLessonType, setHolidayLessonType] = useState("特別レッスン");
   const [privateMinutes, setPrivateMinutes] = useState(15);
-  const [rehearsalDuration, setRehearsalDuration] = useState<"35" | "90" | "120">("90");
+  const [rehearsalDuration, setRehearsalDuration] = useState<"30" | "35" | "90" | "120">("90");
   const [feePreviews, setFeePreviews] = useState<{
     userId: number; name: string; line_picture_url: string | null;
     isTeacher: boolean; lessonFee: number; maintenanceFee: number; total: number;
@@ -1034,7 +1034,7 @@ export default function AdminPanel() {
               <div className={styles.formRow}>
                 <label className={styles.formLabel}>レッスンを選択</label>
                 <div className={styles.lessonGrid}>
-                  {(["35", "90", "120"] as const).map((dur) => (
+                  {(["30", "35", "90", "120"] as const).map((dur) => (
                     <button
                       key={dur}
                       type="button"
