@@ -40,6 +40,7 @@ export default async function NewsPage() {
                       year: "numeric",
                       month: "long",
                       day: "numeric",
+                      timeZone: "Asia/Tokyo",
                     })}
                   </time>
                   {item.category && (

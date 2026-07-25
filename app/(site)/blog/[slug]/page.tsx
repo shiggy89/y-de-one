@@ -38,6 +38,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                   year: "numeric",
                   month: "long",
                   day: "numeric",
+                  timeZone: "Asia/Tokyo",
                 })
               : ""}
           </time>

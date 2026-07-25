@@ -1885,7 +1885,7 @@ export default function AdminPanel() {
                   <div>
                     <p className={styles.noticeItemMeta}>
                       {n.category && <span style={{ background: "#e05080", color: "#fff", borderRadius: 4, padding: "1px 8px", marginRight: 8, fontSize: 12 }}>{n.category}</span>}
-                      {new Date(n.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" })}
+                      {new Date(n.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "Asia/Tokyo" })}
                     </p>
                     <p style={{ fontWeight: 600, margin: "4px 0" }}>{n.title}</p>
                   </div>
@@ -1922,7 +1922,7 @@ export default function AdminPanel() {
                           <span style={{ background: p.status === "published" ? "#4caf50" : "#999", color: "#fff", borderRadius: 4, padding: "1px 8px", marginRight: 8, fontSize: 12 }}>
                             {p.status === "published" ? "公開中" : "下書き"}
                           </span>
-                          {p.published_at ? new Date(p.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit" }) : ""}
+                          {p.published_at ? new Date(p.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "Asia/Tokyo" }) : ""}
                         </p>
                         <p style={{ fontWeight: 600, margin: "4px 0" }}>{p.title}</p>
                         {p.slug && <p style={{ fontSize: 12, color: "#999", margin: 0 }}>/blog/{p.slug}</p>}

@@ -33,6 +33,7 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ id:
                 year: "numeric",
                 month: "long",
                 day: "numeric",
+                timeZone: "Asia/Tokyo",
               })}
             </time>
             {data.category && (
