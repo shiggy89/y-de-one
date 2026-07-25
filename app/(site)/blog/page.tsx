@@ -26,6 +26,8 @@ type Post = {
   meta_description: string | null;
 };
 
+const SHOW_FILTERS = false;
+
 const TYPE_TABS: { value: "seo" | "diary" | null; label: string }[] = [
   { value: null, label: "すべて" },
   { value: "seo", label: "お役立ち記事" },
@@ -189,24 +191,26 @@ export default async function BlogPage({
           </button>
         </form>
 
-        <div className={styles.typeTabs} hidden>
-          {TYPE_TABS.map((t) => (
-            <Link
-              key={t.label}
-              href={buildHref({
-                ...facets,
-                type: t.value,
-                category: t.value === "diary" ? null : facets.category,
-                page: 1,
-              })}
-              className={`${styles.typeTab} ${selectedType === t.value ? styles.typeTabActive : ""}`}
-            >
-              {t.label}
-            </Link>
-          ))}
-        </div>
+        {SHOW_FILTERS && (
+          <div className={styles.typeTabs}>
+            {TYPE_TABS.map((t) => (
+              <Link
+                key={t.label}
+                href={buildHref({
+                  ...facets,
+                  type: t.value,
+                  category: t.value === "diary" ? null : facets.category,
+                  page: 1,
+                })}
+                className={`${styles.typeTab} ${selectedType === t.value ? styles.typeTabActive : ""}`}
+              >
+                {t.label}
+              </Link>
+            ))}
+          </div>
+        )}
 
-        {selectedType !== "diary" && categories && categories.length > 0 && (
+        {SHOW_FILTERS && selectedType !== "diary" && categories && categories.length > 0 && (
           <div className={styles.categoryChips}>
             <Link
               href={buildHref({ ...facets, category: null, page: 1 })}
