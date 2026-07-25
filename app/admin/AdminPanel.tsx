@@ -1960,17 +1960,6 @@ export default function AdminPanel() {
               <button onClick={() => { setBlogView("list"); fetchBlogList(); }} style={{ background: "none", border: "none", color: "#0090e8", cursor: "pointer", fontSize: 14, marginBottom: 16, padding: 0 }}>← 一覧に戻る</button>
 
               <div className={styles.noticeForm}>
-                {!isMobile && (
-                  <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
-                      <input type="radio" value="diary" checked={blogType === "diary"} onChange={() => setBlogType("diary")} /> 日記
-                    </label>
-                    <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
-                      <input type="radio" value="seo" checked={blogType === "seo"} onChange={() => setBlogType("seo")} /> SEO記事
-                    </label>
-                  </div>
-                )}
-
                 <input type="text" className={styles.noticeInput} placeholder="タイトル（必須）" value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} />
 
                 {blogType === "seo" && (
