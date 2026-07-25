@@ -33,7 +33,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       thumbnail_url: thumbnail_url ?? null,
       meta_description: meta_description ?? null,
       category_id: category_id ?? null,
-      published_at: isPublishing && !wasPublished ? now : existing?.published_at ?? null,
+      published_at: isPublishing ? (wasPublished ? existing?.published_at ?? now : now) : null,
       updated_at: now,
     })
     .eq("id", id);
