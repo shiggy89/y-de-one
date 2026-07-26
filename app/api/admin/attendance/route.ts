@@ -12,10 +12,10 @@ function calcPrice(countThisMonth: number, lessonType: string, privateMinutes = 
   if (lessonType === "祝日") {
     if (lessonTitle === "特別レッスン") return 3000;
     if (lessonTitle === "ポワント" || lessonTitle === "プレモダン") return 1100;
-    if (lessonTitle === "バレエ基礎センター") return 1100;
+    if (lessonTitle === "バレエ基礎センター" || lessonTitle === "リハーサル") return 1100;
   } else if (lessonType === "通常") {
     if (lessonTitle === "ポワント" || lessonTitle === "プレモダン") return 1100;
-    if (lessonTitle === "バレエ基礎センター") return 1100;
+    if (lessonTitle === "バレエ基礎センター" || lessonTitle === "リハーサル") return 1100;
   }
   if (countThisMonth >= 9) return 2000;
   const total = LESSON_FEES_ONLY[countThisMonth - 1] ?? 2800;
@@ -26,11 +26,11 @@ function calcPrice(countThisMonth: number, lessonType: string, privateMinutes = 
 // 通常レッスン料金の段階カウントに含める「標準レッスン」判定
 // ポワント・プレモダン・特別レッスンは固定料金のためカウント対象外
 function isStandardLesson(lessonType: string, lessonTitle: string | null | undefined): boolean {
-  if (lessonTitle === "90分リハーサル" || lessonTitle === "リハーサル") return true;
+  if (lessonTitle === "90分リハーサル") return true;
   if (lessonTitle === "30分リハーサル" || lessonTitle === "35分リハーサル" || lessonTitle === "120分リハーサル") return false;
   if (lessonType !== "通常" && lessonType !== "祝日") return false;
   if (lessonTitle === "ポワント" || lessonTitle === "プレモダン" || lessonTitle === "特別レッスン") return false;
-  if (lessonTitle === "バレエ基礎センター") return false;
+  if (lessonTitle === "バレエ基礎センター" || lessonTitle === "リハーサル") return false;
   return true;
 }
 
