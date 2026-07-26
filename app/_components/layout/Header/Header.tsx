@@ -215,7 +215,7 @@ export default function Header() {
             <p className={styles.callModalText}>
               お電話は体験レッスン・見学の<br />
               お申し込み専用です。<br />
-              営業・ご提案につきましては、お問い合わせフォームよりお願いいたします。
+              その他のお問い合わせは、お問い合わせフォームよりお願いいたします。
             </p>
             <div className={styles.callModalButtons}>
               <a
