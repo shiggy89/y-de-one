@@ -206,6 +206,67 @@
 
 .phoneLink {
   display: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.callModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.callModal {
+  width: 100%;
+  max-width: 320px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.callModalText {
+  margin: 0 0 20px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #333;
+}
+
+.callModalButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.callModalCall {
+  display: block;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #0090e8;
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.callModalCancel {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: none;
+  color: #666;
+  font-weight: 600;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
 }
 
 .bellLink {

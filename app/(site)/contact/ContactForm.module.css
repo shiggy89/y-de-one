@@ -36,6 +36,14 @@
   text-decoration: underline;
 }
 
+.phoneNote {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: #e05080;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
 .formTitle {
   max-width: 640px;
   margin: 0 auto 12px;

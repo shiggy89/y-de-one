@@ -51,6 +51,7 @@ export default function Header() {
   const pathname = usePathname();
   const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set());
   const [openSubDropdowns, setOpenSubDropdowns] = useState<Set<string>>(new Set());
+  const [showCallModal, setShowCallModal] = useState(false);
 
   useEffect(() => {
     setIsOpen(false);
@@ -111,10 +112,15 @@ export default function Header() {
             <i className="fa-solid fa-bell" aria-hidden="true" />
             {showBadge && <span className={styles.bellBadge} />}
           </Link>
-          <a href="tel:08067400770" className={styles.phoneLink}>
+          <button
+            type="button"
+            className={styles.phoneLink}
+            onClick={() => setShowCallModal(true)}
+            aria-label="お電話"
+          >
             <i className="fa-solid fa-phone" aria-hidden="true" />
             <span className={styles.phoneNumber}>080-6740-0770</span>
-          </a>
+          </button>
         </div>
         <button
           className={styles.navToggle}
@@ -203,6 +209,32 @@ export default function Header() {
           </ul>
         </nav>
       </div>
+      {showCallModal && (
+        <div className={styles.callModalOverlay} onClick={() => setShowCallModal(false)}>
+          <div className={styles.callModal} onClick={(e) => e.stopPropagation()}>
+            <p className={styles.callModalText}>
+              お電話は体験レッスン・見学のお申し込み専用です。<br />
+              営業はお問い合わせフォームよりお願いします。
+            </p>
+            <div className={styles.callModalButtons}>
+              <a
+                href="tel:08067400770"
+                className={styles.callModalCall}
+                onClick={() => setShowCallModal(false)}
+              >
+                電話をかける
+              </a>
+              <button
+                type="button"
+                className={styles.callModalCancel}
+                onClick={() => setShowCallModal(false)}
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

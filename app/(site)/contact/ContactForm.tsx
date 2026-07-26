@@ -156,6 +156,10 @@ export default function ContactForm() {
             <a href="tel:08067400770" className={styles.phoneNumber}>
               080-6740-0770
             </a>
+            <p className={styles.phoneNote}>
+              お電話は体験レッスン・見学のお申し込み専用です。<br />
+              営業はお問い合わせフォームよりお願いします。
+            </p>
           </div>
 
           <p className={styles.formTitle}>フォームでのお問い合わせ</p>
