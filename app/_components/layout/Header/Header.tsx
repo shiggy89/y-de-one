@@ -213,9 +213,7 @@ export default function Header() {
         <div className={styles.callModalOverlay} onClick={() => setShowCallModal(false)}>
           <div className={styles.callModal} onClick={(e) => e.stopPropagation()}>
             <p className={styles.callModalText}>
-              お電話は体験レッスン・見学の<br />
-              お申し込み専用です。<br />
-              その他のお問い合わせは、お問い合わせフォームよりお願いいたします。
+              お電話は体験レッスン・見学のお申し込み専用です。その他のお問い合わせは、お問い合わせフォームよりお願いいたします。
             </p>
             <div className={styles.callModalButtons}>
               <a
