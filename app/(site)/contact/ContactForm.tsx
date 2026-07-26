@@ -158,7 +158,7 @@ export default function ContactForm() {
             </a>
             <p className={styles.phoneNote}>
               お電話は体験レッスン・見学のお申し込み専用です。<br />
-              その他のお問い合わせはお問い合わせフォームよりお願いします。
+              その他のお問い合わせは下記のフォームよりお願いします。
             </p>
           </div>
 
