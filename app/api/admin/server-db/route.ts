@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   const { data, error } = await supabaseAdmin
     .from("server_db_costs")
     .select("*")
-    .order("year_month", { ascending: false });
+    .order("year_month", { ascending: true });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ records: data ?? [] });
 }
