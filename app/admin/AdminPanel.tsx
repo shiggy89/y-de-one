@@ -28,7 +28,7 @@ type User = {
 
 type Tab = "attendance" | "ledger" | "users" | "message" | "direct" | "server_db" | "report" | "hp_news" | "blog" | "lesson_info" | "analytics";
 
-type ServerDbRecord = { id: number; year_month: string; amount: number; received_at: string | null; note: string | null };
+type ServerDbRecord = { id: number; year_month: string; amount: number | null; received_at: string | null; note: string | null };
 
 type HpNewsRecord = { id: number; title: string; content: string; category: string | null; published_at: string };
 
@@ -1840,8 +1840,8 @@ export default function AdminPanel() {
                     <td style={{ padding: "10px 12px", fontWeight: 600 }}>
                       {r.year_month.split("-").map(Number).join("年")}月
                     </td>
-                    <td style={{ padding: "10px 12px", color: "#e05080", fontWeight: 700 }}>
-                      ¥{r.amount.toLocaleString()}
+                    <td style={{ padding: "10px 12px", color: r.amount != null ? "#e05080" : "#bbb", fontWeight: r.amount != null ? 700 : 400 }}>
+                      {r.amount != null ? `¥${r.amount.toLocaleString()}` : "未定"}
                     </td>
                     <td style={{ padding: "10px 12px", color: r.received_at ? "#4caf50" : "#bbb", fontWeight: r.received_at ? 600 : 400 }}>
                       {r.received_at
