@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { requireAdmin } from "@/lib/adminAuth";
 
-const LESSON_FEES_ONLY = [2800, 5400, 7800, 9600, 11800, 14000, 16200, 17600];
+const NEW_PRICING_MONTH = "2026-09";
+const LESSON_FEES_ONLY_OLD = [2800, 5400, 7800, 9600, 11800, 14000, 16200, 17600];
+const LESSON_FEES_ONLY_NEW = [3000, 5800, 8400, 10800, 13200, 15600, 18000, 20400];
 
 function isStandardLesson(lessonType: string, lessonTitle: string | null | undefined): boolean {
   if (lessonTitle === "90分リハーサル") return true;
@@ -13,21 +15,25 @@ function isStandardLesson(lessonType: string, lessonTitle: string | null | undef
   return true;
 }
 
-function calcPrice(countThisMonth: number, lessonType: string, privateMinutes = 15, lessonTitle?: string): number {
+function calcPrice(countThisMonth: number, lessonType: string, privateMinutes = 15, lessonTitle?: string, yearMonth?: string): number {
+  const isNewPricing = (yearMonth ?? "") >= NEW_PRICING_MONTH;
+  const fixedFee = isNewPricing ? 1200 : 1100;
+  const overNineFee = isNewPricing ? 2200 : 2000;
+  const feesTable = isNewPricing ? LESSON_FEES_ONLY_NEW : LESSON_FEES_ONLY_OLD;
   if (lessonType === "個人") return 2500 * (privateMinutes / 15);
-  if (lessonTitle === "30分リハーサル" || lessonTitle === "35分リハーサル") return 1100;
+  if (lessonTitle === "30分リハーサル" || lessonTitle === "35分リハーサル") return fixedFee;
   if (lessonTitle === "120分リハーサル") return 3000;
   if (lessonType === "祝日") {
     if (lessonTitle === "特別レッスン") return 3000;
-    if (lessonTitle === "ポワント" || lessonTitle === "プレモダン") return 1100;
-    if (lessonTitle === "バレエ基礎センター" || lessonTitle === "リハーサル") return 1100;
+    if (lessonTitle === "ポワント" || lessonTitle === "プレモダン") return fixedFee;
+    if (lessonTitle === "バレエ基礎センター" || lessonTitle === "リハーサル") return fixedFee;
   } else if (lessonType === "通常") {
-    if (lessonTitle === "ポワント" || lessonTitle === "プレモダン") return 1100;
-    if (lessonTitle === "バレエ基礎センター" || lessonTitle === "リハーサル") return 1100;
+    if (lessonTitle === "ポワント" || lessonTitle === "プレモダン") return fixedFee;
+    if (lessonTitle === "バレエ基礎センター" || lessonTitle === "リハーサル") return fixedFee;
   }
-  if (countThisMonth >= 9) return 2000;
-  const total = LESSON_FEES_ONLY[countThisMonth - 1] ?? 2800;
-  const prev = countThisMonth > 1 ? (LESSON_FEES_ONLY[countThisMonth - 2] ?? 0) : 0;
+  if (countThisMonth >= 9) return overNineFee;
+  const total = feesTable[countThisMonth - 1] ?? feesTable[0];
+  const prev = countThisMonth > 1 ? (feesTable[countThisMonth - 2] ?? 0) : 0;
   return total - prev;
 }
 
@@ -73,7 +79,7 @@ export async function POST(req: Request) {
       const newIsFirst = i === 0;
       const newMaintenanceFee = isTeacher ? 0 : (newIsFirst ? 500 : 0);
       const mins = a.lesson_type === "個人" ? parseInt(a.lesson_time ?? "15") : undefined;
-      const newLessonFee = isTeacher ? 0 : calcPrice(standardCount, a.lesson_type, mins, a.lesson_title ?? undefined);
+      const newLessonFee = isTeacher ? 0 : calcPrice(standardCount, a.lesson_type, mins, a.lesson_title ?? undefined, yearMonth);
       const newPrice = newLessonFee + newMaintenanceFee;
 
       if (a.price_paid !== newPrice) {

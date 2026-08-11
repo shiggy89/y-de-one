@@ -11,6 +11,11 @@ type Profile = {
   displayName: string;
 };
 
+// 2026年9月から新料金体系（体験レッスン3,300円→3,500円）に切替
+const NEW_PRICING_MONTH = "2026-09";
+const isNewPricingActive = () =>
+  new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Tokyo" }).slice(0, 7) >= NEW_PRICING_MONTH;
+
 // 体験レッスン用（ジャンル×曜日）
 const TRIAL_SLOTS: Record<string, Record<number, string[]>> = {
   バレエ: {
@@ -81,6 +86,7 @@ export default function TrialPage() {
   const [dateError, setDateError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [datePlaceholder, setDatePlaceholder] = useState("希望日を選択してください");
+  const trialPrice = isNewPricingActive() ? "3,500" : "3,300";
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todayStr = today.toISOString().split("T")[0];
@@ -281,7 +287,7 @@ export default function TrialPage() {
                     checked={formType === "trial"}
                     onChange={() => handleFormTypeChange("trial")}
                   />
-                  <span>体験レッスン（¥3,300）</span>
+                  <span>体験レッスン（¥{trialPrice}）</span>
                 </label>
                 <label className={styles.radioItem}>
                   <input
