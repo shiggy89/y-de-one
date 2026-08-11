@@ -47,7 +47,7 @@ export default function ModernBalletFaq() {
           />
           <FaqItem
             question="体験レッスンはモダンバレエクラスで受けられますか？"
-            answer={<>はい、モダンバレエクラスでの体験レッスン（¥3,300）と無料見学を随時受け付けています。LINEからお気軽にご予約ください。<a href="https://lin.ee/iz33eCM" style={{ color: "#de4e8c", fontWeight: 700, textDecoration: "underline" }}>体験レッスンはこちら →</a></>}
+            answer={<>はい、モダンバレエクラスでの体験レッスン（¥3,500）と無料見学を随時受け付けています。LINEからお気軽にご予約ください。<a href="https://lin.ee/iz33eCM" style={{ color: "#de4e8c", fontWeight: 700, textDecoration: "underline" }}>体験レッスンはこちら →</a></>}
           />
           <FaqItem
             question="男性でも参加できますか？"

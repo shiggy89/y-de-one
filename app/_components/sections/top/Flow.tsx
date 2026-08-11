@@ -135,7 +135,7 @@ export default function Flow({ hideIcons = false, variant }: { hideIcons?: boole
           <div className={styles.trialCardText}>
             <h3>
               体験レッスン料金<br />
-              <span>¥3,300</span>
+              <span>¥3,500</span>
             </h3>
             <p>(通常レッスン1回分)</p>
             <ul>

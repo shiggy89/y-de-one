@@ -90,7 +90,7 @@ export default function Faq() {
           />
           <FaqItem
             question="月謝はどのくらいですか？"
-            answer={<>月の1回目：3,300円、2回目：2,600円、3回目：2,400円...と通えば通うほど1回あたりの料金がお得になります。入会金は不要です。詳しくは<a href="/price" style={{ color: "#0090e8", fontWeight: 700, textDecoration: "underline" }}>料金ページ</a>をご覧ください。</>}
+            answer={<>月の1回目：3,500円、2回目：2,800円、3回目：2,600円...と通えば通うほど1回あたりの料金がお得になります。入会金は不要です。詳しくは<a href="/price" style={{ color: "#0090e8", fontWeight: 700, textDecoration: "underline" }}>料金ページ</a>をご覧ください。</>}
           />
           <FaqItem
             question="体が硬くても大丈夫ですか？"

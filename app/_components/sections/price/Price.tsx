@@ -6,14 +6,14 @@ import SectionCtaButton from "../common/SectionCtaButton";
 import styles from "./Price.module.css";
 
 const LESSON_PRICES = [
-  { times: "月1回",  total: "3,300",  perLesson: "2,800", note: null },
-  { times: "月2回",  total: "5,900",  perLesson: "2,600", note: null },
-  { times: "月3回",  total: "8,300",  perLesson: "2,400", note: null },
-  { times: "月4回",  total: "10,100", perLesson: "1,800", note: null },
-  { times: "月5回",  total: "12,300", perLesson: "2,200", note: null },
-  { times: "月6回",  total: "14,500", perLesson: "2,200", note: null },
-  { times: "月7回",  total: "16,700", perLesson: "2,200", note: null },
-  { times: "月8回",  total: "18,100", perLesson: "1,400", note: null },
+  { times: "月1回",  total: "3,500",  perLesson: "3,000", note: null },
+  { times: "月2回",  total: "6,300",  perLesson: "2,800", note: null },
+  { times: "月3回",  total: "8,900",  perLesson: "2,600", note: null },
+  { times: "月4回",  total: "11,300", perLesson: "2,400", note: null },
+  { times: "月5回",  total: "13,700", perLesson: "2,400", note: null },
+  { times: "月6回",  total: "16,100", perLesson: "2,400", note: null },
+  { times: "月7回",  total: "18,500", perLesson: "2,400", note: null },
+  { times: "月8回",  total: "20,900", perLesson: "2,400", note: null },
 ];
 
 export default function Price() {
@@ -76,7 +76,7 @@ export default function Price() {
               />
               <p className={styles.summaryLabel}>初回体験</p>
               <p className={styles.summaryPrice}>
-                <span className={styles.summaryNum}>3,300</span>円
+                <span className={styles.summaryNum}>3,500</span>円
               </p>
               <p className={styles.summaryNote}>通常レッスン1回分と同じです</p>
             </div>
@@ -119,14 +119,14 @@ export default function Price() {
             <div className={styles.priceCard}>
               <p className={styles.priceTimesLabel}>月9回目以降ずっと</p>
               <p className={styles.priceTotal}>
-                <span className={styles.priceYen}>¥</span>2,000<span className={styles.priceYen}> / 回</span>
+                <span className={styles.priceYen}>¥</span>2,200<span className={styles.priceYen}> / 回</span>
               </p>
               <p className={styles.perLesson}>&nbsp;</p>
             </div>
             <div className={styles.priceCardYellow}>
               <p className={styles.priceTimesLabel}>35分レッスン</p>
               <p className={styles.priceTotal}>
-                <span className={styles.priceYen}>¥</span>1,100<span className={styles.priceYen}> / 回</span>
+                <span className={styles.priceYen}>¥</span>1,200<span className={styles.priceYen}> / 回</span>
               </p>
               <p className={styles.perLesson}>&nbsp;</p>
             </div>
