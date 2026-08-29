@@ -85,13 +85,6 @@
   font-size: 16px;
 }
 
-.formInput[type="date"] {
-  -webkit-appearance: none;
-  appearance: none;
-  min-height: 40px;
-  line-height: 1.5;
-}
-
 .formInput:focus,
 .formTextarea:focus,
 .formSelect:focus {
@@ -106,6 +99,31 @@
 
 .radioGroup {
   margin-top: 4px;
+}
+
+.slotList {
+  max-height: 360px;
+  overflow-y: auto;
+  margin-top: 4px;
+  padding: 8px 10px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  background-color: #fafafa;
+}
+
+.slotGroup {
+  margin-bottom: 12px;
+}
+
+.slotGroup:last-child {
+  margin-bottom: 0;
+}
+
+.slotDate {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0090e8;
+  margin: 0 0 4px;
 }
 
 .radioItem {

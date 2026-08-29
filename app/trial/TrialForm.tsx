@@ -66,6 +66,56 @@ const VISIT_SLOTS: Record<number, string[]> = {
   ],
 };
 
+// 今日から先、何日分の候補日を表示するか（3週間分）
+const UPCOMING_DAYS = 21;
+const YOUBI = ["日", "月", "火", "水", "木", "金", "土"];
+
+// タイムゾーンのズレを起こさない日付文字列変換（toISOString()はUTC変換されるため使わない）
+function localDateStr(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+type DateGroup = { date: string; label: string; items: string[] };
+
+// 今日から先の実際のカレンダー日付に、空いている枠だけを当てはめて一覧化する
+function buildDateGroups(formType: "trial" | "visit", genre: string): DateGroup[] {
+  const groups: DateGroup[] = [];
+  const base = new Date();
+  base.setHours(0, 0, 0, 0);
+
+  for (let i = 0; i < UPCOMING_DAYS; i++) {
+    const d = new Date(base);
+    d.setDate(base.getDate() + i);
+    const day = d.getDay();
+    const isJuly2026 = d.getFullYear() === 2026 && d.getMonth() === 6;
+
+    let items: string[] = [];
+    if (formType === "visit") {
+      items = VISIT_SLOTS[day] ?? [];
+      if (isJuly2026 && day === 2) {
+        items = items.filter((s) => !s.startsWith("19:30"));
+      }
+    } else if (genre) {
+      items = TRIAL_SLOTS[genre]?.[day] ?? [];
+      if (isJuly2026 && genre === "モダンバレエ" && day === 2) {
+        items = items.filter((s) => s !== "19:30 - 21:00");
+      }
+    }
+
+    if (items.length > 0) {
+      groups.push({
+        date: localDateStr(d),
+        label: `${d.getMonth() + 1}/${d.getDate()}(${YOUBI[day]})`,
+        items,
+      });
+    }
+  }
+  return groups;
+}
+
 export default function TrialPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -83,13 +133,9 @@ export default function TrialPage() {
   const [timeSlot, setTimeSlot] = useState("");
   const [experience, setExperience] = useState("");
   const [question, setQuestion] = useState("");
-  const [dateError, setDateError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [datePlaceholder, setDatePlaceholder] = useState("希望日を選択してください");
   const trialPrice = isNewPricingActive() ? "3,500" : "3,300";
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayStr = today.toISOString().split("T")[0];
+
   // ===== LIFF 初期化 =====
   useEffect(() => {
     const initLiff = async () => {
@@ -135,66 +181,22 @@ export default function TrialPage() {
     try { initLiff(); } catch (e) { console.error(e); setLoading(false); }
   }, []);
 
-  // 申込み種別が変わったらジャンル・時間帯・経験をリセット
+  // 申込み種別が変わったらジャンル・日時・経験をリセット
   const handleFormTypeChange = (type: "trial" | "visit") => {
     setFormType(type);
     setGenre("");
+    setDate("");
     setTimeSlot("");
     setExperience("");
   };
 
-  // ===== 日付変更 =====
-  const handleDateChange = (value: string) => {
-    setTimeSlot("");
-    setDateError(null);
-
-    if (!value) {
-      setDate("");
-      setDatePlaceholder("希望日を選択してください");
-      return;
-    }
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const selected = new Date(value + "T00:00:00");
-
-    if (selected < today) {
-      setDate("");
-      setDatePlaceholder("希望日を選択してください");
-      setDateError("過去の日付は選択できません。本日以降の日付をお選びください。");
-      return;
-    }
-
-    setDate(value);
-    const day = selected.getDay();
-    const youbi = ["日", "月", "火", "水", "木", "金", "土"][day];
-    setDatePlaceholder(`${value}（${youbi}）`);
-
-    if (day === 1) {
-      setDateError("月曜日はレッスン休講日のため、別の日付をお選びください。");
-    }
+  // 日時の選択（日付と時間帯を同時に確定させる）
+  const selectSlot = (slotDate: string, item: string) => {
+    setDate(slotDate);
+    setTimeSlot(item);
   };
 
-  const getSlots = (): string[] => {
-    if (!date) return [];
-    const selected = new Date(date + "T00:00:00");
-    const day = selected.getDay();
-    const isJuly2026 = selected.getFullYear() === 2026 && selected.getMonth() === 6;
-
-    if (formType === "visit") {
-      let slots = VISIT_SLOTS[day] ?? [];
-      if (isJuly2026 && day === 2) {
-        slots = slots.filter((s) => !s.startsWith("19:30"));
-      }
-      return slots;
-    }
-    if (!genre) return [];
-    let slots = TRIAL_SLOTS[genre]?.[day] ?? [];
-    if (isJuly2026 && genre === "モダンバレエ" && day === 2) {
-      slots = slots.filter((s) => s !== "19:30 - 21:00");
-    }
-    return slots;
-  };
+  const dateGroups = buildDateGroups(formType, genre);
 
   // ===== 送信 =====
   const handleSubmit = async (e: { preventDefault(): void }) => {
@@ -203,10 +205,7 @@ export default function TrialPage() {
 
     if (!name.trim()) { setError("氏名を入力してください。"); return; }
     if (formType === "trial" && !genre) { setError("体験レッスンの種類を選択してください。"); return; }
-    if (!date) { setError("希望日を選択してください。"); return; }
-    const d = new Date(date + "T00:00:00");
-    if (d.getDay() === 1) { setError("月曜日はレッスン休講日のため、別の日付をお選びください。"); return; }
-    if (!timeSlot) { setError("時間帯を選択してください。"); return; }
+    if (!date || !timeSlot) { setError("希望日時を選択してください。"); return; }
     if (formType === "trial" && !experience) { setError("バレエ経験を選択してください。"); return; }
 
     setSubmitting(true);
@@ -247,8 +246,6 @@ export default function TrialPage() {
       </main>
     );
   }
-
-  const slots = getSlots();
 
   return (
     <main className={styles.trial}>
@@ -331,7 +328,7 @@ export default function TrialPage() {
                         name="genre"
                         value={g}
                         checked={genre === g}
-                        onChange={(e) => { setGenre(e.target.value); setTimeSlot(""); }}
+                        onChange={(e) => { setGenre(e.target.value); setDate(""); setTimeSlot(""); }}
                       />
                       <span>{g}</span>
                     </label>
@@ -340,59 +337,42 @@ export default function TrialPage() {
               </div>
             )}
 
-            {/* 希望日（必須） */}
+            {/* 希望日時（必須）：空いている日時だけを選択肢として表示する */}
             <div className={styles.formField}>
               <label className={styles.formLabel}>
-                {formType === "visit" ? "見学希望日" : "体験レッスン希望日"}{" "}
+                {formType === "visit" ? "見学希望日時" : "体験レッスン希望日時"}{" "}
                 <span className={styles.formRequired}>必須</span>
-              </label>
-              <input
-                type="date"
-                className={styles.formInput}
-                required
-                value={date}
-                onChange={(e) => handleDateChange(e.target.value)}
-                min={todayStr}
-              />
-              {date && <p className={styles.formNote}>選択した日：{datePlaceholder}</p>}
-              {dateError && <p className={styles.formError}>{dateError}</p>}
-            </div>
-
-            {/* 時間帯（必須） */}
-            <div className={styles.formField}>
-              <label className={styles.formLabel}>
-                時間帯 <span className={styles.formRequired}>必須</span>
               </label>
 
               {formType === "trial" && !genre && (
                 <p className={styles.formNote}>先に「体験レッスンの種類」を選択してください。</p>
               )}
 
-              {(formType === "visit" || genre) && !date && (
-                <p className={styles.formNote}>先に「希望日」を選択してください。</p>
-              )}
-
-              {(formType === "visit" || genre) && date && slots.length === 0 && (
+              {(formType === "visit" || genre) && dateGroups.length === 0 && (
                 <p className={styles.formNote}>
-                  {formType === "visit"
-                    ? "この日はレッスンを行っていません。別の日付をお選びください。"
-                    : `この日は${genre}の体験レッスンを行っていません。別の日付をお選びください。`}
+                  現在お選びいただける日時がありません。お手数ですがお問い合わせください。
                 </p>
               )}
 
-              {slots.length > 0 && (
-                <div className={styles.radioGroup}>
-                  {slots.map((slot) => (
-                    <label key={slot} className={styles.radioItem}>
-                      <input
-                        type="radio"
-                        name="timeSlot"
-                        value={slot}
-                        checked={timeSlot === slot}
-                        onChange={(e) => setTimeSlot(e.target.value)}
-                      />
-                      <span>{slot}</span>
-                    </label>
+              {dateGroups.length > 0 && (
+                <div className={styles.slotList}>
+                  {dateGroups.map((group) => (
+                    <div key={group.date} className={styles.slotGroup}>
+                      <p className={styles.slotDate}>{group.label}</p>
+                      <div className={styles.radioGroup}>
+                        {group.items.map((item) => (
+                          <label key={item} className={styles.radioItem}>
+                            <input
+                              type="radio"
+                              name="dateTimeSlot"
+                              checked={date === group.date && timeSlot === item}
+                              onChange={() => selectSlot(group.date, item)}
+                            />
+                            <span>{item}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
