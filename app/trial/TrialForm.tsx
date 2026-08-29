@@ -133,6 +133,8 @@ export default function TrialPage() {
   const [timeSlot, setTimeSlot] = useState("");
   const [experience, setExperience] = useState("");
   const [question, setQuestion] = useState("");
+  const [noSlotMatch, setNoSlotMatch] = useState(false);
+  const [customRequest, setCustomRequest] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const trialPrice = isNewPricingActive() ? "3,500" : "3,300";
 
@@ -188,12 +190,22 @@ export default function TrialPage() {
     setDate("");
     setTimeSlot("");
     setExperience("");
+    setNoSlotMatch(false);
+    setCustomRequest("");
   };
 
-  // 日時の選択（日付と時間帯を同時に確定させる）
+  // 日時の選択(日付と時間帯を同時に確定させる)
   const selectSlot = (slotDate: string, item: string) => {
     setDate(slotDate);
     setTimeSlot(item);
+    setNoSlotMatch(false);
+  };
+
+  // 「希望の日時が見つからない」を選んだ場合
+  const selectNoSlotMatch = () => {
+    setNoSlotMatch(true);
+    setDate("");
+    setTimeSlot("");
   };
 
   const dateGroups = buildDateGroups(formType, genre);
@@ -205,7 +217,12 @@ export default function TrialPage() {
 
     if (!name.trim()) { setError("氏名を入力してください。"); return; }
     if (formType === "trial" && !genre) { setError("体験レッスンの種類を選択してください。"); return; }
-    if (!date || !timeSlot) { setError("希望日時を選択してください。"); return; }
+    if (noSlotMatch) {
+      if (!customRequest.trim()) { setError("ご希望の曜日・時間帯を入力してください。"); return; }
+    } else if (!date || !timeSlot) {
+      setError("希望日時を選択してください。");
+      return;
+    }
     if (formType === "trial" && !experience) { setError("バレエ経験を選択してください。"); return; }
 
     setSubmitting(true);
@@ -219,8 +236,9 @@ export default function TrialPage() {
           name,
           formType,
           genre: formType === "trial" ? genre : undefined,
-          date,
-          timeSlot,
+          date: noSlotMatch ? undefined : date,
+          timeSlot: noSlotMatch ? undefined : timeSlot,
+          customRequest: noSlotMatch ? customRequest : undefined,
           experience: formType === "trial" ? experience : undefined,
           question,
         }),
@@ -328,7 +346,13 @@ export default function TrialPage() {
                         name="genre"
                         value={g}
                         checked={genre === g}
-                        onChange={(e) => { setGenre(e.target.value); setDate(""); setTimeSlot(""); }}
+                        onChange={(e) => {
+                        setGenre(e.target.value);
+                        setDate("");
+                        setTimeSlot("");
+                        setNoSlotMatch(false);
+                        setCustomRequest("");
+                      }}
                       />
                       <span>{g}</span>
                     </label>
@@ -374,6 +398,36 @@ export default function TrialPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {(formType === "visit" || genre) && (
+                <label className={`${styles.radioItem} ${styles.noMatchOption}`}>
+                  <input
+                    type="radio"
+                    name="dateTimeSlot"
+                    checked={noSlotMatch}
+                    onChange={selectNoSlotMatch}
+                  />
+                  <span>ご希望の日時が見つからない方はこちら</span>
+                </label>
+              )}
+
+              {noSlotMatch && (
+                <div className={styles.noMatchField}>
+                  <label className={styles.formLabel}>
+                    ご希望の曜日・時間帯 <span className={styles.formRequired}>必須</span>
+                  </label>
+                  <textarea
+                    className={styles.formTextarea}
+                    rows={3}
+                    value={customRequest}
+                    onChange={(e) => setCustomRequest(e.target.value)}
+                    placeholder="例）水曜19時以降なら通えます／土日の午前中を希望 など"
+                  />
+                  <p className={styles.formNote}>
+                    いただいた内容をもとに、スタッフから改めて日程をご案内します。
+                  </p>
                 </div>
               )}
             </div>

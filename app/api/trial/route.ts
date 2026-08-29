@@ -8,8 +8,9 @@ type TrialRequestBody = {
   name: string;
   formType?: "trial" | "visit";
   genre?: string;
-  date: string;
-  timeSlot: string;
+  date?: string;
+  timeSlot?: string;
+  customRequest?: string;
   experience?: string;
   question?: string;
 };
@@ -39,14 +40,18 @@ export async function POST(req: Request) {
       genre,
       date,
       timeSlot,
+      customRequest,
       experience,
       question,
     } = body;
 
     const isVisit = formType === "visit";
+    // 候補日から選べなかった場合は、date/timeSlotの代わりにcustomRequest（自由記述の希望）が入る
+    const hasFixedSlot = Boolean(date && timeSlot);
+    const hasCustomRequest = Boolean(customRequest && customRequest.trim());
 
     // ② 簡単なバリデーション（必須項目チェック）
-    if (!name || !date || !timeSlot || (!isVisit && !experience)) {
+    if (!name || (!hasFixedSlot && !hasCustomRequest) || (!isVisit && !experience)) {
       return NextResponse.json(
         { ok: false, error: "必須項目が送信されていません。" },
         { status: 400 }
@@ -103,10 +108,18 @@ export async function POST(req: Request) {
       return /^U[a-fA-F0-9]{16,64}$/.test(id);
     }
 
-    const d = new Date(date + "T00:00:00");
-    const day = d.getDay();
-    const youbi = ["日", "月", "火", "水", "木", "金", "土"][day];
-    const dateWithYoubi = `${date}（${youbi}）`;
+    let dateWithYoubi = "";
+    if (hasFixedSlot && date) {
+      const d = new Date(date + "T00:00:00");
+      const day = d.getDay();
+      const youbi = ["日", "月", "火", "水", "木", "金", "土"][day];
+      dateWithYoubi = `${date}（${youbi}）`;
+    }
+
+    // 日時が確定している場合は「日付＋時間帯」、相談希望の場合は自由記述をそのまま使う
+    const scheduleLine = hasFixedSlot
+      ? `・${isVisit ? "見学希望日" : "希望日"}：${dateWithYoubi}\n・時間帯：${timeSlot}\n`
+      : `・ご希望の曜日・時間帯：${customRequest}\n`;
 
     if (lineUserId && isValidLineUserId(lineUserId)) {
       console.log("LINE に送ろうとしている lineUserId:", lineUserId);
@@ -117,28 +130,33 @@ export async function POST(req: Request) {
         ? `${displayNameForMessage} 様\n\n` +
           `Y-de-ONEバレエ教室です🩰\n` +
           `レッスン見学のお申込みありがとうございます。\n\n` +
-          `🎉【見学のご予約が確定しました】🎉\n\n` +
+          (hasFixedSlot
+            ? `🎉【見学のご予約が確定しました】🎉\n\n`
+            : `【見学のご希望を承りました】\n\n`) +
           `▼ ご予約内容\n` +
           `・お名前：${displayNameForMessage}\n` +
-          `・見学希望日：${dateWithYoubi}\n` +
-          `・時間帯：${timeSlot}\n` +
+          scheduleLine +
           (question ? `・ご質問 / 不安なこと：${question}\n` : "") +
-          `\n当日はスタジオでお待ちしております😊\n` +
-          `動きやすい服装でお越しください。\n\n` +
+          (hasFixedSlot
+            ? `\n当日はスタジオでお待ちしております😊\n動きやすい服装でお越しください。\n\n`
+            : `\nスタッフが空き状況を確認し、改めてこちらのLINEで日程をご案内いたします😊\n\n`) +
           `📍Y-de-ONEスタジオ\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n` +
           `\n何か変更やキャンセルがある場合は、このLINEからお知らせください。`
         : `${displayNameForMessage} 様\n\n` +
           `Y-de-ONEバレエ教室です🩰\n` +
           `体験レッスンのお申込みありがとうございます。\n\n` +
-          `🎉【ご予約が確定しました】🎉\n\n` +
+          (hasFixedSlot
+            ? `🎉【ご予約が確定しました】🎉\n\n`
+            : `【ご希望を承りました】\n\n`) +
           `▼ ご予約内容\n` +
           `・お名前：${displayNameForMessage}\n` +
           `・レッスン種類：${genre ?? ""}\n` +
-          `・希望日：${dateWithYoubi}\n` +
-          `・時間帯：${timeSlot}\n` +
+          scheduleLine +
           `・バレエ経験：${experience ?? ""}\n` +
           (question ? `・ご質問 / 不安なこと：${question}\n` : "") +
-          `\n当日はスタジオでお会いできることを楽しみにしております😊\n\n` +
+          (hasFixedSlot
+            ? `\n当日はスタジオでお会いできることを楽しみにしております😊\n\n`
+            : `\nスタッフが空き状況を確認し、改めてこちらのLINEで日程をご案内いたします😊\n\n`) +
           `📍Y-de-ONEスタジオ\nhttps://maps.app.goo.gl/qfoj5m4KPzcPF5g76\n` +
           `\n何か変更やキャンセルがある場合は、このLINEからお知らせください。`;
 
@@ -182,20 +200,18 @@ export async function POST(req: Request) {
 
       if (adminUserIds.length > 0) {
         const adminText = isVisit
-          ? `【見学申込み通知】\n\n` +
+          ? `${hasFixedSlot ? "【見学申込み通知】" : "【要対応】見学：希望日時の個別相談"}\n\n` +
             `▼ お申込み内容\n` +
             `・お名前：${name}\n` +
             `・LINE表示名：${lineDisplayName ?? "不明"}\n` +
-            `・見学希望日：${dateWithYoubi}\n` +
-            `・時間帯：${timeSlot}\n` +
+            scheduleLine +
             (question ? `\n\n・ご質問／不安なこと：${question}\n` : "")
-          : `【体験レッスン申込み通知】\n\n` +
+          : `${hasFixedSlot ? "【体験レッスン申込み通知】" : "【要対応】体験：希望日時の個別相談"}\n\n` +
             `▼ お申込み内容\n` +
             `・お名前：${name}\n` +
             `・LINE表示名：${lineDisplayName ?? "不明"}\n` +
             `・レッスン種類：${genre ?? ""}\n` +
-            `・希望日：${dateWithYoubi}\n` +
-            `・時間帯：${timeSlot}\n` +
+            scheduleLine +
             `・バレエ経験：${experience ?? ""}\n` +
             (question ? `\n\n・ご質問／不安なこと：${question}\n` : "");
 
