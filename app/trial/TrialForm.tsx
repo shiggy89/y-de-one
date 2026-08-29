@@ -244,9 +244,11 @@ export default function TrialPage() {
         }),
       });
 
-      const msg = formType === "visit"
-        ? "見学のお申込みありがとうございます。\n詳細はこの後LINEでご連絡いたします。"
-        : "体験レッスンのお申込みありがとうございます。\n詳細はこの後LINEでご連絡いたします。";
+      const msg = noSlotMatch
+        ? "ご希望ありがとうございます。\nスタッフが改めて日程をご案内いたします。"
+        : formType === "visit"
+          ? "見学のお申込みありがとうございます。\n詳細はこの後LINEでご連絡いたします。"
+          : "体験レッスンのお申込みありがとうございます。\n詳細はこの後LINEでご連絡いたします。";
       alert(msg);
       router.push("/");
       try { if (liff.isInClient()) liff.closeWindow(); } catch { /* ignore */ }
@@ -423,10 +425,10 @@ export default function TrialPage() {
                     rows={3}
                     value={customRequest}
                     onChange={(e) => setCustomRequest(e.target.value)}
-                    placeholder="例）水曜19時以降なら通えます／土日の午前中を希望 など"
+                    placeholder="例）水曜19時以降 / 土日の午前中を希望 など"
                   />
                   <p className={styles.formNote}>
-                    いただいた内容をもとに、スタッフから改めて日程をご案内します。
+                    いただいた内容をもとに、スタッフから改めて日程をご案内いたします。
                   </p>
                 </div>
               )}
@@ -476,9 +478,11 @@ export default function TrialPage() {
             <button type="submit" className={styles.formSubmit} disabled={submitting}>
               {submitting
                 ? "送信中..."
-                : formType === "visit"
-                  ? "この内容で見学を申込む"
-                  : "この内容で体験レッスンを申込む"}
+                : noSlotMatch
+                  ? "この内容で日程を相談する"
+                  : formType === "visit"
+                    ? "この内容で見学を申込む"
+                    : "この内容で体験レッスンを申込む"}
             </button>
           </form>
         </section>
