@@ -8,7 +8,6 @@ import { getLessonsForDate, type Lesson } from "@/lib/lessons";
 import * as Holiday from "@holiday-jp/holiday_jp";
 
 const TipTapEditor = dynamic(() => import("./TipTapEditor"), { ssr: false });
-const AnalyticsTab = dynamic(() => import("./AnalyticsTab"), { ssr: false });
 
 function LineAvatar({ src, imgClass, placeholderClass }: { src: string | null; imgClass: string; placeholderClass: string }) {
   const [broken, setBroken] = useState(false);
@@ -26,7 +25,7 @@ type User = {
   is_admin: boolean;
 };
 
-type Tab = "attendance" | "ledger" | "users" | "message" | "direct" | "server_db" | "report" | "hp_news" | "blog" | "lesson_info" | "analytics";
+type Tab = "attendance" | "ledger" | "users" | "message" | "direct" | "server_db" | "report" | "hp_news" | "blog" | "lesson_info";
 
 type ServerDbRecord = { id: number; year_month: string; amount: number | null; received_at: string | null; note: string | null };
 
@@ -138,7 +137,7 @@ export default function AdminPanel() {
   const [tab, setTab] = useState<Tab>(() => {
     if (typeof window !== "undefined") {
       const hash = window.location.hash.replace("#", "") as Tab;
-      const valid: Tab[] = ["attendance", "ledger", "users", "message", "direct", "server_db", "report", "hp_news", "blog", "lesson_info", "analytics"];
+      const valid: Tab[] = ["attendance", "ledger", "users", "message", "direct", "server_db", "report", "hp_news", "blog", "lesson_info"];
       if (valid.includes(hash)) return hash;
     }
     return "attendance";
@@ -962,9 +961,6 @@ export default function AdminPanel() {
           {/* <button className={`${styles.tab} ${tab === "message" ? styles.active : ""}`} onClick={() => changeTab("message")}>メッセージ</button> */}
           <button className={`${styles.tab} ${tab === "direct" ? styles.active : ""}`} onClick={() => changeTab("direct")}>個別メッセージ</button>
           <button className={`${styles.tab} ${tab === "server_db" ? styles.active : ""}`} onClick={() => changeTab("server_db")}>サーバーDB</button>
-          {isSuperAdmin && (
-            <button className={`${styles.tab} ${tab === "analytics" ? styles.active : ""}`} onClick={() => changeTab("analytics")}>分析</button>
-          )}
         </div>
       </div>
 
@@ -2089,13 +2085,6 @@ export default function AdminPanel() {
 
           {lessonInfoMsg && <p className={styles.noticeMsg}>{lessonInfoMsg}</p>}
           </div>
-        </div>
-      )}
-
-      {/* ━━━ 分析 ━━━ */}
-      {tab === "analytics" && isSuperAdmin && (
-        <div className={styles.section}>
-          <AnalyticsTab adminFetch={adminFetch} />
         </div>
       )}
 
