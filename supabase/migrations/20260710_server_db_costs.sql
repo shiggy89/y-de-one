@@ -6,6 +6,3 @@ create table if not exists server_db_costs (
   note text,
   created_at timestamptz default now()
 );
-
-insert into server_db_costs (year_month, amount) values ('2026-07', 7587)
-  on conflict (year_month) do nothing;
