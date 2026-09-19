@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getVerifiedLineUserId } from "@/lib/lineAuth";
 
 export async function PATCH(req: Request) {
   try {
-    const { lineUserId } = await req.json();
-    if (!lineUserId) return NextResponse.json({ error: "lineUserId required" }, { status: 400 });
+    const lineUserId = await getVerifiedLineUserId(req);
+    if (!lineUserId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { error } = await supabaseAdmin
       .from("users")

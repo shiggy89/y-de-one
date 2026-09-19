@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getVerifiedLineUserId } from "@/lib/lineAuth";
 
 // 1人1notice1リアクション制限でトグル
 export async function POST(req: Request) {
   try {
-    const { lineUserId, noticeId, emoji } = await req.json();
-    if (!lineUserId || !noticeId || !emoji) {
+    const lineUserId = await getVerifiedLineUserId(req);
+    if (!lineUserId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { noticeId, emoji } = await req.json();
+    if (!noticeId || !emoji) {
       return NextResponse.json({ error: "必須項目が不足しています" }, { status: 400 });
     }
 

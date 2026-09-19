@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { verifyLineSignature } from "@/lib/lineSignature";
 
 const LINE_PUSH_ENDPOINT = "https://api.line.me/v2/bot/message/push";
 const LINE_REPLY_ENDPOINT = "https://api.line.me/v2/bot/message/reply";
@@ -85,7 +86,18 @@ async function notifyAdmins(messages: { type: string; text: string }[]) {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    // LINE 以外からの偽イベント（ユーザーの勝手な作成、公式アカウントからの不正なメッセージ送信）を防ぐ
+    const channelSecret = process.env.LINE_CHANNEL_SECRET;
+    if (!channelSecret) {
+      console.error("LINE_CHANNEL_SECRET が設定されていません。Webhook を拒否します。");
+      return NextResponse.json({ ok: false }, { status: 500 });
+    }
+    const rawBody = await req.text();
+    if (!verifyLineSignature(rawBody, req.headers.get("x-line-signature"), channelSecret)) {
+      return NextResponse.json({ ok: false, error: "Invalid signature" }, { status: 401 });
+    }
+
+    const body = JSON.parse(rawBody);
     const events = body.events ?? [];
 
     for (const event of events) {

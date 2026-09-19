@@ -5,6 +5,7 @@ import liff from "@line/liff";
 import Heading2 from "../_components/sections/common/Heading2";
 import styles from "../trial/TrialForm.module.css";
 import popupStyles from "./register.module.css";
+import { lineAuthHeaders } from "@/lib/lineClient";
 
 type Profile = {
   userId: string;
@@ -74,9 +75,8 @@ export default function RegisterForm() {
     try {
       const res = await fetch("/api/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...lineAuthHeaders() },
         body: JSON.stringify({
-          lineUserId: profile?.userId,
           lastName: lastName.trim(),
           firstName: firstName.trim(),
           lineDisplayName: profile?.displayName,

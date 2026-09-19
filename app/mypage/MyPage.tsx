@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ChangeEvent } from "react";
 import liff from "@line/liff";
 import styles from "./mypage.module.css";
+import { lineAuthHeaders } from "@/lib/lineClient";
 
 const REACTION_EMOJIS = ["❤️", "👍", "😊", "😮", "😢"];
 
@@ -68,8 +69,8 @@ function NoticeItem({ n, lineUserId, onReactionUpdate, myDisplayName, myPictureU
 
     const res = await fetch("/api/mypage/reactions", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lineUserId, noticeId: n.id, emoji }),
+      headers: { "Content-Type": "application/json", ...lineAuthHeaders() },
+      body: JSON.stringify({ noticeId: n.id, emoji }),
     });
     const data = await res.json();
     if (data.reactions !== undefined) {
@@ -239,16 +240,15 @@ export default function MyPage() {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("lineUserId", lineUserId);
 
-    const res = await fetch("/api/mypage/upload-avatar", { method: "POST", body: formData });
+    const res = await fetch("/api/mypage/upload-avatar", { method: "POST", headers: lineAuthHeaders(), body: formData });
     if (!res.ok) { console.error("upload failed"); return; }
     const { publicUrl } = await res.json();
 
     await fetch("/api/mypage/profile", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lineUserId, mypage_picture_url: publicUrl }),
+      headers: { "Content-Type": "application/json", ...lineAuthHeaders() },
+      body: JSON.stringify({ mypage_picture_url: publicUrl }),
     });
     setUser((prev) => prev ? { ...prev, mypage_picture_url: publicUrl } : prev);
     e.target.value = "";
@@ -259,8 +259,8 @@ export default function MyPage() {
     setNameSaving(true);
     await fetch("/api/mypage/profile", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lineUserId, mypage_name: editName.trim() }),
+      headers: { "Content-Type": "application/json", ...lineAuthHeaders() },
+      body: JSON.stringify({ mypage_name: editName.trim() }),
     });
     setUser((prev) => prev ? { ...prev, mypage_name: editName.trim() } : prev);
     setNameSaving(false);
@@ -314,8 +314,8 @@ export default function MyPage() {
         if (p.pictureUrl) {
           fetch("/api/mypage/me", {
             method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ lineUserId: p.userId, line_picture_url: p.pictureUrl }),
+            headers: { "Content-Type": "application/json", ...lineAuthHeaders() },
+            body: JSON.stringify({ line_picture_url: p.pictureUrl }),
           }).catch(console.error);
         }
       } catch (e) {
@@ -331,7 +331,7 @@ export default function MyPage() {
   // ユーザー情報取得
   useEffect(() => {
     if (!lineUserId) return;
-    fetch(`/api/mypage/me?lineUserId=${lineUserId}`, { cache: "no-store" })
+    fetch("/api/mypage/me", { cache: "no-store", headers: lineAuthHeaders() })
       .then((r) => r.json())
       .then((data) => {
         if (data.user) setUser(data.user);
@@ -359,28 +359,22 @@ export default function MyPage() {
           // 通知済みにマーク
           fetch("/api/mypage/mark-badge-notified", {
             method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ lineUserId }),
+            headers: lineAuthHeaders(),
           });
         }
       });
   }, [lineUserId]);
 
   // お知らせ取得
-  const fetchNotices = (uid?: string) => {
-    const q = uid ? `?lineUserId=${uid}` : lineUserId ? `?lineUserId=${lineUserId}` : "";
-    fetch(`/api/mypage/notices${q}`, { cache: "no-store" })
+  const fetchNotices = () => {
+    fetch("/api/mypage/notices", { cache: "no-store", headers: lineAuthHeaders() })
       .then((r) => r.json())
       .then((data) => setNotices(data.notices ?? []));
   };
 
+  // LINEログイン確定後に取得（お知らせは会員のみ閲覧可・リアクションの「自分」判定にも必要）
   useEffect(() => {
-    fetchNotices();
-  }, []);
-
-  // lineUserId 確定後に再取得（リアクションの「自分」判定のため）
-  useEffect(() => {
-    if (lineUserId) fetchNotices(lineUserId);
+    if (lineUserId) fetchNotices();
   }, [lineUserId]);
 
   useEffect(() => {

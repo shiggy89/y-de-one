@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getVerifiedLineUserId } from "@/lib/lineAuth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const lineUserId = searchParams.get("lineUserId");
+    const lineUserId = await getVerifiedLineUserId(req);
+    if (!lineUserId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     // お知らせ + リアクションを並列取得
     const [{ data: noticesRaw, error }, { data: reactionsRaw }, { data: currentUser }] = await Promise.all([
@@ -18,9 +19,7 @@ export async function GET(req: Request) {
       supabaseAdmin
         .from("reactions")
         .select("notice_id, emoji, user_id, users(line_display_name, line_picture_url)"),
-      lineUserId
-        ? supabaseAdmin.from("users").select("id").eq("line_user_id", lineUserId).single()
-        : Promise.resolve({ data: null }),
+      supabaseAdmin.from("users").select("id").eq("line_user_id", lineUserId).single(),
     ]);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });

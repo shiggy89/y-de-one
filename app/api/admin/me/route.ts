@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { SUPER_ADMIN_IDS } from "@/lib/superAdmin";
+import { getVerifiedLineUserId } from "@/lib/lineAuth";
 
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const lineUserId = searchParams.get("lineUserId");
+  const lineUserId = await getVerifiedLineUserId(req);
 
   if (!lineUserId) {
     return NextResponse.json({ isAdmin: false, isSuperAdmin: false, userId: null });

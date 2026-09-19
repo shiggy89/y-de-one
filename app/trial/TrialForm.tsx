@@ -5,6 +5,7 @@ import liff from "@line/liff";
 import Heading2 from "../_components/sections/common/Heading2";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./TrialForm.module.css";
+import { lineAuthHeaders } from "@/lib/lineClient";
 
 type Profile = {
   userId: string;
@@ -168,8 +169,8 @@ export default function TrialPage() {
         if (p.pictureUrl) {
           fetch("/api/mypage/me", {
             method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ lineUserId: p.userId, line_picture_url: p.pictureUrl }),
+            headers: { "Content-Type": "application/json", ...lineAuthHeaders() },
+            body: JSON.stringify({ line_picture_url: p.pictureUrl }),
           }).catch(console.error);
         }
       } catch (e) {
@@ -229,9 +230,8 @@ export default function TrialPage() {
     try {
       await fetch("/api/trial", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...lineAuthHeaders() },
         body: JSON.stringify({
-          lineUserId: profile?.userId,
           lineDisplayName: profile?.displayName,
           name,
           formType,

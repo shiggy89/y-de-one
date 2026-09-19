@@ -6,6 +6,7 @@ import liff from "@line/liff";
 import styles from "./admin.module.css";
 import { getLessonsForDate, type Lesson } from "@/lib/lessons";
 import * as Holiday from "@holiday-jp/holiday_jp";
+import { lineAuthHeaders } from "@/lib/lineClient";
 
 const TipTapEditor = dynamic(() => import("./TipTapEditor"), { ssr: false });
 
@@ -118,11 +119,10 @@ function calcLessonFee(countThisMonth: number, lessonType: string, privateMinute
 
 export default function AdminPanel() {
   const [lineUserId, setLineUserId] = useState<string | null>(null);
-  const lineUserIdRef = useRef<string | null>(null);
   const adminFetch = (url: string, options: RequestInit = {}) =>
     fetch(url, {
       ...options,
-      headers: { ...(options.headers as Record<string, string> ?? {}), "x-admin-id": lineUserIdRef.current ?? "" },
+      headers: { ...(options.headers as Record<string, string> ?? {}), ...lineAuthHeaders() },
     });
   const [isAdmin, setIsAdmin] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
@@ -585,9 +585,8 @@ export default function AdminPanel() {
         if (!liff.isLoggedIn()) { liff.login({ redirectUri: window.location.href }); return; }
         const p = await liff.getProfile();
         setLineUserId(p.userId);
-        lineUserIdRef.current = p.userId;
 
-        const res = await adminFetch(`/api/admin/me?lineUserId=${p.userId}`);
+        const res = await adminFetch("/api/admin/me");
         const data = await res.json();
         setIsAdmin(data.isAdmin ?? false);
         setIsSuperAdmin(data.isSuperAdmin ?? false);

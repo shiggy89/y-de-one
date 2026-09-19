@@ -82,6 +82,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=xxxx
 SUPABASE_SERVICE_ROLE_KEY=xxxx
 LINE_CHANNEL_ACCESS_TOKEN=xxxx
+LINE_CHANNEL_SECRET=xxxx   # Messaging API のチャネルシークレット（Webhook の署名検証に使用）
 LINE_ADMIN_USER_IDS=Uxxxx,Uxxxx
 MICROCMS_API_KEY=xxxx
 MICROCMS_SERVICE_DOMAIN=xxxx
@@ -102,6 +103,9 @@ Open [http://localhost:3000](http://localhost:3000)
 
 **LIFF external browser auth**
 When a user opens the LIFF URL in an external browser (not LINE), LINE redirects back to the endpoint root with a `liff.state` query parameter. `middleware.ts` intercepts this and redirects to the correct path (`/trial`, `/mypage`, etc.) before the page renders.
+
+**Server-side identity verification**
+The API never trusts a user ID sent by the client. The LIFF front end sends its access token as `Authorization: Bearer ...`; `lib/lineAuth.ts` verifies it against LINE (`oauth2/v2.1/verify`, checking it was issued for this app's own LINE Login channel and has not expired), then reads the real user ID from LINE's profile endpoint. Admin routes (`lib/adminAuth.ts`), My Page, registration and trial booking all derive the user from that verified ID. The LINE Messaging webhook validates `x-line-signature` (HMAC-SHA256 of the raw body with the channel secret) before touching the database. Covered by unit tests in `lib/__tests__/`. For local development only, `x-dev-line-user-id` is accepted when `NODE_ENV` is not `production`.
 
 **Badge calculation**
 Badges are calculated server-side from `lesson_history` records in Supabase. Monthly counts are compared against thresholds (Bronze: 4, Silver: 8, Gold: 12, Platinum: 20, Diamond: 40). The previous month's badge is shown in the header and triggers a one-time achievement popup.

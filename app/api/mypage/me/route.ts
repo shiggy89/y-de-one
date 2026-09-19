@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getVerifiedLineUserId } from "@/lib/lineAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -43,8 +44,10 @@ const BADGE_LABEL: Record<string, string> = {
 
 export async function PATCH(req: Request) {
   try {
-    const { lineUserId, line_picture_url } = await req.json();
-    if (!lineUserId || !line_picture_url) return NextResponse.json({ error: "invalid params" }, { status: 400 });
+    const lineUserId = await getVerifiedLineUserId(req);
+    if (!lineUserId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const { line_picture_url } = await req.json();
+    if (!line_picture_url) return NextResponse.json({ error: "invalid params" }, { status: 400 });
     await supabaseAdmin
       .from("users")
       .update({ line_picture_url })
@@ -58,9 +61,8 @@ export async function PATCH(req: Request) {
 
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const lineUserId = searchParams.get("lineUserId");
-    if (!lineUserId) return NextResponse.json({ error: "lineUserId required" }, { status: 400 });
+    const lineUserId = await getVerifiedLineUserId(req);
+    if (!lineUserId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { data: user } = await supabaseAdmin
       .from("users")

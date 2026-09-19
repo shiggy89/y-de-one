@@ -1,9 +1,10 @@
 import { supabaseAdmin } from "./supabase";
+import { getVerifiedLineUserId } from "./lineAuth";
 
 export const SUPER_ADMIN_IDS = [14, 15];
 
 export async function requireSuperAdmin(req: Request): Promise<boolean> {
-  const lineUserId = req.headers.get("x-admin-id");
+  const lineUserId = await getVerifiedLineUserId(req);
   if (!lineUserId) return false;
   if (process.env.NODE_ENV !== "production" && lineUserId === "debug") return true;
   const { data } = await supabaseAdmin

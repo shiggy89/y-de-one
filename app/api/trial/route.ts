@@ -1,9 +1,9 @@
 // app/api/trial/route.ts
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getVerifiedLineUserId } from "@/lib/lineAuth";
 
 type TrialRequestBody = {
-  lineUserId?: string;
   lineDisplayName?: string;
   name: string;
   formType?: "trial" | "visit";
@@ -32,8 +32,10 @@ export async function POST(req: Request) {
     // ① フロントから送られてきたデータを取得
     const body = (await req.json()) as TrialRequestBody;
 
+    // LINEのユーザーIDは、リクエスト本文ではなく検証済みトークンから取得する（未ログインなら null）
+    const lineUserId = await getVerifiedLineUserId(req);
+
     const {
-      lineUserId,
       lineDisplayName,
       name,
       formType = "trial",

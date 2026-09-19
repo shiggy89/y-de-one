@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getVerifiedLineUserId } from "@/lib/lineAuth";
 
 export async function POST(req: Request) {
   try {
-    const { lineUserId, lastName, firstName, lineDisplayName, linePictureUrl } = await req.json();
+    const lineUserId = await getVerifiedLineUserId(req);
+    if (!lineUserId) {
+      return NextResponse.json({ ok: false, error: "LINEログインが必要です。" }, { status: 401 });
+    }
 
-    if (!lineUserId || !lastName || !firstName) {
+    const { lastName, firstName, lineDisplayName, linePictureUrl } = await req.json();
+
+    if (!lastName || !firstName) {
       return NextResponse.json(
         { ok: false, error: "必須項目が送信されていません。" },
         { status: 400 }

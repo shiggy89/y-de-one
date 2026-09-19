@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { getVerifiedLineUserId } from "@/lib/lineAuth";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
+    const lineUserId = await getVerifiedLineUserId(req);
+    if (!lineUserId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
-    const lineUserId = formData.get("lineUserId") as string | null;
 
-    if (!file || !lineUserId) {
-      return NextResponse.json({ error: "file and lineUserId required" }, { status: 400 });
+    if (!file) {
+      return NextResponse.json({ error: "file required" }, { status: 400 });
     }
 
     const ext = file.name.split(".").pop();
