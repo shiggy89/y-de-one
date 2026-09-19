@@ -28,9 +28,13 @@ export async function POST(req: Request) {
       .single();
 
     if (existing) {
-      if (existing.status === "member") {
+      // 昇格できるのは体験（trial）の人だけ。会員はもちろん、先生など他の状態のアカウントは書き換えない
+      if (existing.status !== "trial") {
         return NextResponse.json(
-          { ok: false, error: "すでに会員登録済みです。" },
+          {
+            ok: false,
+            error: existing.status === "member" ? "すでに会員登録済みです。" : "このアカウントは会員登録の対象外です。",
+          },
           { status: 409 }
         );
       }
