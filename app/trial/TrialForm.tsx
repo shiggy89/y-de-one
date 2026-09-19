@@ -416,7 +416,9 @@ export default function TrialPage() {
                     />
                     <span className={styles.noMatchText}>
                       <span className={styles.noMatchTitle}>
-                        希望の日時がない場合（曜日・時間帯を伝える）
+                        希望の日時がない場合
+                        <br />
+                        （曜日・時間帯を伝える）
                       </span>
                       <span className={styles.noMatchSub}>
                         ご希望をお聞きして、スタッフから改めて日程をご案内します

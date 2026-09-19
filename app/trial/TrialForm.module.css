@@ -129,13 +129,13 @@
 .noMatchCard {
   margin-top: 12px;
   padding: 12px;
-  border: 1px solid #0090e8;
+  border: 1px solid #e05080;
   border-radius: 6px;
   background-color: #fff;
 }
 
 .noMatchCardActive {
-  background-color: #e8f4fd;
+  background-color: #fdeef3;
 }
 
 .noMatchOption {
