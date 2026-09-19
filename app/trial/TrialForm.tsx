@@ -404,32 +404,40 @@ export default function TrialPage() {
               )}
 
               {(formType === "visit" || genre) && (
-                <label className={`${styles.radioItem} ${styles.noMatchOption}`}>
-                  <input
-                    type="radio"
-                    name="dateTimeSlot"
-                    checked={noSlotMatch}
-                    onChange={selectNoSlotMatch}
-                  />
-                  <span>ご希望の日時が見つからない方はこちら</span>
-                </label>
-              )}
-
-              {noSlotMatch && (
-                <div className={styles.noMatchField}>
-                  <label className={styles.formLabel}>
-                    ご希望の曜日・時間帯 <span className={styles.formRequired}>必須</span>
+                <div
+                  className={`${styles.noMatchCard} ${noSlotMatch ? styles.noMatchCardActive : ""}`}
+                >
+                  <label className={styles.noMatchOption}>
+                    <input
+                      type="radio"
+                      name="dateTimeSlot"
+                      checked={noSlotMatch}
+                      onChange={selectNoSlotMatch}
+                    />
+                    <span className={styles.noMatchText}>
+                      <span className={styles.noMatchTitle}>
+                        希望の日時がない場合（曜日・時間帯を伝える）
+                      </span>
+                      <span className={styles.noMatchSub}>
+                        ご希望をお聞きして、スタッフから改めて日程をご案内します
+                      </span>
+                    </span>
                   </label>
-                  <textarea
-                    className={styles.formTextarea}
-                    rows={3}
-                    value={customRequest}
-                    onChange={(e) => setCustomRequest(e.target.value)}
-                    placeholder="例）水曜19時以降 / 土日の午前中を希望 など"
-                  />
-                  <p className={styles.formNote}>
-                    いただいた内容をもとに、スタッフから改めて日程をご案内いたします。
-                  </p>
+
+                  {noSlotMatch && (
+                    <div className={styles.noMatchField}>
+                      <label className={styles.formLabel}>
+                        ご希望の曜日・時間帯 <span className={styles.formRequired}>必須</span>
+                      </label>
+                      <textarea
+                        className={styles.formTextarea}
+                        rows={3}
+                        value={customRequest}
+                        onChange={(e) => setCustomRequest(e.target.value)}
+                        placeholder="例）水曜19時以降 / 土日の午前中を希望 など"
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>

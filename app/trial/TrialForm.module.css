@@ -126,16 +126,50 @@
   margin: 0 0 4px;
 }
 
+.noMatchCard {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid #0090e8;
+  border-radius: 6px;
+  background-color: #fff;
+}
+
+.noMatchCardActive {
+  background-color: #e8f4fd;
+}
+
 .noMatchOption {
-  margin-top: 8px;
+  display: flex;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.noMatchOption input {
+  margin: 4px 8px 0 0;
+  flex-shrink: 0;
+}
+
+.noMatchText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.noMatchTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.5;
+}
+
+.noMatchSub {
+  font-size: 13px;
   color: #666;
+  line-height: 1.5;
 }
 
 .noMatchField {
-  margin-top: 8px;
-  padding: 12px;
-  border: 1px dashed #ccc;
-  border-radius: 6px;
+  margin-top: 12px;
 }
 
 .radioItem {
