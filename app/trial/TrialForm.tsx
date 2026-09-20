@@ -70,7 +70,7 @@ const VISIT_SLOTS: Record<number, string[]> = {
 // 今日から先、何日分の候補日を表示するか（3週間分）
 const UPCOMING_DAYS = 21;
 // 最初に表示する候補日数（残りは「さらに日程を表示」で開く）
-const INITIAL_DATE_COUNT = 5;
+const INITIAL_DATE_COUNT = 3;
 const YOUBI = ["日", "月", "火", "水", "木", "金", "土"];
 
 // タイムゾーンのズレを起こさない日付文字列変換（toISOString()はUTC変換されるため使わない）
