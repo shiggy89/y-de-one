@@ -102,8 +102,6 @@
 }
 
 .slotList {
-  max-height: 360px;
-  overflow-y: auto;
   margin-top: 4px;
   padding: 8px 10px;
   border: 1px solid #eee;
@@ -124,6 +122,20 @@
   font-weight: 700;
   color: #0090e8;
   margin: 0 0 4px;
+}
+
+.showMoreButton {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 0;
+  border: 1px solid #0090e8;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #0090e8;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .noMatchCard {

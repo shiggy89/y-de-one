@@ -69,6 +69,8 @@ const VISIT_SLOTS: Record<number, string[]> = {
 
 // 今日から先、何日分の候補日を表示するか（3週間分）
 const UPCOMING_DAYS = 21;
+// 最初に表示する候補日数（残りは「さらに日程を表示」で開く）
+const INITIAL_DATE_COUNT = 5;
 const YOUBI = ["日", "月", "火", "水", "木", "金", "土"];
 
 // タイムゾーンのズレを起こさない日付文字列変換（toISOString()はUTC変換されるため使わない）
@@ -136,6 +138,7 @@ export default function TrialPage() {
   const [question, setQuestion] = useState("");
   const [noSlotMatch, setNoSlotMatch] = useState(false);
   const [customRequest, setCustomRequest] = useState("");
+  const [showAllDates, setShowAllDates] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const trialPrice = isNewPricingActive() ? "3,500" : "3,300";
 
@@ -193,6 +196,7 @@ export default function TrialPage() {
     setExperience("");
     setNoSlotMatch(false);
     setCustomRequest("");
+    setShowAllDates(false);
   };
 
   // 日時の選択(日付と時間帯を同時に確定させる)
@@ -210,6 +214,8 @@ export default function TrialPage() {
   };
 
   const dateGroups = buildDateGroups(formType, genre);
+  const visibleGroups = showAllDates ? dateGroups : dateGroups.slice(0, INITIAL_DATE_COUNT);
+  const hiddenCount = dateGroups.length - visibleGroups.length;
 
   // ===== 送信 =====
   const handleSubmit = async (e: { preventDefault(): void }) => {
@@ -354,6 +360,7 @@ export default function TrialPage() {
                         setTimeSlot("");
                         setNoSlotMatch(false);
                         setCustomRequest("");
+                        setShowAllDates(false);
                       }}
                       />
                       <span>{g}</span>
@@ -382,7 +389,7 @@ export default function TrialPage() {
 
               {dateGroups.length > 0 && (
                 <div className={styles.slotList}>
-                  {dateGroups.map((group) => (
+                  {visibleGroups.map((group) => (
                     <div key={group.date} className={styles.slotGroup}>
                       <p className={styles.slotDate}>{group.label}</p>
                       <div className={styles.radioGroup}>
@@ -400,6 +407,15 @@ export default function TrialPage() {
                       </div>
                     </div>
                   ))}
+                  {hiddenCount > 0 && (
+                    <button
+                      type="button"
+                      className={styles.showMoreButton}
+                      onClick={() => setShowAllDates(true)}
+                    >
+                      さらに日程を表示（残り{hiddenCount}日）
+                    </button>
+                  )}
                 </div>
               )}
 
