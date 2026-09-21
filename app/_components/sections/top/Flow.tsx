@@ -79,7 +79,7 @@ export default function Flow({ hideIcons = false, variant, lang = "ja" }: { hide
             <p>
               {t("LINEの友だち追加をしていただき、体験レッスン申込みフォームよりご希望の日時をお送りください。",
                 <>LINE is the messaging app used across Japan. Add the school as a friend, then send your preferred date and time with the trial lesson form.{" "}
-                  <a href="/demo#about-line">What is LINE?</a></>)}
+                  <a href="/#about-line">What is LINE?</a></>)}
             </p>
           </div>
           <div className={styles.flowItem}>

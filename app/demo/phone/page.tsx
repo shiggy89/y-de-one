@@ -24,7 +24,7 @@ export default async function PhonePage({ searchParams }: { searchParams: Promis
           On a computer we show it in a phone-sized frame.
         </p>
         <p className={styles.text}>For the best experience, open this demo on your phone.</p>
-        <Link className={styles.back} href="/demo">
+        <Link className={styles.back} href="/">
           Back to the demo menu
         </Link>
       </div>

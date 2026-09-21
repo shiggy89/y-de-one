@@ -28,6 +28,17 @@ TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
 `MICROCMS_*`, `GEMINI_API_KEY`, `ANALYTICS_PASSWORD`, and any production Supabase key.
 The code also skips every LINE / email send when `NEXT_PUBLIC_DEMO_MODE=true`.
 
+## URLs in the demo
+
+| URL | What it shows |
+|---|---|
+| `/` | Entry page (a middleware rewrite to `/demo`, so the address stays `/`) |
+| `/ja` | The Japanese school website (rewrite to `/`) |
+| `/en` | The English school website |
+| `/admin`, `/mypage`, `/trial` | The app screens (phone-sized frame on desktop) |
+
+The rewrites exist only when `NEXT_PUBLIC_DEMO_MODE=true`. Production keeps `/` as the Japanese home page.
+
 ## What demo mode changes
 
 | Area | Behavior |

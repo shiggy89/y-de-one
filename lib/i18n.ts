@@ -3,6 +3,7 @@
 // lang を渡さなければ日本語のまま表示されるので、日本語ページの表示は変わらない。
 
 import type { ReactNode } from "react";
+import { DEMO_MODE } from "./demo";
 
 export type Lang = "ja" | "en";
 
@@ -30,11 +31,17 @@ export function localePath(lang: Lang, path: string): string {
   return base === "/" ? `/en${path.slice(1)}` : `/en${path}`;
 }
 
+// 各言語のホームページの URL。デモ環境では「/」が入口ページなので、日本語のホームは /ja。
+export function homePath(lang: Lang): string {
+  return lang === "en" ? "/en" : DEMO_MODE ? "/ja" : "/";
+}
+
 // 現在のパスの、もう一方の言語での URL（言語切り替えリンク用）
 export function alternatePath(lang: Lang, pathname: string): string {
   if (lang === "en") {
     const stripped = pathname.replace(/^\/en(?=\/|$)/, "");
-    return stripped === "" ? "/" : stripped;
+    return stripped === "" ? homePath("ja") : stripped;
   }
-  return EN_PAGES.has(pathname) ? (pathname === "/" ? "/en" : `/en${pathname}`) : "/en";
+  const page = pathname === "/ja" ? "/" : pathname;
+  return EN_PAGES.has(page) ? (page === "/" ? "/en" : `/en${page}`) : "/en";
 }

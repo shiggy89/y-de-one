@@ -574,7 +574,7 @@ export default function AdminPanel() {
       try {
         if (DEMO_MODE) {
           const session = await fetchDemoSession();
-          if (session.role !== "admin") { window.location.replace("/demo"); return; }
+          if (session.role !== "admin") { window.location.replace("/"); return; }
           setLineUserId(session.lineUserId);
           const res = await adminFetch("/api/admin/me");
           const data = await res.json();

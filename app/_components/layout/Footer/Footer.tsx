@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./Footer.module.css";
 import { DEMO_MODE, TRIAL_ENTRY_URL } from "@/lib/demo";
-import { localePath, makeT, type Lang } from "@/lib/i18n";
+import { homePath, localePath, makeT, type Lang } from "@/lib/i18n";
 
 export default function Footer({ lang = "ja" }: { lang?: Lang }) {
   const t = makeT(lang);
@@ -13,7 +13,7 @@ export default function Footer({ lang = "ja" }: { lang?: Lang }) {
     <footer className={styles.footer}>
       <div className={`inner ${styles.innerFooter}`}>
         <div className={styles.footerCol}>
-          <Link href={localePath(lang, "/")}>
+          <Link href={homePath(lang)}>
             <Image
               className={styles.ydeoneLogoFooter}
               src="/images/common/ydeone-logo.png"

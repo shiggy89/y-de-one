@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "./thanks.module.css";
+import { homePath } from "@/lib/i18n";
 
 type ContactData = {
   name: string;
@@ -79,7 +80,7 @@ export default function ThanksPage() {
             </div>
           )}
 
-          <Link href="/" className={styles.backLink}>
+          <Link href={homePath("ja")} className={styles.backLink}>
             トップページへ戻る
           </Link>
         </div>

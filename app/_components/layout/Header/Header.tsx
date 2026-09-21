@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import styles from "./Header.module.css";
 import { useNewsBadge } from "../../hooks/useNewsBadge";
 import { DEMO_MODE, TRIAL_ENTRY_URL } from "@/lib/demo";
-import { alternatePath, localePath, makeT, type Lang } from "@/lib/i18n";
+import { alternatePath, homePath, localePath, makeT, type Lang } from "@/lib/i18n";
 
 type NavGrandchild = { label: string; href: string };
 type NavChild =
@@ -131,7 +131,7 @@ export default function Header({ lang = "ja" }: { lang?: Lang }) {
     <header className={styles.header}>
       <div className={`inner ${styles.inner} ${styles.innerHeader}`}>
         <div className={styles.headerLeft}>
-          <Link href={localePath(lang, "/")}>
+          <Link href={homePath(lang)}>
             <Image
               className={styles.siteLogo}
               src="/images/common/ydeone-logo.png"
