@@ -17,6 +17,9 @@ const EN_PAGES = new Set([
   "/",
   "/class",
   "/price",
+  "/studio",
+  "/modern-ballet",
+  "/lesson-info",
 ]);
 
 // 英語ページ内のリンクを /en 付きにする。外部リンクや英語版がないページはそのまま。
