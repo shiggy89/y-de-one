@@ -1,6 +1,8 @@
 // LIFF アクセストークンをサーバー側で検証し、LINE が保証するユーザーIDを返す。
 // クライアントが送ってくる lineUserId は自己申告なので、認証には使わない。
 
+import { DEMO_MODE, getDemoSession } from "./demo";
+
 const VERIFY_ENDPOINT = "https://api.line.me/oauth2/v2.1/verify";
 const PROFILE_ENDPOINT = "https://api.line.me/v2/profile";
 
@@ -53,6 +55,9 @@ export async function verifyLineAccessToken(accessToken: string): Promise<string
 // リクエストの Authorization: Bearer <LIFFアクセストークン> から、検証済みのユーザーIDを取り出す。
 // 未認証・不正なトークンの場合は null。
 export async function getVerifiedLineUserId(req: Request): Promise<string | null> {
+  // デモ環境（LINEなし）。Cookie で選んだ役割の架空ユーザーを返す。LINE には問い合わせない。
+  if (DEMO_MODE) return getDemoSession(req)?.lineUserId ?? null;
+
   // ローカル開発（npm run dev）専用。本番ビルドでは NODE_ENV が production になり無効。
   if (process.env.NODE_ENV !== "production") {
     const dev = req.headers.get("x-dev-line-user-id");

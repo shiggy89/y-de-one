@@ -7,6 +7,8 @@ import styles from "./admin.module.css";
 import { getLessonsForDate, type Lesson } from "@/lib/lessons";
 import * as Holiday from "@holiday-jp/holiday_jp";
 import { lineAuthHeaders } from "@/lib/lineClient";
+import { DEMO_MODE } from "@/lib/demo";
+import { fetchDemoSession } from "@/lib/demoClient";
 
 const TipTapEditor = dynamic(() => import("./TipTapEditor"), { ssr: false });
 
@@ -570,6 +572,17 @@ export default function AdminPanel() {
   useEffect(() => {
     const init = async () => {
       try {
+        if (DEMO_MODE) {
+          const session = await fetchDemoSession();
+          if (session.role !== "admin") { window.location.replace("/demo"); return; }
+          setLineUserId(session.lineUserId);
+          const res = await adminFetch("/api/admin/me");
+          const data = await res.json();
+          setIsAdmin(data.isAdmin ?? false);
+          setIsSuperAdmin(data.isSuperAdmin ?? false);
+          return;
+        }
+
         if (process.env.NODE_ENV !== "production") {
           setLineUserId("debug");
           setIsAdmin(true);

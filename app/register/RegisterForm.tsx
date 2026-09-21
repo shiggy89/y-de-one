@@ -6,6 +6,8 @@ import Heading2 from "../_components/sections/common/Heading2";
 import styles from "../trial/TrialForm.module.css";
 import popupStyles from "./register.module.css";
 import { lineAuthHeaders } from "@/lib/lineClient";
+import { DEMO_MODE } from "@/lib/demo";
+import { fetchDemoSession } from "@/lib/demoClient";
 
 type Profile = {
   userId: string;
@@ -25,6 +27,13 @@ export default function RegisterForm() {
   useEffect(() => {
     const initLiff = async () => {
       try {
+        if (DEMO_MODE) {
+          const session = await fetchDemoSession();
+          setProfile({ userId: session.lineUserId, displayName: session.displayName });
+          setLoading(false);
+          return;
+        }
+
         const liffId = process.env.NEXT_PUBLIC_LIFF_ID;
 
         if (!liffId) {

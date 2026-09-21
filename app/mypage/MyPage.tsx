@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, type CSSProperties, type ChangeEvent } fro
 import liff from "@line/liff";
 import styles from "./mypage.module.css";
 import { lineAuthHeaders } from "@/lib/lineClient";
+import { DEMO_MODE } from "@/lib/demo";
+import { fetchDemoSession } from "@/lib/demoClient";
 
 const REACTION_EMOJIS = ["❤️", "👍", "😊", "😮", "😢"];
 
@@ -283,8 +285,8 @@ export default function MyPage() {
 
   // LIFF初期化
   useEffect(() => {
-    // キャッシュがあれば即座に表示
-    const cached = loadCache();
+    // キャッシュがあれば即座に表示（デモは役割を切り替えるので使わない）
+    const cached = DEMO_MODE ? null : loadCache();
     if (cached) {
       setUser(cached.user);
       setCurrentBadge(cached.currentBadge);
@@ -295,6 +297,13 @@ export default function MyPage() {
 
     const init = async () => {
       try {
+        if (DEMO_MODE) {
+          const session = await fetchDemoSession();
+          setLineUserId(session.lineUserId);
+          setDisplayName(session.displayName);
+          return;
+        }
+
         if (process.env.NODE_ENV !== "production") {
           setLineUserId("debug");
           setDisplayName("テストユーザー");
