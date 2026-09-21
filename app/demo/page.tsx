@@ -59,6 +59,32 @@ export default function DemoPage() {
           ))}
         </ul>
 
+        <section id="about-line" className={styles.line}>
+          <h2 className={styles.lineTitle}>What is LINE?</h2>
+          <p className={styles.lineLead}>
+            LINE is the messaging app most people in Japan use every day, for chatting, calling and paying.
+            Many Japanese businesses, including this school, run their customer service inside it.
+          </p>
+          <ol className={styles.lineSteps}>
+            <li>
+              <strong>Students add the school on LINE.</strong> The school has an official account, which is a business
+              account inside the app.
+            </li>
+            <li>
+              <strong>The web app opens inside the chat.</strong> Booking a trial lesson, the My Page and the admin
+              panel are web pages that run within LINE (built with LIFF, the LINE Front-end Framework). Nothing to
+              install and no separate password: LINE itself signs the person in.
+            </li>
+            <li>
+              <strong>Messages arrive in the same chat.</strong> Booking confirmations and announcements are sent as LINE
+              messages, and the teachers manage everything from the admin panel.
+            </li>
+          </ol>
+          <p className={styles.lineNote}>
+            In this demo, sign-in with LINE is replaced by the role picker above, and no messages are sent.
+          </p>
+        </section>
+
         <section className={styles.notes}>
           <h2 className={styles.notesTitle}>About this sandbox</h2>
           <ul className={styles.notesList}>

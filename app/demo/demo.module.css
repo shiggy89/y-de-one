@@ -96,6 +96,42 @@
   background: #0090e8;
 }
 
+.line {
+  margin: 0 0 24px;
+  padding: 24px;
+  border-radius: 16px;
+  background: #e9f8ee;
+  border: 2px solid #06c755;
+  scroll-margin-top: 24px;
+}
+
+.lineTitle {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+
+.lineLead {
+  margin: 0 0 16px;
+  line-height: 1.8;
+}
+
+.lineSteps {
+  margin: 0 0 16px;
+  padding-left: 22px;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.lineSteps li + li {
+  margin-top: 8px;
+}
+
+.lineNote {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
 .notes {
   padding: 24px;
   border-radius: 16px;

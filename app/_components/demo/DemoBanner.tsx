@@ -6,6 +6,9 @@ export default function DemoBanner() {
     <div className={styles.banner} role="status">
       <span className={styles.badge}>DEMO</span>
       <span className={styles.text}>Sample data only. No LINE messages or emails are sent.</span>
+      <a className={styles.link} href="/demo#about-line">
+        What&apos;s LINE?
+      </a>
       <a className={styles.link} href="/demo">
         Switch view
       </a>
