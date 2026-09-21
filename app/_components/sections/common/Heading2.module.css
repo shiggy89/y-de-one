@@ -51,6 +51,14 @@
   margin-left: -10px;
 }
 
+/* 英語版: 英文は長くなるので、両脇のイラストに重ならない幅に収める */
+:global([data-lang="en"]) .title {
+  max-width: 62%;
+  margin-left: auto;
+  margin-right: auto;
+  text-wrap: balance;
+}
+
 .lead {
   font-weight: 500;
   line-height: 1.5;
@@ -69,6 +77,10 @@
 
   .lead {
     width: 100%;
+  }
+
+  :global([data-lang="en"]) .title {
+    max-width: 100%;
   }
 
   .headingIcon {

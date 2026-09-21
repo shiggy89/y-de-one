@@ -110,3 +110,50 @@
     left: 50%;
   }
 }
+
+/* ── 英語版: 英文は行が長く高さも変わるので、写真は文章の間に並べる ── */
+.enPhotos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  margin: 32px 0 8px;
+}
+
+.enPortrait {
+  width: 123px;
+  height: auto;
+  border-radius: 20px;
+}
+
+.enHorn {
+  width: 150px;
+  height: auto;
+}
+
+.enDuo {
+  width: 260px;
+  max-width: 80%;
+  height: auto;
+  border-radius: 20px;
+}
+
+:global([data-lang="en"]) .mainText p {
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 577px) {
+  /* 見出し左右の大きなイラストが、最初の段落にかからないようにする */
+  :global([data-lang="en"]) .mainText > p:first-child {
+    padding-top: 72px;
+  }
+}
+
+@media (max-width: 576px) {
+  :global([data-lang="en"]) .mainText h3:nth-of-type(2),
+  :global([data-lang="en"]) .mainText h3:nth-of-type(3) {
+    margin-top: 48px;
+  }
+}
