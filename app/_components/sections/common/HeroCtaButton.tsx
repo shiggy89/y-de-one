@@ -1,5 +1,6 @@
 import Link from "next/link";
 import styles from "./CtaButton.module.css";
+import { TRIAL_ENTRY_URL } from "@/lib/demo";
 
 type Props = {
   href?: string;
@@ -8,7 +9,7 @@ type Props = {
 };
 
 export default function HeroCtaButton({
-  href = "https://lin.ee/iz33eCM",
+  href = TRIAL_ENTRY_URL,
   showLineText = true,
   className,
 }: Props) {

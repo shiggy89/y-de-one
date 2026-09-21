@@ -5,6 +5,7 @@ import Image from "next/image";
 import Heading2 from "../common/Heading2";
 import styles from "./Faq.module.css";
 import ctaStyles from "../common/CtaButton.module.css";
+import { TRIAL_ENTRY_URL } from "@/lib/demo";
 
 type FaqItemProps = {
   question: string,
@@ -135,7 +136,7 @@ export default function Faq() {
           />
         </div>
         <div className={ctaStyles.centerBtn}>
-          <a href="https://lin.ee/iz33eCM" className={styles.lastBtn}>体験レッスンはこちら <i className="fa-solid fa-arrow-up-right-from-square"></i></a>
+          <a href={TRIAL_ENTRY_URL} className={styles.lastBtn}>体験レッスンはこちら <i className="fa-solid fa-arrow-up-right-from-square"></i></a>
           <span className={ctaStyles.lineAddText}>
             <i className="fa-brands fa-line"></i>
             LINEから簡単に予約できます

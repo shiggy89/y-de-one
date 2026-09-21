@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./Footer.module.css";
+import { DEMO_MODE, TRIAL_ENTRY_URL } from "@/lib/demo";
 
 export default function Footer() {
   return (
@@ -92,7 +93,7 @@ export default function Footer() {
             <li><Link href="/access">アクセス</Link></li>
             <li><Link href="/news">お知らせ</Link></li>
             <li><Link href="/contact">お問い合わせ</Link></li>
-            <li><a href="https://lin.ee/iz33eCM" target="_blank" rel="noopener noreferrer">体験レッスン</a></li>
+            <li><a href={TRIAL_ENTRY_URL} {...(DEMO_MODE ? {} : { target: "_blank", rel: "noopener noreferrer" })}>体験レッスン</a></li>
           </ul>
         </div>
       </div>

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import styles from "./Header.module.css";
 import { useNewsBadge } from "../../hooks/useNewsBadge";
+import { TRIAL_ENTRY_URL } from "@/lib/demo";
 
 type NavGrandchild = { label: string; href: string };
 type NavChild =
@@ -42,7 +43,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "アクセス", href: "/access" },
   { label: "お知らせ", href: "/news" },
   { label: "お問い合わせ", href: "/contact" },
-  { label: "体験レッスン", href: "https://lin.ee/iz33eCM" },
+  { label: "体験レッスン", href: TRIAL_ENTRY_URL },
 ];
 
 export default function Header() {

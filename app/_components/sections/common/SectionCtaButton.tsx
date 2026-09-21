@@ -1,5 +1,6 @@
 import Link from "next/link";
 import styles from "./CtaButton.module.css";
+import { TRIAL_ENTRY_URL } from "@/lib/demo";
 
 type Props = {
   href?: string;
@@ -9,7 +10,7 @@ type Props = {
 };
 
 export default function SectionCtaButton({
-  href = "https://lin.ee/iz33eCM",
+  href = TRIAL_ENTRY_URL,
   label = "体験レッスンはこちら",
   note = "LINEから簡単に予約できます",
   className,
