@@ -4,46 +4,52 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./Footer.module.css";
 import { DEMO_MODE, TRIAL_ENTRY_URL } from "@/lib/demo";
+import { localePath, makeT, type Lang } from "@/lib/i18n";
 
-export default function Footer() {
+export default function Footer({ lang = "ja" }: { lang?: Lang }) {
+  const t = makeT(lang);
+  const en = lang === "en";
   return (
     <footer className={styles.footer}>
       <div className={`inner ${styles.innerFooter}`}>
         <div className={styles.footerCol}>
-          <Link href="/">
+          <Link href={localePath(lang, "/")}>
             <Image
               className={styles.ydeoneLogoFooter}
               src="/images/common/ydeone-logo.png"
-              alt="質問できる大人バレエ教室 Y-de-ONE ロゴ"
+              alt={t("質問できる大人バレエ教室 Y-de-ONE ロゴ", "Y-de-ONE adult ballet school logo") as string}
               width={300}
               height={103}
             />
           </Link>
           <p className={styles.footerCopyText}>
-            Y-de-ONE | ワイデワン<br />
+            {t(<>Y-de-ONE | ワイデワン<br />
             10代から80代まで通う<br />
-            初心者歓迎大人バレエ教室
+            初心者歓迎大人バレエ教室</>, <>Y-de-ONE<br />
+            Adult ballet school<br />
+            Ages 10 to 80+, beginners welcome</>)}
           </p>
           <p className={styles.footerArea}>
-            高田馬場・東中野・落合・新宿エリア
+            {t("高田馬場・東中野・落合・新宿エリア", "Takadanobaba · Higashi-Nakano · Ochiai · Shinjuku, Tokyo")}
           </p>
           <div className="footer-address">
-            <p className={styles.footerAddressTitle}>所在地</p>
+            <p className={styles.footerAddressTitle}>{t("所在地", "Address")}</p>
             <p className={styles.footerAddressRow}>
               <span>
                 <i className="fa-solid fa-location-dot"></i>
               </span>
               <span>
-                〒169-0075<br />
+                {t(<>〒169-0075<br />
                 東京都新宿区高田馬場3-36-6<br />
-                兼子ビル2階
+                兼子ビル2階</>, <>Kaneko Bldg. 2F, 3-36-6 Takadanobaba<br />
+                Shinjuku-ku, Tokyo 169-0075</>)}
               </span>
             </p>
           </div>
         </div>
         <div className={`${styles.footerCol} ${styles.footerContact}`}>
           <div className={styles.footerBlock}>
-            <p className={styles.footerHeading}>お問い合わせ</p>
+            <p className={styles.footerHeading}>{t("お問い合わせ", "Contact")}</p>
             <p className={styles.footerContactRow}>
               <span>
                 <i className="fa-solid fa-phone"></i>
@@ -58,42 +64,48 @@ export default function Footer() {
             </p>
           </div>
           <div className={styles.footerBlock}>
-            <p className={styles.footerHeading}>営業時間</p>
+            <p className={styles.footerHeading}>{t("営業時間", "Opening hours")}</p>
             <p className={styles.footerContactRow}>
               <span>
                 <i className="fa-regular fa-clock"></i>
               </span>
               <span>
-                月曜：定休日<br />
+                {t(<>月曜：定休日<br />
                 火曜：13:00〜21:00<br />
                 水曜：13:00〜20:45<br />
                 木曜：13:00〜21:00<br />
                 金曜：15:00〜17:05<br />
                 土曜：12:30〜18:00<br />
-                日曜：12:30〜16:30
+                日曜：12:30〜16:30</>, <>Mon: closed<br />
+                Tue: 13:00–21:00<br />
+                Wed: 13:00–20:45<br />
+                Thu: 13:00–21:00<br />
+                Fri: 15:00–17:05<br />
+                Sat: 12:30–18:00<br />
+                Sun: 12:30–16:30</>)}
               </span>
             </p>
           </div>
         </div>
         <div className={`${styles.footerCol} ${styles.footerLinks}`}>
           <ul className={styles.footerNav}>
-            <li className={styles.footerNavGroup}>レッスン</li>
-            <li><Link href="/class#schedule">スケジュール</Link></li>
-            <li><Link href="/class">大人バレエクラス</Link></li>
-            <li><Link href="/modern-ballet">モダンバレエクラス</Link></li>
-            <li><Link href="/saitama">埼玉クラス（大宮・朝霞）</Link></li>
-            <li><Link href="/down-syndrome">ダウン症の方向けクラス</Link></li>
-            <li><Link href="/price">料金</Link></li>
-            <li><Link href="/instructor">講師</Link></li>
+            <li className={styles.footerNavGroup}>{t("レッスン", "Lessons")}</li>
+            <li><Link href={localePath(lang, "/class#schedule")}>{t("スケジュール", "Schedule")}</Link></li>
+            <li><Link href={localePath(lang, "/class")}>{t("大人バレエクラス", "Adult ballet")}</Link></li>
+            <li><Link href={localePath(lang, "/modern-ballet")}>{t("モダンバレエクラス", "Modern ballet")}</Link></li>
+            <li><Link href={localePath(lang, "/saitama")}>{t("埼玉クラス（大宮・朝霞）", "Saitama classes (Omiya & Asaka)")}</Link></li>
+            <li><Link href={localePath(lang, "/down-syndrome")}>{t("ダウン症の方向けクラス", "Down syndrome classes")}</Link></li>
+            <li><Link href={localePath(lang, "/price")}>{t("料金", "Price")}</Link></li>
+            <li><Link href={localePath(lang, "/instructor")}>{t("講師", "Instructors")}</Link></li>
             <li className={styles.footerNavGroup}>Y-de-ONE</li>
-            <li><Link href="/studio">スタジオ紹介</Link></li>
-            <li><Link href="/works">作品・活動</Link></li>
-            <li><Link href="/blog">ブログ</Link></li>
-            <li className={styles.footerNavGroup}>その他</li>
-            <li><Link href="/access">アクセス</Link></li>
-            <li><Link href="/news">お知らせ</Link></li>
-            <li><Link href="/contact">お問い合わせ</Link></li>
-            <li><a href={TRIAL_ENTRY_URL} {...(DEMO_MODE ? {} : { target: "_blank", rel: "noopener noreferrer" })}>体験レッスン</a></li>
+            <li><Link href={localePath(lang, "/studio")}>{t("スタジオ紹介", "The studio")}</Link></li>
+            <li><Link href={localePath(lang, "/works")}>{t("作品・活動", "Works & activities")}</Link></li>
+            {!en && <li><Link href="/blog">ブログ</Link></li>}
+            <li className={styles.footerNavGroup}>{t("その他", "More")}</li>
+            <li><Link href={localePath(lang, "/access")}>{t("アクセス", "Access")}</Link></li>
+            {!en && <li><Link href="/news">お知らせ</Link></li>}
+            <li><Link href={localePath(lang, "/contact")}>{t("お問い合わせ", "Contact")}</Link></li>
+            <li><a href={TRIAL_ENTRY_URL} {...(DEMO_MODE ? {} : { target: "_blank", rel: "noopener noreferrer" })}>{t("体験レッスン", "Trial lesson")}</a></li>
           </ul>
         </div>
       </div>

@@ -6,7 +6,8 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import styles from "./Header.module.css";
 import { useNewsBadge } from "../../hooks/useNewsBadge";
-import { TRIAL_ENTRY_URL } from "@/lib/demo";
+import { DEMO_MODE, TRIAL_ENTRY_URL } from "@/lib/demo";
+import { alternatePath, localePath, makeT, type Lang } from "@/lib/i18n";
 
 type NavGrandchild = { label: string; href: string };
 type NavChild =
@@ -46,7 +47,37 @@ const NAV_ITEMS: NavItem[] = [
   { label: "体験レッスン", href: TRIAL_ENTRY_URL },
 ];
 
-export default function Header() {
+const NAV_ITEMS_EN: NavItem[] = [
+  { label: "Schedule changes & closures", href: "/lesson-info" },
+  { label: "Schedule", href: "/class#schedule" },
+  {
+    label: "Classes",
+    children: [
+      { label: "Adult ballet", href: "/class" },
+      { label: "Modern ballet", href: "/modern-ballet" },
+      { label: "Saitama classes (Omiya & Asaka)", href: "/saitama" },
+      { label: "Classes for people with Down syndrome", href: "/down-syndrome" },
+    ],
+  },
+  { label: "Price", href: "/price" },
+  { label: "Instructors", href: "/instructor", mobileOnly: true },
+  { label: "Student voices", href: "/voice" },
+  {
+    label: "Y-de-ONE",
+    children: [
+      { label: "Instructors", href: "/instructor" },
+      { label: "The studio", href: "/studio" },
+      { label: "Works & activities", href: "/works" },
+    ],
+  },
+  { label: "Access", href: "/access" },
+  { label: "Contact", href: "/contact" },
+  { label: "Trial lesson", href: TRIAL_ENTRY_URL },
+];
+
+export default function Header({ lang = "ja" }: { lang?: Lang }) {
+  const t = makeT(lang);
+  const navItems = lang === "en" ? NAV_ITEMS_EN : NAV_ITEMS;
   const [isOpen, setIsOpen] = useState(false);
   const showBadge = useNewsBadge();
   const pathname = usePathname();
@@ -100,32 +131,39 @@ export default function Header() {
     <header className={styles.header}>
       <div className={`inner ${styles.inner} ${styles.innerHeader}`}>
         <div className={styles.headerLeft}>
-          <Link href="/">
+          <Link href={localePath(lang, "/")}>
             <Image
               className={styles.siteLogo}
               src="/images/common/ydeone-logo.png"
-              alt="質問できる大人バレエ教室 Y-de-ONE ロゴ"
+              alt={t("質問できる大人バレエ教室 Y-de-ONE ロゴ", "Y-de-ONE adult ballet school logo") as string}
               width={300}
               height={103}
             />
           </Link>
-          <Link href="/news" className={styles.bellLink} aria-label="お知らせ">
-            <i className="fa-solid fa-bell" aria-hidden="true" />
-            {showBadge && <span className={styles.bellBadge} />}
-          </Link>
+          {lang === "ja" && (
+            <Link href="/news" className={styles.bellLink} aria-label="お知らせ">
+              <i className="fa-solid fa-bell" aria-hidden="true" />
+              {showBadge && <span className={styles.bellBadge} />}
+            </Link>
+          )}
           <button
             type="button"
             className={styles.phoneLink}
             onClick={() => setShowCallModal(true)}
-            aria-label="お電話"
+            aria-label={t("お電話", "Call the studio") as string}
           >
             <i className="fa-solid fa-phone" aria-hidden="true" />
             <span className={styles.phoneNumber}>080-6740-0770</span>
           </button>
+          {DEMO_MODE && (
+            <Link className={styles.langSwitch} href={alternatePath(lang, pathname)} hrefLang={lang === "en" ? "ja" : "en"}>
+              {lang === "en" ? "日本語" : "English"}
+            </Link>
+          )}
         </div>
         <button
           className={styles.navToggle}
-          aria-label="メニューを開く"
+          aria-label={t("メニューを開く", "Open menu") as string}
           onClick={handleToggle}
         >
           {isOpen ? (
@@ -136,8 +174,8 @@ export default function Header() {
         </button>
         <nav className="header-right">
           <ul className={`${styles.globalNav} ${isOpen ? styles.isOpen : ""}`}>
-            {NAV_ITEMS.map((item) => {
-              const isCta = item.label === "体験レッスン";
+            {navItems.map((item) => {
+              const isCta = item.href === TRIAL_ENTRY_URL;
 
               if (item.children) {
                 const isDropdownOpen = openDropdowns.has(item.label);
@@ -169,7 +207,7 @@ export default function Header() {
                                 <ul className={`${styles.subDropdown} ${isSubOpen ? styles.subDropdownOpen : ""}`}>
                                   {child.children.map((grandchild) => (
                                     <li key={grandchild.href}>
-                                      <Link href={grandchild.href} onClick={() => setIsOpen(false)}>
+                                      <Link href={localePath(lang, grandchild.href)} onClick={() => setIsOpen(false)}>
                                         <span>{grandchild.label}</span>
                                       </Link>
                                     </li>
@@ -180,7 +218,7 @@ export default function Header() {
                           }
                           return (
                             <li key={child.href}>
-                              <Link href={child.href} onClick={() => setIsOpen(false)}>
+                              <Link href={localePath(lang, child.href)} onClick={() => setIsOpen(false)}>
                                 <span>{child.label}</span>
                               </Link>
                             </li>
@@ -192,16 +230,16 @@ export default function Header() {
                 );
               }
 
-              const isNews = item.label === "お知らせ";
+              const isNews = item.href === "/news";
               const isLessonInfo = item.href === "/lesson-info";
               const isMobileOnly = "mobileOnly" in item && item.mobileOnly;
               return (
                 <li key={item.label} className={`${isCta ? styles.ctaItem : ""} ${isLessonInfo ? styles.lessonInfoNavItem : ""} ${isMobileOnly ? styles.mobileOnlyItem : ""}`}>
                   <Link
-                    href={item.href}
+                    href={localePath(lang, item.href)}
                                         className={isNews ? styles.newsNavLink : ""}
                   >
-                    {isLessonInfo ? <>祝日・変更・不定期レッスンと<br />休講のお知らせ</> : item.label}
+                    {isLessonInfo && lang === "ja" ? <>祝日・変更・不定期レッスンと<br />休講のお知らせ</> : item.label}
                     {isNews && showBadge && <span className={styles.navBadge} />}
                   </Link>
                 </li>
@@ -214,7 +252,8 @@ export default function Header() {
         <div className={styles.callModalOverlay} onClick={() => setShowCallModal(false)}>
           <div className={styles.callModal} onClick={(e) => e.stopPropagation()}>
             <p className={styles.callModalText}>
-              お電話は体験レッスン・見学のお申し込み専用です。その他のお問い合わせは、お問い合わせフォームよりお願いいたします。
+              {t("お電話は体験レッスン・見学のお申し込み専用です。その他のお問い合わせは、お問い合わせフォームよりお願いいたします。",
+                "Phone calls are for trial lesson and studio visit bookings in Japanese only. For anything else, please use the contact form.")}
             </p>
             <div className={styles.callModalButtons}>
               <a
@@ -222,14 +261,14 @@ export default function Header() {
                 className={styles.callModalCall}
                 onClick={() => setShowCallModal(false)}
               >
-                電話をかける
+                {t("電話をかける", "Call")}
               </a>
               <button
                 type="button"
                 className={styles.callModalCancel}
                 onClick={() => setShowCallModal(false)}
               >
-                閉じる
+                {t("閉じる", "Close")}
               </button>
             </div>
           </div>
