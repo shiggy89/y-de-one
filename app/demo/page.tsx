@@ -47,6 +47,19 @@ export default function DemoPage() {
           so you can explore everything without an account.
         </p>
 
+        <div className={styles.phoneNotice} role="note">
+          <span className={styles.phoneIcon} aria-hidden="true">
+            <i className="fa-solid fa-mobile-screen-button" />
+          </span>
+          <div>
+            <p className={styles.phoneNoticeTitle}>Best viewed on a smartphone</p>
+            <p className={styles.phoneNoticeText}>
+              The admin panel and My Page are used inside the LINE app on a phone, so they are designed for smartphones
+              only. Please open this demo on your phone. On a computer, we show them in a phone-sized frame.
+            </p>
+          </div>
+        </div>
+
         <ul className={styles.grid}>
           {ENTRIES.map((entry) => (
             <li key={entry.title} className={`${styles.card} ${styles[entry.accent]}`}>
@@ -60,7 +73,12 @@ export default function DemoPage() {
         </ul>
 
         <section id="about-line" className={styles.line}>
-          <h2 className={styles.lineTitle}>What is LINE?</h2>
+          <h2 className={styles.lineTitle}>
+            <span className={styles.lineLogo} aria-hidden="true">
+              <i className="fa-brands fa-line" />
+            </span>
+            What is LINE?
+          </h2>
           <p className={styles.lineLead}>
             LINE is the messaging app most people in Japan use every day, for chatting, calling and paying.
             Many Japanese businesses, including this school, run their customer service inside it.

@@ -106,8 +106,54 @@
 }
 
 .lineTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin: 0 0 12px;
   font-size: 20px;
+}
+
+.lineLogo {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #06c755;
+  color: #fff;
+  font-size: 28px;
+}
+
+.phoneNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin: 0 0 32px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: #fff4e5;
+  border: 2px solid #f59e0b;
+}
+
+.phoneIcon {
+  flex: none;
+  font-size: 32px;
+  line-height: 1;
+  color: #d97706;
+}
+
+.phoneNoticeTitle {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.phoneNoticeText {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
 }
 
 .lineLead {
