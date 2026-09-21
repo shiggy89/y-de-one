@@ -85,7 +85,7 @@ export default function DemoPage() {
               Website in English
             </Link>
             <Link className={styles.websiteSecondary} href="/">
-              日本語のホームページ
+              Website in Japanese (日本語)
             </Link>
           </div>
         </section>
