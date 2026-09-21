@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { verifyLineSignature } from "@/lib/lineSignature";
+import { DEMO_MODE } from "@/lib/demo";
 
 const LINE_PUSH_ENDPOINT = "https://api.line.me/v2/bot/message/push";
 const LINE_REPLY_ENDPOINT = "https://api.line.me/v2/bot/message/reply";
@@ -85,6 +86,9 @@ async function notifyAdmins(messages: { type: string; text: string }[]) {
 }
 
 export async function POST(req: Request) {
+  // デモ環境には LINE 公式アカウントがつながっていない
+  if (DEMO_MODE) return new Response(null, { status: 404 });
+
   try {
     // LINE 以外からの偽イベント（ユーザーの勝手な作成、公式アカウントからの不正なメッセージ送信）を防ぐ
     const channelSecret = process.env.LINE_CHANNEL_SECRET;

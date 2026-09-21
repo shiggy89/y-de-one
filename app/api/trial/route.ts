@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getVerifiedLineUserId } from "@/lib/lineAuth";
+import { DEMO_MODE } from "@/lib/demo";
 
 type TrialRequestBody = {
   lineDisplayName?: string;
@@ -68,7 +69,7 @@ export async function POST(req: Request) {
         .eq("line_user_id", lineUserId)
         .single();
 
-      const profile = await getLineProfile(lineUserId);
+      const profile = DEMO_MODE ? null : await getLineProfile(lineUserId);
 
       if (!existing) {
         await supabaseAdmin.from("users").insert({
@@ -87,6 +88,9 @@ export async function POST(req: Request) {
         }).eq("line_user_id", lineUserId);
       }
     }
+
+    // デモ環境では LINE へは何も送らない（申込みの記録までで終わり）
+    if (DEMO_MODE) return NextResponse.json({ ok: true, demo: true });
 
     // ④ LINE へのプッシュメッセージ送信
     //    lineUserId が取得できている場合のみ送信します

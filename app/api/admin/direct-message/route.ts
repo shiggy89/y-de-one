@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/adminAuth";
+import { DEMO_MODE } from "@/lib/demo";
 
 const LINE_ENDPOINT = "https://api.line.me/v2/bot/message/push";
 
@@ -14,6 +15,9 @@ export async function POST(req: Request) {
     if (!/^U[a-fA-F0-9]{16,64}$/.test(lineUserId)) {
       return NextResponse.json({ error: "無効なLINEユーザーIDです" }, { status: 400 });
     }
+
+    // デモ環境では LINE へは送らない
+    if (DEMO_MODE) return NextResponse.json({ ok: true, demo: true });
 
     const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;
     if (!token) {

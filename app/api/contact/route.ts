@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { DEMO_MODE } from "@/lib/demo";
 
 const LINE_ENDPOINT = "https://api.line.me/v2/bot/message/push";
 const ADMIN_EMAILS = ["ydeone.danceschool@gmail.com"];
@@ -62,6 +63,9 @@ export async function POST(req: Request) {
         );
       }
     }
+
+    // デモ環境ではメールも LINE 通知も送らない
+    if (DEMO_MODE) return NextResponse.json({ ok: true, demo: true });
 
     // ① ユーザーへの受付確認メール
     // ② 管理者への通知メール（Reply-To = ユーザーのメアド）

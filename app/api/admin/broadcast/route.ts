@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { requireAdmin } from "@/lib/adminAuth";
+import { DEMO_MODE } from "@/lib/demo";
 
 const LINE_ENDPOINT = "https://api.line.me/v2/bot/message/push";
 
@@ -11,6 +12,15 @@ export async function POST(req: Request) {
 
     if (!message?.trim()) {
       return NextResponse.json({ error: "メッセージを入力してください" }, { status: 400 });
+    }
+
+    // デモ環境では実際には送らず、送信対象の人数だけ返す
+    if (DEMO_MODE) {
+      const { count } = await supabaseAdmin
+        .from("users")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "trial");
+      return NextResponse.json({ ok: true, count: count ?? 0, demo: true });
     }
 
     const token = process.env.LINE_CHANNEL_ACCESS_TOKEN;

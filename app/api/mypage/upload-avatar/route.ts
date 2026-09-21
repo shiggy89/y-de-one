@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { getVerifiedLineUserId } from "@/lib/lineAuth";
+import { DEMO_MODE, DEMO_MAX_UPLOAD_BYTES } from "@/lib/demo";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,10 @@ export async function POST(req: Request) {
 
     if (!file) {
       return NextResponse.json({ error: "file required" }, { status: 400 });
+    }
+
+    if (DEMO_MODE && (!file.type.startsWith("image/") || file.size > DEMO_MAX_UPLOAD_BYTES)) {
+      return NextResponse.json({ error: "Demo: images up to 2MB only" }, { status: 413 });
     }
 
     const ext = file.name.split(".").pop();
