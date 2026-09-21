@@ -6,10 +6,12 @@ export const metadata = {
 
 import { Suspense } from "react";
 import TrialForm from "./TrialForm";
+import DemoPhoneRedirect from "../_components/demo/DemoPhoneRedirect";
 
 export default function TrialPage() {
   return (
     <Suspense>
+      <DemoPhoneRedirect />
       <TrialForm />
     </Suspense>
   );
