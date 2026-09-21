@@ -9,6 +9,7 @@ import * as Holiday from "@holiday-jp/holiday_jp";
 import { lineAuthHeaders } from "@/lib/lineClient";
 import { DEMO_MODE } from "@/lib/demo";
 import { fetchDemoSession } from "@/lib/demoClient";
+import { EN, fmtLessons, fmtMonth, fmtYearMonth, tr, weekday } from "@/lib/tr";
 
 const TipTapEditor = dynamic(() => import("./TipTapEditor"), { ssr: false });
 
@@ -203,16 +204,16 @@ export default function AdminPanel() {
     if (res.ok) {
       setNoticeTitle("");
       setNoticeBody("");
-      setNoticeMsg("投稿しました");
+      setNoticeMsg(tr("投稿しました"));
       await fetchNotices();
     } else {
-      setNoticeMsg("投稿に失敗しました");
+      setNoticeMsg(tr("投稿に失敗しました"));
     }
     setNoticeSending(false);
   };
 
   const handleDeleteNotice = async (id: number) => {
-    if (!confirm("このお知らせを削除しますか？")) return;
+    if (!confirm(tr("このお知らせを削除しますか？"))) return;
     setNotices((prev) => prev.filter((n) => n.id !== id));
     await adminFetch("/api/admin/notices", {
       method: "DELETE",
@@ -256,16 +257,16 @@ export default function AdminPanel() {
     ]);
     if (res.ok) {
       setHpNewsTitle(""); setHpNewsContent(""); setHpNewsCategory("");
-      setHpNewsMsg("投稿しました（HP・マイページ両方）");
+      setHpNewsMsg(tr("投稿しました（HP・マイページ両方）"));
       await fetchHpNews();
     } else {
-      setHpNewsMsg("投稿に失敗しました");
+      setHpNewsMsg(tr("投稿に失敗しました"));
     }
     setHpNewsSending(false);
   };
 
   const handleDeleteHpNews = async (id: number) => {
-    if (!confirm("このお知らせを削除しますか？")) return;
+    if (!confirm(tr("このお知らせを削除しますか？"))) return;
     const item = hpNewsList.find((n) => n.id === id);
     setHpNewsList((prev) => prev.filter((n) => n.id !== id));
     await Promise.all([
@@ -305,7 +306,7 @@ export default function AdminPanel() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ section, content }),
     });
-    setLessonInfoMsg(res.ok ? "保存しました" : "保存に失敗しました");
+    setLessonInfoMsg(tr(res.ok ? "保存しました" : "保存に失敗しました"));
     setLessonInfoSaving(null);
   };
 
@@ -323,14 +324,14 @@ export default function AdminPanel() {
   };
 
   const handleAddCategory = async () => {
-    if (!catName.trim() || !catSlug.trim()) { setCatMsg("名前とスラッグを入力してください"); return; }
+    if (!catName.trim() || !catSlug.trim()) { setCatMsg(tr("名前とスラッグを入力してください")); return; }
     const res = await adminFetch("/api/admin/categories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: catName, slug: catSlug }) });
-    if (res.ok) { setCatName(""); setCatSlug(""); setCatMsg("追加しました"); await fetchCategories(); }
-    else { const d = await res.json(); setCatMsg(d.error ?? "失敗しました"); }
+    if (res.ok) { setCatName(""); setCatSlug(""); setCatMsg(tr("追加しました")); await fetchCategories(); }
+    else { const d = await res.json(); setCatMsg(d.error ?? tr("失敗しました")); }
   };
 
   const handleDeleteCategory = async (id: number) => {
-    if (!confirm("このカテゴリを削除しますか？")) return;
+    if (!confirm(tr("このカテゴリを削除しますか？"))) return;
     await adminFetch("/api/admin/categories", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }) });
     await fetchCategories();
   };
@@ -378,8 +379,8 @@ export default function AdminPanel() {
   };
 
   const handleSaveBlog = async () => {
-    if (!blogTitle.trim()) { setBlogMsg("タイトルを入力してください"); return; }
-    if (blogMetaDesc.length > 120) { setBlogMsg("メタディスクリプションは120字以内にしてください"); return; }
+    if (!blogTitle.trim()) { setBlogMsg(tr("タイトルを入力してください")); return; }
+    if (blogMetaDesc.length > 120) { setBlogMsg(tr("メタディスクリプションは120字以内にしてください")); return; }
     setBlogSaving(true); setBlogMsg(null);
     const body = { title: blogTitle, slug: blogSlug || null, content: blogContent, type: blogType, status: blogStatus, thumbnail_url: blogThumbnailUrl || null, meta_description: blogMetaDesc || null, category_id: blogCategoryId };
     const res = blogEditId
@@ -389,14 +390,14 @@ export default function AdminPanel() {
       await fetchBlogList();
       setBlogView("list");
     } else {
-      setBlogMsg("保存に失敗しました");
+      setBlogMsg(tr("保存に失敗しました"));
       setBlogSaving(false);
     }
     setBlogSaving(false);
   };
 
   const handleDeleteBlog = async (id: number) => {
-    if (!confirm("この記事を削除しますか？")) return;
+    if (!confirm(tr("この記事を削除しますか？"))) return;
     setBlogList((prev) => prev.filter((p) => p.id !== id));
     await adminFetch(`/api/admin/posts/${id}`, { method: "DELETE" });
   };
@@ -674,7 +675,7 @@ export default function AdminPanel() {
   };
 
   const handleStatusChange = async (userId: number, newStatus: string, currentStatus: string) => {
-    if (!confirm(`${currentStatus} → ${newStatus} に変更しますか？`)) return;
+    if (!confirm(EN ? `Change ${tr(currentStatus)} → ${tr(newStatus)}?` : `${currentStatus} → ${newStatus} に変更しますか？`)) return;
     await adminFetch("/api/admin/users", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -685,11 +686,11 @@ export default function AdminPanel() {
 
   const handleAdminToggle = async (userId: number, currentIsAdmin: boolean) => {
     if (currentIsAdmin) {
-      if (!confirm("管理者 → 一般 に変更しますか？")) return;
+      if (!confirm(tr("管理者 → 一般 に変更しますか？"))) return;
     } else {
-      const input = prompt("管理者に変更するには「admin」と入力してください");
+      const input = prompt(tr("管理者に変更するには「admin」と入力してください"));
       if (input !== "admin") {
-        if (input !== null) alert("入力が正しくありません");
+        if (input !== null) alert(tr("入力が正しくありません"));
         return;
       }
     }
@@ -769,8 +770,8 @@ export default function AdminPanel() {
 
   const handleAttendance = async () => {
     setAttendanceError(null);
-    if (selectedUserIds.length === 0) { setAttendanceError("生徒を選択してください"); return; }
-    if (lessonType === "通常" && !selectedLesson) { setAttendanceError("レッスンを選択してください"); return; }
+    if (selectedUserIds.length === 0) { setAttendanceError(tr("生徒を選択してください")); return; }
+    if (lessonType === "通常" && !selectedLesson) { setAttendanceError(tr("レッスンを選択してください")); return; }
 
     // 選択した生徒のアイコンをAPIレスポンス待たずに即時非表示
     const prevAttendedIds = attendedIds;
@@ -816,7 +817,7 @@ export default function AdminPanel() {
 
     const failed = results.filter((r) => !r.ok);
     if (failed.length > 0) {
-      setAttendanceError("一部の記録に失敗しました");
+      setAttendanceError(tr("一部の記録に失敗しました"));
       setAttendedIds(prevAttendedIds); // 楽観更新を元に戻す
       setAttendanceMonthData((prev) => prev.filter((r) => r.id >= 0)); // 楽観レコードを削除
     } else {
@@ -840,8 +841,8 @@ export default function AdminPanel() {
       // 月データと全カウントマップを再取得（次回の即時計算を最新に）
       fetchAttendanceMonth(lessonDate.slice(0, 7));
       fetchAllLessonCounts();
-      const names = selectedUserIds.map((id) => users.find((u) => u.id === id)?.name ?? "").filter(Boolean).join("、");
-      setToast(`${results.length}名の出席を記録しました\n${names}`);
+      const names = selectedUserIds.map((id) => users.find((u) => u.id === id)?.name ?? "").filter(Boolean).join(EN ? ", " : "、");
+      setToast(EN ? `Recorded attendance for ${results.length} ${results.length === 1 ? "student" : "students"}\n${names}` : `${results.length}名の出席を記録しました\n${names}`);
       setTimeout(() => setToast(null), 4000);
     }
     setSubmitting(false);
@@ -903,8 +904,8 @@ export default function AdminPanel() {
   const handleSendMessage = async () => {
     setSendMsg(null);
     setSendError(null);
-    if (!message.trim()) { setSendError("メッセージを入力してください"); return; }
-    if (!confirm(`trial会員${trialCount}人にメッセージを送信しますか？`)) return;
+    if (!message.trim()) { setSendError(tr("メッセージを入力してください")); return; }
+    if (!confirm(EN ? `Send this message to ${trialCount} trial ${trialCount === 1 ? "member" : "members"}?` : `trial会員${trialCount}人にメッセージを送信しますか？`)) return;
 
     const res = await adminFetch("/api/admin/broadcast", {
       method: "POST",
@@ -913,20 +914,20 @@ export default function AdminPanel() {
     });
     const data = await res.json();
     if (res.ok) {
-      setSendMsg(`${data.count}人に送信しました`);
+      setSendMsg(EN ? `Sent to ${data.count} ${data.count === 1 ? "person" : "people"} (demo: nothing is really sent)` : `${data.count}人に送信しました`);
       setMessage("");
     } else {
-      setSendError(data.error ?? "エラーが発生しました");
+      setSendError(data.error ?? tr("エラーが発生しました"));
     }
   };
 
   const handleSendDirectMessage = async () => {
     setDirectMsg(null);
     setDirectError(null);
-    if (directTargets.length === 0) { setDirectError("送信先を選択してください"); return; }
-    if (!directMessage.trim()) { setDirectError("メッセージを入力してください"); return; }
-    const names = directTargets.map((t) => t.name ?? t.line_display_name ?? "名前なし").join("、");
-    if (!confirm(`${directTargets.length}人（${names}）にメッセージを送信しますか？`)) return;
+    if (directTargets.length === 0) { setDirectError(tr("送信先を選択してください")); return; }
+    if (!directMessage.trim()) { setDirectError(tr("メッセージを入力してください")); return; }
+    const names = directTargets.map((t) => t.name ?? t.line_display_name ?? tr("名前なし")).join(EN ? ", " : "、");
+    if (!confirm(EN ? `Send this message to ${directTargets.length} ${directTargets.length === 1 ? "person" : "people"} (${names})?` : `${directTargets.length}人（${names}）にメッセージを送信しますか？`)) return;
     setDirectSending(true);
     let successCount = 0;
     for (const target of directTargets) {
@@ -938,11 +939,11 @@ export default function AdminPanel() {
       if (res.ok) successCount++;
     }
     if (successCount === directTargets.length) {
-      setDirectMsg(`${successCount}人に送信しました`);
+      setDirectMsg(EN ? `Sent to ${successCount} ${successCount === 1 ? "person" : "people"} (demo: nothing is really sent)` : `${successCount}人に送信しました`);
       setDirectMessage("");
       setDirectTargets([]);
     } else {
-      setDirectError(`${successCount}/${directTargets.length}人に送信しました（一部失敗）`);
+      setDirectError(EN ? `Sent to ${successCount} of ${directTargets.length} (some failed)` : `${successCount}/${directTargets.length}人に送信しました（一部失敗）`);
       setDirectSending(false);
     }
     setDirectSending(false);
@@ -954,25 +955,25 @@ export default function AdminPanel() {
 
   const isFutureDate = lessonDate > fmtLocal(new Date());
 
-  if (loading) return <div className={styles.admin}><p>読み込み中...</p></div>;
-  if (!isAdmin) return <div className={styles.unauthorized}>管理者のみアクセスできます</div>;
+  if (loading) return <div className={styles.admin}><p>{tr("読み込み中...")}</p></div>;
+  if (!isAdmin) return <div className={styles.unauthorized}>{tr("管理者のみアクセスできます")}</div>;
 
   return (
     <div className={styles.admin}>
       <div className={styles.stickyTop}>
-        <h1 className={styles.title}>管理画面</h1>
+        <h1 className={styles.title}>{tr("管理画面")}</h1>
 
         <div className={styles.tabs}>
-          <button className={`${styles.tab} ${tab === "attendance" ? styles.active : ""}`} onClick={() => changeTab("attendance")}>出席記録</button>
-          <button className={`${styles.tab} ${tab === "ledger" ? styles.active : ""}`} onClick={() => changeTab("ledger")}>出席簿</button>
-          <button className={`${styles.tab} ${tab === "users" ? styles.active : ""}`} onClick={() => changeTab("users")}>会員管理</button>
-          <button className={`${styles.tab} ${tab === "report" ? styles.active : ""}`} onClick={() => changeTab("report")}>レポート</button>
-          <button className={`${styles.tab} ${tab === "lesson_info" ? styles.active : ""}`} onClick={() => changeTab("lesson_info")}>変更・休講</button>
-          <button className={`${styles.tab} ${tab === "hp_news" ? styles.active : ""}`} onClick={() => changeTab("hp_news")}>お知らせ</button>
-          <button className={`${styles.tab} ${tab === "blog" ? styles.active : ""}`} onClick={() => changeTab("blog")}>ブログ</button>
+          <button className={`${styles.tab} ${tab === "attendance" ? styles.active : ""}`} onClick={() => changeTab("attendance")}>{tr("出席記録")}</button>
+          <button className={`${styles.tab} ${tab === "ledger" ? styles.active : ""}`} onClick={() => changeTab("ledger")}>{tr("出席簿")}</button>
+          <button className={`${styles.tab} ${tab === "users" ? styles.active : ""}`} onClick={() => changeTab("users")}>{tr("会員管理")}</button>
+          <button className={`${styles.tab} ${tab === "report" ? styles.active : ""}`} onClick={() => changeTab("report")}>{tr("レポート")}</button>
+          <button className={`${styles.tab} ${tab === "lesson_info" ? styles.active : ""}`} onClick={() => changeTab("lesson_info")}>{tr("変更・休講")}</button>
+          <button className={`${styles.tab} ${tab === "hp_news" ? styles.active : ""}`} onClick={() => changeTab("hp_news")}>{tr("お知らせ")}</button>
+          <button className={`${styles.tab} ${tab === "blog" ? styles.active : ""}`} onClick={() => changeTab("blog")}>{tr("ブログ")}</button>
           {/* <button className={`${styles.tab} ${tab === "message" ? styles.active : ""}`} onClick={() => changeTab("message")}>メッセージ</button> */}
-          <button className={`${styles.tab} ${tab === "direct" ? styles.active : ""}`} onClick={() => changeTab("direct")}>個別メッセージ</button>
-          <button className={`${styles.tab} ${tab === "server_db" ? styles.active : ""}`} onClick={() => changeTab("server_db")}>サーバーDB</button>
+          <button className={`${styles.tab} ${tab === "direct" ? styles.active : ""}`} onClick={() => changeTab("direct")}>{tr("個別メッセージ")}</button>
+          <button className={`${styles.tab} ${tab === "server_db" ? styles.active : ""}`} onClick={() => changeTab("server_db")}>{tr("サーバーDB")}</button>
         </div>
       </div>
 
@@ -980,10 +981,10 @@ export default function AdminPanel() {
       {/* ━━━ 出席記録 ━━━ */}
       {tab === "attendance" && (
         <div className={styles.section}>
-          <p className={styles.sectionTitle}>出席を記録する</p>
+          <p className={styles.sectionTitle}>{tr("出席を記録する")}</p>
           <div className={styles.attendanceForm}>
             <div className={styles.formRow}>
-              <label className={styles.formLabel}>レッスン日</label>
+              <label className={styles.formLabel}>{tr("レッスン日")}</label>
               <input
                 type="date"
                 className={styles.formInput}
@@ -1004,12 +1005,12 @@ export default function AdminPanel() {
                 const dow = d.getDay();
                 const holiday = Holiday.isHoliday(d) ? Holiday.between(d, d)[0]?.name : null;
                 const cls = holiday ? styles.lessonDowHoliday : dow === 0 ? styles.lessonDowSun : dow === 6 ? styles.lessonDowSat : styles.lessonDow;
-                return <span className={cls}>{"日月火水木金土"[dow]}曜日{holiday ? `（${holiday}）` : ""}</span>;
+                return <span className={cls}>{EN ? weekday(dow) : `${"日月火水木金土"[dow]}曜日`}{holiday ? `（${tr(holiday)}）` : ""}</span>;
               })()}
-              {isFutureDate && <p className={styles.alertMsg}>未来の日付は記録できません</p>}
+              {isFutureDate && <p className={styles.alertMsg}>{tr("未来の日付は記録できません")}</p>}
             </div>
             <div className={styles.formRow}>
-              <label className={styles.formLabel}>レッスン種別</label>
+              <label className={styles.formLabel}>{tr("レッスン種別")}</label>
               <select className={styles.formSelect} value={lessonType} onChange={(e) => {
                 setLessonType(e.target.value);
                 setSelectedLesson(null);
@@ -1018,15 +1019,15 @@ export default function AdminPanel() {
                 setLessonCounts({});
                 setRehearsalDuration("90");
               }}>
-                <option value="通常">通常レッスン</option>
-                <option value="祝日">祝日レッスン</option>
-                <option value="個人">個人レッスン</option>
-                <option value="リハーサル">リハーサル</option>
+                <option value="通常">{tr("通常レッスン")}</option>
+                <option value="祝日">{tr("祝日レッスン")}</option>
+                <option value="個人">{tr("個人レッスン")}</option>
+                <option value="リハーサル">{tr("リハーサル")}</option>
               </select>
             </div>
             {lessonType === "個人" && (
               <div className={styles.formRow}>
-                <label className={styles.formLabel}>個人レッスン時間</label>
+                <label className={styles.formLabel}>{tr("個人レッスン時間")}</label>
                 <select
                   className={styles.formSelect}
                   value={privateMinutes}
@@ -1039,14 +1040,14 @@ export default function AdminPanel() {
                   }}
                 >
                   {[15, 30, 45, 60, 75, 90, 105, 120].map((m) => (
-                    <option key={m} value={m}>{m}分（¥{(2500 * m / 15).toLocaleString()}）</option>
+                    <option key={m} value={m}>{EN ? `${m} min` : `${m}分`}（¥{(2500 * m / 15).toLocaleString()}）</option>
                   ))}
                 </select>
               </div>
             )}
             {lessonType === "リハーサル" && (
               <div className={styles.formRow}>
-                <label className={styles.formLabel}>レッスンを選択</label>
+                <label className={styles.formLabel}>{tr("レッスンを選択")}</label>
                 <div className={styles.lessonGrid}>
                   {(["30", "35", "90", "120"] as const).map((dur) => (
                     <button
@@ -1065,7 +1066,7 @@ export default function AdminPanel() {
                         setAttendedIds([...new Set<number>([...fromHistory, ...fromJustRecorded])]);
                       }}
                     >
-                      <span className={styles.lessonBtnTitle}>{dur}分リハーサル</span>
+                      <span className={styles.lessonBtnTitle}>{tr(`${dur}分リハーサル`)}</span>
                     </button>
                   ))}
                 </div>
@@ -1073,7 +1074,7 @@ export default function AdminPanel() {
             )}
             {lessonType === "祝日" && (
               <div className={styles.formRow}>
-                <label className={styles.formLabel}>レッスンを選択</label>
+                <label className={styles.formLabel}>{tr("レッスンを選択")}</label>
                 <div className={styles.lessonGrid}>
                   {["特別レッスン", "バレエ", "ポワント", "モダン", "プレモダン"].map((t) => (
                     <button
@@ -1091,7 +1092,7 @@ export default function AdminPanel() {
                         setAttendedIds([...new Set<number>([...fromHistory, ...fromJustRecorded])]);
                       }}
                     >
-                      <span className={styles.lessonBtnTitle}>{t}</span>
+                      <span className={styles.lessonBtnTitle}>{tr(t)}</span>
                     </button>
                   ))}
                 </div>
@@ -1101,7 +1102,7 @@ export default function AdminPanel() {
               const lessons = getLessonsForDate(lessonDate);
               return lessons.length > 0 ? (
                 <div className={styles.formRow}>
-                  <label className={styles.formLabel}>レッスンを選択</label>
+                  <label className={styles.formLabel}>{tr("レッスンを選択")}</label>
                   <div className={styles.lessonGrid}>
                     {lessons.map((l) => (
                       <button
@@ -1122,20 +1123,20 @@ export default function AdminPanel() {
                         }}
                       >
                         <span className={styles.lessonBtnTime}>{l.start}〜{l.end}</span>
-                        <span className={styles.lessonBtnTitle}>{l.title}</span>
-                        <span className={styles.lessonBtnTeacher}>{l.teacher}</span>
+                        <span className={styles.lessonBtnTitle}>{tr(l.title)}</span>
+                        <span className={styles.lessonBtnTeacher}>{tr(l.teacher)}</span>
                       </button>
                     ))}
                   </div>
                 </div>
               ) : (
-                <p className={styles.noLesson}>この日はレッスンがありません</p>
+                <p className={styles.noLesson}>{tr("この日はレッスンがありません")}</p>
               );
             })()}
             <div className={styles.formRow}>
               <div className={styles.studentLabelRow}>
-                <label className={styles.formLabel}>生徒を選択</label>
-                <span className={styles.selectedCount}>{selectedUserIds.length}人</span>
+                <label className={styles.formLabel}>{tr("生徒を選択")}</label>
+                <span className={styles.selectedCount}>{EN ? `${selectedUserIds.length} selected` : `${selectedUserIds.length}人`}</span>
               </div>
               <div className={styles.studentGrid}>
                 {users
@@ -1158,7 +1159,7 @@ export default function AdminPanel() {
                         const previews = next.map((id) => {
                           const usr = users.find((u) => u.id === id);
                           const fee = calcClientFee(id, lessonDate, lessonType, lessonTitle, timeStart, privateMinutes);
-                          return { userId: id, name: usr?.name ?? "名前なし", line_picture_url: usr?.line_picture_url ?? null, ...fee };
+                          return { userId: id, name: usr?.name ?? tr("名前なし"), line_picture_url: usr?.line_picture_url ?? null, ...fee };
                         });
                         setFeePreviews(previews);
                       } else {
@@ -1167,7 +1168,7 @@ export default function AdminPanel() {
                     }}
                   >
                     <LineAvatar src={u.line_picture_url} imgClass={styles.studentIcon} placeholderClass={styles.studentIconPlaceholder} />
-                    <span className={styles.studentName}>{u.name ?? "名前なし"}</span>
+                    <span className={styles.studentName}>{u.name ?? tr("名前なし")}</span>
                   </div>
                 ))}
               </div>
@@ -1183,7 +1184,7 @@ export default function AdminPanel() {
                         ¥{f.isTeacher ? "0" : f.total.toLocaleString()}
                       </span>
                       <span className={styles.feePreviewNote}>
-                        {f.isTeacher ? "（講師）" : f.maintenanceFee > 0 ? "（維持費含む）" : ""}
+                        {f.isTeacher ? tr("（講師）") : f.maintenanceFee > 0 ? tr("（維持費含む）") : ""}
                       </span>
                     </span>
                   </div>
@@ -1192,7 +1193,7 @@ export default function AdminPanel() {
             )}
             {attendanceError && <p className={styles.errorMsg}>{attendanceError}</p>}
             <button className={styles.submitBtn} onClick={handleAttendance} disabled={isFutureDate || submitting}>
-              {submitting ? "記録中..." : "記録する"}
+              {submitting ? tr("記録中...") : tr("記録する")}
             </button>
           </div>
         </div>
@@ -1217,7 +1218,7 @@ export default function AdminPanel() {
                 d.setMonth(d.getMonth() - 1);
                 setLedgerMonth(d.toISOString().slice(0, 7));
               }}>◀</button>
-              <span className={styles.calendarNavMonth}>{ledgerMonth.split("-").map(Number).join("年")}月</span>
+              <span className={styles.calendarNavMonth}>{fmtYearMonth(ledgerMonth)}</span>
               <button className={styles.calendarNavBtn} onClick={() => {
                 const d = new Date(`${ledgerMonth}-01`);
                 d.setMonth(d.getMonth() + 1);
@@ -1225,10 +1226,10 @@ export default function AdminPanel() {
               }}>▶</button>
             </div>
           </div>
-          {ledgerLoading ? <p className={styles.noLesson}>読み込み中...</p> : (
+          {ledgerLoading ? <p className={styles.noLesson}>{tr("読み込み中...")}</p> : (
             <div className={styles.calendarWrapper}>
               <div className={styles.calendarHeader}>
-                {["月", "火", "水", "木", "金", "土", "日"].map((d) => (
+                {(EN ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] : ["月", "火", "水", "木", "金", "土", "日"]).map((d) => (
                   <div key={d} className={styles.calendarDow}>{d}</div>
                 ))}
               </div>
@@ -1266,7 +1267,7 @@ export default function AdminPanel() {
             const dayRecords = ledgerRecords.filter((r) => r.lesson_date === ledgerDate);
             const total = dayRecords.reduce((sum, r) => sum + r.price_paid, 0);
             const [, m, d] = ledgerDate.split("-");
-            const dow = ["日", "月", "火", "水", "木", "金", "土"][new Date(ledgerDate + "T00:00:00").getDay()];
+            const dow = weekday(new Date(ledgerDate + "T00:00:00").getDay());
 
             // lesson_time + lesson_title + lesson_teacher でグループ化
             const groupKey = (r: LedgerRecord) => `${r.lesson_time ?? ""}__${r.lesson_title ?? r.lesson_type}__${r.lesson_teacher ?? ""}`;
@@ -1281,16 +1282,16 @@ export default function AdminPanel() {
             return (
               <div className={styles.ledgerDetail}>
                 <div className={styles.ledgerDetailHeader}>
-                  <span>{parseInt(m)}月{parseInt(d)}日（{dow}）</span>
-                  <span className={styles.ledgerTotal}>合計 ¥{total.toLocaleString()}</span>
+                  <span>{EN ? `${fmtMonth(parseInt(m))} ${parseInt(d)} (${dow})` : `${parseInt(m)}月${parseInt(d)}日（${dow}）`}</span>
+                  <span className={styles.ledgerTotal}>{tr("合計")} ¥{total.toLocaleString()}</span>
                 </div>
                 {groups.map((g) => (
                   <div key={g.key} className={styles.ledgerGroup}>
                     <div className={styles.ledgerGroupHeader}>
                       <span className={styles.ledgerGroupInfo}>
                         {g.time && <span className={styles.ledgerGroupTime}>{g.time}</span>}
-                        <span>{g.title}</span>
-                        {g.teacher && <span className={styles.ledgerGroupTeacher}>{g.teacher}</span>}
+                        <span>{tr(g.title)}</span>
+                        {g.teacher && <span className={styles.ledgerGroupTeacher}>{tr(g.teacher)}</span>}
                       </span>
                       <span>¥{g.records.reduce((s, r) => s + r.price_paid, 0).toLocaleString()}</span>
                     </div>
@@ -1301,14 +1302,14 @@ export default function AdminPanel() {
                         <button
                           className={styles.ledgerDeleteBtn}
                           onClick={async () => {
-                            if (!confirm(`${r.name} の出席記録を削除しますか？`)) return;
+                            if (!confirm(EN ? `Delete the attendance record for ${r.name}?` : `${r.name} の出席記録を削除しますか？`)) return;
                             // attendedIds・attendanceMonthData を即時更新（出席タブのアイコン復活）
                             setAttendedIds((prev) => prev.filter((id) => id !== r.student_id));
                             setAttendanceMonthData((prev) => prev.filter((a) => a.id !== r.id));
                             await adminFetch(`/api/admin/attendance/${r.id}`, { method: "DELETE" });
                             fetchLedger(ledgerMonth);
                           }}
-                        >削除</button>
+                        >{tr("削除")}</button>
                         <span className={styles.ledgerPrice}>¥{r.price_paid.toLocaleString()}</span>
                       </div>
                     ))}
@@ -1323,10 +1324,10 @@ export default function AdminPanel() {
       {/* ━━━ 会員管理 ━━━ */}
       {tab === "users" && (
         <div className={styles.section}>
-          <p className={styles.sectionTitle}>会員一覧（{users.length}人）</p>
+          <p className={styles.sectionTitle}>{EN ? `Members (${users.length})` : `会員一覧（${users.length}人）`}</p>
           <input
             className={styles.searchInput}
-            placeholder="名前で検索..."
+            placeholder={tr("名前で検索...")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -1335,7 +1336,7 @@ export default function AdminPanel() {
               <div key={u.id} className={styles.userCard}>
                 <LineAvatar src={u.line_picture_url} imgClass={styles.lineIcon} placeholderClass={styles.lineIconPlaceholder} />
                 <div className={styles.userInfo}>
-                  <span className={styles.userName}>{u.name ?? "（名前なし）"}</span>
+                  <span className={styles.userName}>{u.name ?? tr("（名前なし）")}</span>
                   {u.line_display_name && (
                     <span className={styles.lineDisplayName}>{u.line_display_name}</span>
                   )}
@@ -1348,16 +1349,16 @@ export default function AdminPanel() {
                   className={`${styles.adminToggle} ${u.is_admin ? styles.isAdmin : ""}`}
                   onClick={() => handleAdminToggle(u.id, u.is_admin)}
                 >
-                  {u.is_admin ? "管理者" : "一般"}
+                  {u.is_admin ? tr("管理者") : tr("一般")}
                 </button>
                 <button className={styles.historyBtn} onClick={() => openHistory(u)}>
-                  レッスン履歴
+                  {tr("レッスン履歴")}
                 </button>
                 <button className={styles.badgeBtn} onClick={() => openBadge(u)}>
-                  バッジ
+                  {tr("バッジ")}
                 </button>
                 <button className={styles.editBtn} onClick={() => openEdit(u)}>
-                  編集
+                  {tr("編集")}
                 </button>
               </div>
             ))}
@@ -1371,12 +1372,12 @@ export default function AdminPanel() {
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <LineAvatar src={historyUser.line_picture_url} imgClass={styles.modalIcon} placeholderClass={styles.modalIconPlaceholder} />
-              <span className={styles.modalName}>{historyUser.name ?? "（名前なし）"}</span>
+              <span className={styles.modalName}>{historyUser.name ?? tr("（名前なし）")}</span>
               <button className={styles.modalClose} onClick={() => setHistoryUser(null)}>✕</button>
             </div>
             <div className={styles.monthNav}>
               <button className={styles.monthNavBtn} onClick={() => changeHistoryMonth(-1)}>‹</button>
-              <span className={styles.monthNavLabel}>{historyMonth.split("-").map(Number).join("年")}月</span>
+              <span className={styles.monthNavLabel}>{fmtYearMonth(historyMonth)}</span>
               <button
                 className={styles.monthNavBtn}
                 onClick={() => changeHistoryMonth(1)}
@@ -1384,7 +1385,7 @@ export default function AdminPanel() {
               >›</button>
             </div>
             <div className={styles.modalTitleRow}>
-              <p className={styles.modalTitle}>{parseInt(historyMonth.split("-")[1])}月レッスン {(() => {
+              <p className={styles.modalTitle}>{EN ? `${fmtMonth(parseInt(historyMonth.split("-")[1]), true)} lessons: ` : `${parseInt(historyMonth.split("-")[1])}月レッスン `}{(() => {
                 const count = historyMonthData.reduce((sum, a) => {
                   if (a.lesson_type === "個人") {
                     const mins = a.lesson_time ? parseInt(a.lesson_time) : 15;
@@ -1393,14 +1394,14 @@ export default function AdminPanel() {
                   if (a.lesson_title === "ポワント" || a.lesson_title === "プレモダン") return sum + 0.5;
                   return sum + 1;
                 }, 0);
-                return Number.isInteger(count) ? `${count}回` : `${count}回`;
+                return fmtLessons(count);
               })()}</p>
-              <p className={styles.modalTotal}>合計 ¥{historyMonthData.reduce((sum, a) => sum + a.price_paid, 0).toLocaleString()}</p>
+              <p className={styles.modalTotal}>{tr("合計")} ¥{historyMonthData.reduce((sum, a) => sum + a.price_paid, 0).toLocaleString()}</p>
             </div>
             {historyLoading ? (
-              <p className={styles.modalLoading}>読み込み中...</p>
+              <p className={styles.modalLoading}>{tr("読み込み中...")}</p>
             ) : historyMonthData.length === 0 ? (
-              <p className={styles.modalEmpty}>この月の履歴がありません</p>
+              <p className={styles.modalEmpty}>{tr("この月の履歴がありません")}</p>
             ) : (() => {
               const totalPages = Math.ceil(historyMonthData.length / HISTORY_PER_PAGE);
               const pageData = historyMonthData.slice((historyPage - 1) * HISTORY_PER_PAGE, historyPage * HISTORY_PER_PAGE);
@@ -1412,15 +1413,15 @@ export default function AdminPanel() {
                         {a.maintenance_fee > 0 && (
                           <div className={styles.historyRow}>
                             <span className={styles.historyDate}>{a.lesson_date.split("-").slice(1).map(Number).join("/")}</span>
-                            <span className={styles.historyTypeMaint}>維持費</span>
+                            <span className={styles.historyTypeMaint}>{tr("維持費")}</span>
                             <span className={styles.historyPrice}>¥{a.maintenance_fee.toLocaleString()}</span>
                           </div>
                         )}
                         <div className={styles.historyRow}>
                           <span className={styles.historyDate}>{a.maintenance_fee > 0 ? "" : a.lesson_date.split("-").slice(1).map(Number).join("/")}</span>
                           <span className={styles.historyLessonName}>
-                            {a.lesson_title ?? { 通常: "通常レッスン", 祝日: "祝日レッスン", 個人: "個人レッスン", 特別: "特別レッスン" }[a.lesson_type] ?? a.lesson_type}
-                            {a.lesson_teacher && <><br /><span className={styles.historyTeacher}>{a.lesson_teacher}</span></>}
+                            {tr(a.lesson_title ?? { 通常: "通常レッスン", 祝日: "祝日レッスン", 個人: "個人レッスン", 特別: "特別レッスン" }[a.lesson_type] ?? a.lesson_type)}
+                            {a.lesson_teacher && <><br /><span className={styles.historyTeacher}>{tr(a.lesson_teacher)}</span></>}
                           </span>
                           <span className={styles.historyPrice}>¥{a.lesson_fee.toLocaleString()}</span>
                         </div>
@@ -1445,7 +1446,7 @@ export default function AdminPanel() {
       {statusTarget && (
         <div className={styles.modalOverlay} onClick={() => setStatusTarget(null)}>
           <div className={styles.statusSheet} onClick={(e) => e.stopPropagation()}>
-            <p className={styles.statusSheetTitle}>{statusTarget.name} のステータスを変更</p>
+            <p className={styles.statusSheetTitle}>{EN ? `Change status of ${statusTarget.name}` : `${statusTarget.name} のステータスを変更`}</p>
             {["trial", "member", "teacher"].map((s) => (
               <button
                 key={s}
@@ -1456,7 +1457,7 @@ export default function AdminPanel() {
                 }}
               >{s}</button>
             ))}
-            <button className={styles.statusSheetCancel} onClick={() => setStatusTarget(null)}>キャンセル</button>
+            <button className={styles.statusSheetCancel} onClick={() => setStatusTarget(null)}>{tr("キャンセル")}</button>
           </div>
         </div>
       )}
@@ -1467,20 +1468,20 @@ export default function AdminPanel() {
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <LineAvatar src={editUser.line_picture_url} imgClass={styles.modalIcon} placeholderClass={styles.modalIconPlaceholder} />
-              <span className={styles.modalName}>{editUser.name ?? "（名前なし）"}</span>
+              <span className={styles.modalName}>{editUser.name ?? tr("（名前なし）")}</span>
               <button className={styles.modalClose} onClick={() => setEditUser(null)}>✕</button>
             </div>
             <div className={styles.editForm}>
               <div className={styles.editRow}>
-                <label className={styles.editLabel}>姓</label>
-                <input className={styles.editInput} value={editLastName} onChange={(e) => setEditLastName(e.target.value)} placeholder="姓" />
+                <label className={styles.editLabel}>{tr("姓")}</label>
+                <input className={styles.editInput} value={editLastName} onChange={(e) => setEditLastName(e.target.value)} placeholder={tr("姓")} />
               </div>
               <div className={styles.editRow}>
-                <label className={styles.editLabel}>名</label>
-                <input className={styles.editInput} value={editFirstName} onChange={(e) => setEditFirstName(e.target.value)} placeholder="名" />
+                <label className={styles.editLabel}>{tr("名")}</label>
+                <input className={styles.editInput} value={editFirstName} onChange={(e) => setEditFirstName(e.target.value)} placeholder={tr("名")} />
               </div>
               <button className={styles.editSaveBtn} onClick={handleSaveName} disabled={editSaving}>
-                {editSaving ? "保存中..." : "保存する"}
+                {editSaving ? tr("保存中...") : tr("保存する")}
               </button>
             </div>
           </div>
@@ -1493,11 +1494,11 @@ export default function AdminPanel() {
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <LineAvatar src={badgeUser.line_picture_url} imgClass={styles.modalIcon} placeholderClass={styles.modalIconPlaceholder} />
-              <span className={styles.modalName}>{badgeUser.name ?? "（名前なし）"}</span>
+              <span className={styles.modalName}>{badgeUser.name ?? tr("（名前なし）")}</span>
               <button className={styles.modalClose} onClick={() => setBadgeUser(null)}>✕</button>
             </div>
             {badgeLoading ? (
-              <p className={styles.modalLoading}>読み込み中...</p>
+              <p className={styles.modalLoading}>{tr("読み込み中...")}</p>
             ) : (
               <>
                 <div className={styles.monthNav}>
@@ -1506,7 +1507,7 @@ export default function AdminPanel() {
                     onClick={() => setBadgeYear((y) => y - 1)}
                     disabled={badgeYear <= getBadgeMinYear()}
                   >‹</button>
-                  <span className={styles.monthNavLabel}>{badgeYear}年</span>
+                  <span className={styles.monthNavLabel}>{badgeYear}{EN ? "" : "年"}</span>
                   <button
                     className={styles.monthNavBtn}
                     onClick={() => setBadgeYear((y) => y + 1)}
@@ -1526,7 +1527,7 @@ export default function AdminPanel() {
                             className={styles.badgeIconImg}
                           />
                         ) : (
-                          <span className={styles.badgeEmptyMonth}>{m}月</span>
+                          <span className={styles.badgeEmptyMonth}>{fmtMonth(m)}</span>
                         )}
                       </div>
                     );
@@ -1587,7 +1588,7 @@ export default function AdminPanel() {
         // ナビゲーションラベル
         const navLabel = isWeek
           ? `${from.slice(5).split("-").map(Number).join("/")} - ${to.slice(5).split("-").map(Number).join("/")}`
-          : `${reportYear}年`;
+          : EN ? `${reportYear}` : `${reportYear}年`;
 
         // レッスンごとにグループ化
         type LessonGroup = { key: string; date: string; time: string | null; title: string | null; teacher: string | null; attendees: { name: string | null; pic: string | null }[] };
@@ -1604,14 +1605,14 @@ export default function AdminPanel() {
           return (a.time ?? "").localeCompare(b.time ?? "");
         });
 
-        const youbi = ["日", "月", "火", "水", "木", "金", "土"];
+        const youbi = [0, 1, 2, 3, 4, 5, 6].map(weekday);
 
         return (
           <div className={styles.section}>
             {/* 週/月 切り替え */}
             <div className={styles.reportModeToggle}>
-              <button className={`${styles.reportModeBtn} ${isWeek ? styles.reportModeBtnActive : ""}`} onClick={() => setReportMode("week")}>週間</button>
-              <button className={`${styles.reportModeBtn} ${!isWeek ? styles.reportModeBtnActive : ""}`} onClick={() => setReportMode("month")}>月間</button>
+              <button className={`${styles.reportModeBtn} ${isWeek ? styles.reportModeBtnActive : ""}`} onClick={() => setReportMode("week")}>{tr("週間")}</button>
+              <button className={`${styles.reportModeBtn} ${!isWeek ? styles.reportModeBtnActive : ""}`} onClick={() => setReportMode("month")}>{tr("月間")}</button>
             </div>
 
             {/* ナビゲーション */}
@@ -1632,7 +1633,7 @@ export default function AdminPanel() {
 
             {/* バーグラフ */}
             {reportLoading ? (
-              <p className={styles.modalLoading}>読み込み中...</p>
+              <p className={styles.modalLoading}>{tr("読み込み中...")}</p>
             ) : (
               <>
                 <div className={styles.reportChart}>
@@ -1661,7 +1662,7 @@ export default function AdminPanel() {
                         <div className={styles.reportBarTrack}>
                           <div className={`${styles.reportBarFill} ${selectedReportDay === ym ? styles.reportBarFillActive : ""}`} style={{ height: `${pct}%` }} />
                         </div>
-                        <span className={styles.reportBarLabel}>{m}月</span>
+                        <span className={styles.reportBarLabel}>{fmtMonth(m)}</span>
                       </div>
                     );
                   })}
@@ -1670,7 +1671,7 @@ export default function AdminPanel() {
                 {/* 日付ごとにグループ化して表示 */}
                 <div className={styles.reportLessons}>
                   {lessonGroups.length === 0 ? (
-                    <p className={styles.modalEmpty}>この期間のデータがありません</p>
+                    <p className={styles.modalEmpty}>{tr("この期間のデータがありません")}</p>
                   ) : (() => {
                     // 日付でまとめる（selectedReportDayでフィルタ）
                     const filteredGroups = selectedReportDay
@@ -1683,7 +1684,7 @@ export default function AdminPanel() {
                       else dateGroups.push({ date: g.date, lessons: [g] });
                     });
                     return dateGroups.length === 0
-                      ? <p key="empty" className={styles.modalEmpty}>この日のデータがありません</p>
+                      ? <p key="empty" className={styles.modalEmpty}>{tr("この日のデータがありません")}</p>
                       : dateGroups.map((dg) => {
                         const [dgy, dgm, dgd] = dg.date.split("-").map(Number);
                         const dt = new Date(dgy, dgm - 1, dgd);
@@ -1702,9 +1703,9 @@ export default function AdminPanel() {
                               <div key={g.key} className={styles.reportLesson}>
                                 <div className={styles.reportLessonHeader}>
                                   {g.time && <span className={styles.reportLessonTime}>{g.time}</span>}
-                                  <span className={styles.reportLessonTitle}>{g.title ?? "レッスン"}</span>
-                                  {g.teacher && <span className={styles.reportLessonTeacher}>{g.teacher}</span>}
-                                  <span className={styles.reportLessonCount}>{g.attendees.length}人</span>
+                                  <span className={styles.reportLessonTitle}>{tr(g.title ?? "レッスン")}</span>
+                                  {g.teacher && <span className={styles.reportLessonTeacher}>{tr(g.teacher)}</span>}
+                                  <span className={styles.reportLessonCount}>{EN ? g.attendees.length : `${g.attendees.length}人`}</span>
                                 </div>
                                 <div className={styles.reportAttendees}>
                                   {g.attendees.map((a, i) => (
@@ -1730,20 +1731,20 @@ export default function AdminPanel() {
       {/* ━━━ メッセージ送信 ━━━ */}
       {tab === "message" && (
         <div className={styles.section}>
-          <p className={styles.sectionTitle}>trial会員への一斉送信</p>
-          <p className={styles.trialCount}>現在のtrial会員：{trialCount}人</p>
+          <p className={styles.sectionTitle}>{tr("trial会員への一斉送信")}</p>
+          <p className={styles.trialCount}>{EN ? `Current trial members: ${trialCount}` : `現在のtrial会員：${trialCount}人`}</p>
           <div className={styles.messageForm}>
             <textarea
               className={styles.textarea}
               rows={6}
-              placeholder="送信するメッセージを入力..."
+              placeholder={tr("送信するメッセージを入力...")}
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />
             {sendMsg && <p className={styles.successMsg}>{sendMsg}</p>}
             {sendError && <p className={styles.errorMsg}>{sendError}</p>}
             <button className={styles.sendBtn} onClick={handleSendMessage}>
-              {trialCount}人に送信する
+              {EN ? `Send to ${trialCount} ${trialCount === 1 ? "member" : "members"}` : `${trialCount}人に送信する`}
             </button>
           </div>
         </div>
@@ -1752,7 +1753,7 @@ export default function AdminPanel() {
       {/* ━━━ 個別メッセージ ━━━ */}
       {tab === "direct" && (
         <div className={styles.section}>
-          <p className={styles.sectionTitle}>個別メッセージを送る</p>
+          <p className={styles.sectionTitle}>{tr("個別メッセージを送る")}</p>
           {(["teacher", "member", "trial"] as const).map((status) => {
             const group = users.filter((u) => u.status === status);
             if (group.length === 0) return null;
@@ -1793,7 +1794,7 @@ export default function AdminPanel() {
                         }}
                       >
                         <LineAvatar src={u.line_picture_url} imgClass={styles.studentIcon} placeholderClass={styles.studentIconPlaceholder} />
-                        <span className={styles.studentName}>{u.name ?? u.line_display_name ?? "名前なし"}</span>
+                        <span className={styles.studentName}>{u.name ?? u.line_display_name ?? tr("名前なし")}</span>
                       </div>
                     );
                   })}
@@ -1808,20 +1809,20 @@ export default function AdminPanel() {
                 {directTargets.map((t) => (
                   <LineAvatar key={t.id} src={t.line_picture_url} imgClass={styles.studentIcon} placeholderClass={styles.studentIconPlaceholder} />
                 ))}
-                <span className={styles.directSelectedName}>{directTargets.length}人に送信</span>
+                <span className={styles.directSelectedName}>{EN ? `To ${directTargets.length} ${directTargets.length === 1 ? "person" : "people"}` : `${directTargets.length}人に送信`}</span>
               </div>
               <div className={styles.messageForm}>
                 <textarea
                   className={styles.textarea}
                   rows={5}
-                  placeholder="送信するメッセージを入力..."
+                  placeholder={tr("送信するメッセージを入力...")}
                   value={directMessage}
                   onChange={(e) => setDirectMessage(e.target.value)}
                 />
                 {directMsg && <p className={styles.successMsg}>{directMsg}</p>}
                 {directError && <p className={styles.errorMsg}>{directError}</p>}
                 <button className={styles.sendBtn} onClick={handleSendDirectMessage} disabled={directSending}>
-                  {directSending ? "送信中..." : `${directTargets.length}人に送信する`}
+                  {directSending ? tr("送信中...") : EN ? `Send to ${directTargets.length} ${directTargets.length === 1 ? "person" : "people"}` : `${directTargets.length}人に送信する`}
                 </button>
               </div>
             </div>
@@ -1836,31 +1837,31 @@ export default function AdminPanel() {
       {/* ━━━ サーバーDB ━━━ */}
       {tab === "server_db" && (
         <div className={styles.section}>
-          <p className={styles.sectionTitle}>サーバーDB費用</p>
+          <p className={styles.sectionTitle}>{tr("サーバーDB費用")}</p>
           {serverDbRecords.length === 0 ? (
-            <p className={styles.empty}>データがありません</p>
+            <p className={styles.empty}>{tr("データがありません")}</p>
           ) : (
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
               <thead>
                 <tr style={{ borderBottom: "2px solid #eee", textAlign: "left" }}>
-                  <th style={{ padding: "8px 12px", color: "#666", fontWeight: 600 }}>年月</th>
-                  <th style={{ padding: "8px 12px", color: "#666", fontWeight: 600 }}>金額</th>
-                  <th style={{ padding: "8px 12px", color: "#666", fontWeight: 600 }}>受領日</th>
+                  <th style={{ padding: "8px 12px", color: "#666", fontWeight: 600 }}>{tr("年月")}</th>
+                  <th style={{ padding: "8px 12px", color: "#666", fontWeight: 600 }}>{tr("金額")}</th>
+                  <th style={{ padding: "8px 12px", color: "#666", fontWeight: 600 }}>{tr("受領日")}</th>
                 </tr>
               </thead>
               <tbody>
                 {serverDbRecords.map((r) => (
                   <tr key={r.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
                     <td style={{ padding: "10px 12px", fontWeight: 600 }}>
-                      {r.year_month.split("-").map(Number).join("年")}月
+                      {fmtYearMonth(r.year_month)}
                     </td>
                     <td style={{ padding: "10px 12px", color: r.amount != null ? "#e05080" : "#bbb", fontWeight: r.amount != null ? 700 : 400 }}>
-                      {r.amount != null ? `¥${r.amount.toLocaleString()}` : "未定"}
+                      {r.amount != null ? `¥${r.amount.toLocaleString()}` : tr("未定")}
                     </td>
                     <td style={{ padding: "10px 12px", color: r.received_at ? "#4caf50" : "#bbb", fontWeight: r.received_at ? 600 : 400 }}>
                       {r.received_at
-                        ? new Date(r.received_at + "T00:00:00").toLocaleDateString("ja-JP", { month: "long", day: "numeric" })
-                        : "未受領"}
+                        ? new Date(r.received_at + "T00:00:00").toLocaleDateString(EN ? "en-US" : "ja-JP", { month: "long", day: "numeric" })
+                        : tr("未受領")}
                     </td>
                   </tr>
                 ))}
@@ -1873,25 +1874,25 @@ export default function AdminPanel() {
       {/* ━━━ HP お知らせ管理 ━━━ */}
       {tab === "hp_news" && (
         <div className={styles.section}>
-          <p className={styles.sectionTitle}>お知らせを投稿する</p>
+          <p className={styles.sectionTitle}>{tr("お知らせを投稿する")}</p>
           <div className={styles.noticeForm}>
-            <input type="text" className={styles.noticeInput} placeholder="タイトル（必須）" value={hpNewsTitle} onChange={(e) => setHpNewsTitle(e.target.value)} />
+            <input type="text" className={styles.noticeInput} placeholder={tr("タイトル（必須）")} value={hpNewsTitle} onChange={(e) => setHpNewsTitle(e.target.value)} />
             <select className={styles.noticeInput} value={hpNewsCategory} onChange={(e) => setHpNewsCategory(e.target.value)}>
-              <option value="">カテゴリなし</option>
-              <option value="休講・振替">休講・振替</option>
-              <option value="祝日レッスン">祝日レッスン</option>
-              <option value="イベント">イベント</option>
-              <option value="お知らせ">お知らせ</option>
+              <option value="">{tr("カテゴリなし")}</option>
+              <option value="休講・振替">{tr("休講・振替")}</option>
+              <option value="祝日レッスン">{tr("祝日レッスン")}</option>
+              <option value="イベント">{tr("イベント")}</option>
+              <option value="お知らせ">{tr("お知らせ")}</option>
             </select>
-            <textarea className={styles.noticeTextarea} placeholder="本文（省略可）" value={hpNewsContent} onChange={(e) => setHpNewsContent(e.target.value)} rows={6} />
+            <textarea className={styles.noticeTextarea} placeholder={tr("本文（省略可）")} value={hpNewsContent} onChange={(e) => setHpNewsContent(e.target.value)} rows={6} />
             <button className={styles.noticePostBtn} onClick={handlePostHpNews} disabled={hpNewsSending || !hpNewsTitle.trim()}>
-              {hpNewsSending ? "投稿中..." : "投稿する"}
+              {hpNewsSending ? tr("投稿中...") : tr("投稿する")}
             </button>
             {hpNewsMsg && <p className={styles.noticeMsg}>{hpNewsMsg}</p>}
           </div>
-          <p className={styles.sectionTitle} style={{ marginTop: 24 }}>投稿済みのお知らせ</p>
+          <p className={styles.sectionTitle} style={{ marginTop: 24 }}>{tr("投稿済みのお知らせ")}</p>
           {hpNewsList.length === 0 ? (
-            <p className={styles.empty}>お知らせはありません</p>
+            <p className={styles.empty}>{tr("お知らせはありません")}</p>
           ) : (
             hpNewsList.map((n) => (
               <div key={n.id} className={styles.noticeItem}>
@@ -1903,7 +1904,7 @@ export default function AdminPanel() {
                     </p>
                     <p style={{ fontWeight: 600, margin: "4px 0" }}>{n.title}</p>
                   </div>
-                  <button className={styles.noticeDeleteBtn} onClick={() => handleDeleteHpNews(n.id)}>削除</button>
+                  <button className={styles.noticeDeleteBtn} onClick={() => handleDeleteHpNews(n.id)}>{tr("削除")}</button>
                 </div>
                 {n.content && <p className={styles.noticeItemBody}>{n.content}</p>}
               </div>
@@ -1918,12 +1919,12 @@ export default function AdminPanel() {
           {blogView === "list" && (
             <>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                <p className={styles.sectionTitle} style={{ margin: 0 }}>記事一覧</p>
-                <button className={styles.noticePostBtn} onClick={openBlogNew}>＋ 新規投稿</button>
+                <p className={styles.sectionTitle} style={{ margin: 0 }}>{tr("記事一覧")}</p>
+                <button className={styles.noticePostBtn} onClick={openBlogNew}>{tr("＋ 新規投稿")}</button>
               </div>
-              {blogListError && <p style={{ color: "#e05080", fontSize: 13, marginBottom: 8 }}>エラー: {blogListError}</p>}
+              {blogListError && <p style={{ color: "#e05080", fontSize: 13, marginBottom: 8 }}>{tr("エラー:")} {blogListError}</p>}
               {blogList.length === 0 ? (
-                <p className={styles.empty}>記事がありません</p>
+                <p className={styles.empty}>{tr("記事がありません")}</p>
               ) : (
                 blogList.filter((p) => !isMobile || p.type !== "seo").map((p) => (
                   <div key={p.id} className={styles.noticeItem} style={{ cursor: "pointer" }} onClick={() => openBlogEdit(p.id)}>
@@ -1931,10 +1932,10 @@ export default function AdminPanel() {
                       <div style={{ flex: 1 }}>
                         <p className={styles.noticeItemMeta}>
                           <span style={{ background: p.type === "seo" ? "#0090e8" : "#e05080", color: "#fff", borderRadius: 4, padding: "1px 8px", marginRight: 8, fontSize: 12 }}>
-                            {p.type === "seo" ? "SEO記事" : "日記"}
+                            {p.type === "seo" ? tr("SEO記事") : tr("日記")}
                           </span>
                           <span style={{ background: p.status === "published" ? "#4caf50" : "#999", color: "#fff", borderRadius: 4, padding: "1px 8px", marginRight: 8, fontSize: 12 }}>
-                            {p.status === "published" ? "公開中" : "下書き"}
+                            {p.status === "published" ? tr("公開中") : tr("下書き")}
                           </span>
                           {p.published_at ? new Date(p.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit", day: "2-digit", timeZone: "Asia/Tokyo" }) : ""}
                         </p>
@@ -1942,7 +1943,7 @@ export default function AdminPanel() {
                         {p.slug && <p style={{ fontSize: 12, color: "#999", margin: 0 }}>/blog/{p.slug}</p>}
                       </div>
                       <div style={{ display: "flex", gap: 8 }}>
-                        <button className={styles.noticeDeleteBtn} onClick={(e) => { e.stopPropagation(); handleDeleteBlog(p.id); }}>削除</button>
+                        <button className={styles.noticeDeleteBtn} onClick={(e) => { e.stopPropagation(); handleDeleteBlog(p.id); }}>{tr("削除")}</button>
                       </div>
                     </div>
                   </div>
@@ -1950,18 +1951,18 @@ export default function AdminPanel() {
               )}
 
               {/* カテゴリ管理 - PC のみ */}
-              {!isMobile && <><p className={styles.sectionTitle} style={{ marginTop: 32 }}>カテゴリ管理</p>
+              {!isMobile && <><p className={styles.sectionTitle} style={{ marginTop: 32 }}>{tr("カテゴリ管理")}</p>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
-                <input type="text" className={styles.noticeInput} style={{ flex: 1, minWidth: 120 }} placeholder="カテゴリ名（例：バレエ初心者ガイド）" value={catName} onChange={(e) => setCatName(e.target.value)} />
-                <input type="text" className={styles.noticeInput} style={{ flex: 1, minWidth: 120 }} placeholder="スラッグ（例：ballet-beginner）" value={catSlug} onChange={(e) => setCatSlug(e.target.value)} />
-                <button className={styles.noticePostBtn} style={{ whiteSpace: "nowrap" }} onClick={handleAddCategory}>追加</button>
+                <input type="text" className={styles.noticeInput} style={{ flex: 1, minWidth: 120 }} placeholder={tr("カテゴリ名（例：バレエ初心者ガイド）")} value={catName} onChange={(e) => setCatName(e.target.value)} />
+                <input type="text" className={styles.noticeInput} style={{ flex: 1, minWidth: 120 }} placeholder={tr("スラッグ（例：ballet-beginner）")} value={catSlug} onChange={(e) => setCatSlug(e.target.value)} />
+                <button className={styles.noticePostBtn} style={{ whiteSpace: "nowrap" }} onClick={handleAddCategory}>{tr("追加")}</button>
               </div>
               {catMsg && <p className={styles.noticeMsg}>{catMsg}</p>}
               {categories.map((c) => (
                 <div key={c.id} className={styles.noticeItem} style={{ padding: "8px 12px" }}>
                   <div className={styles.noticeItemHeader}>
                     <span>{c.name} <span style={{ fontSize: 12, color: "#999" }}>/blog/category/{c.slug}</span></span>
-                    <button className={styles.noticeDeleteBtn} onClick={() => handleDeleteCategory(c.id)}>削除</button>
+                    <button className={styles.noticeDeleteBtn} onClick={() => handleDeleteCategory(c.id)}>{tr("削除")}</button>
                   </div>
                 </div>
               ))}
@@ -1971,18 +1972,18 @@ export default function AdminPanel() {
 
           {(blogView === "new" || blogView === "edit") && (
             <>
-              <button onClick={() => { setBlogView("list"); fetchBlogList(); }} style={{ background: "none", border: "none", color: "#0090e8", cursor: "pointer", fontSize: 14, marginBottom: 16, padding: 0 }}>← 一覧に戻る</button>
+              <button onClick={() => { setBlogView("list"); fetchBlogList(); }} style={{ background: "none", border: "none", color: "#0090e8", cursor: "pointer", fontSize: 14, marginBottom: 16, padding: 0 }}>{tr("← 一覧に戻る")}</button>
 
               <div className={styles.noticeForm}>
-                <input type="text" className={styles.noticeInput} placeholder="タイトル（必須）" value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} />
+                <input type="text" className={styles.noticeInput} placeholder={tr("タイトル（必須）")} value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} />
 
                 {blogType === "seo" && (
                   <>
-                    <input type="text" className={styles.noticeInput} placeholder="パーマリンク（例：adult-ballet-beginner-guide）" value={blogSlug} onChange={(e) => setBlogSlug(e.target.value)} />
+                    <input type="text" className={styles.noticeInput} placeholder={tr("パーマリンク（例：adult-ballet-beginner-guide）")} value={blogSlug} onChange={(e) => setBlogSlug(e.target.value)} />
                     <div>
                       <textarea
                         className={styles.noticeTextarea}
-                        placeholder="メタディスクリプション（検索結果に表示される説明文・120字以内）"
+                        placeholder={tr("メタディスクリプション（検索結果に表示される説明文・120字以内）")}
                         value={blogMetaDesc}
                         onChange={(e) => setBlogMetaDesc(e.target.value)}
                         rows={1}
@@ -1990,21 +1991,21 @@ export default function AdminPanel() {
                         maxLength={120}
                       />
                       <p style={{ fontSize: 12, textAlign: "right", margin: "2px 0 0", color: blogMetaDesc.length > 120 ? "#e05080" : "#999" }}>
-                        {blogMetaDesc.length} / 120字
+                        {blogMetaDesc.length} / 120{EN ? " chars" : "字"}
                       </p>
                     </div>
                     <select className={styles.noticeInput} value={blogCategoryId ?? ""} onChange={(e) => setBlogCategoryId(e.target.value ? Number(e.target.value) : null)}>
-                      <option value="">カテゴリなし</option>
+                      <option value="">{tr("カテゴリなし")}</option>
                       {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                   </>
                 )}
 
                 <div style={{ marginBottom: 8 }}>
-                  <p style={{ fontSize: 13, color: "#666", marginBottom: 4 }}>サムネイル画像</p>
+                  <p style={{ fontSize: 13, color: "#666", marginBottom: 4 }}>{tr("サムネイル画像")}</p>
                   <input ref={blogThumbInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={(e) => { const f = e.target.files?.[0]; if (f) handleBlogThumbnailUpload(f); e.target.value = ""; }} />
                   <button type="button" className={styles.noticePostBtn} style={{ padding: "6px 16px", fontSize: 13 }} onClick={() => blogThumbInputRef.current?.click()}>
-                    画像を選択
+                    {tr("画像を選択")}
                   </button>
                   {blogThumbnailUrl && <p style={{ fontSize: 12, color: "#0090e8", marginTop: 4, wordBreak: "break-all" }}>{blogThumbnailUrl}</p>}
                 </div>
@@ -2019,15 +2020,15 @@ export default function AdminPanel() {
 
                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
                   <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
-                    <input type="radio" value="draft" checked={blogStatus === "draft"} onChange={() => setBlogStatus("draft")} /> 下書き
+                    <input type="radio" value="draft" checked={blogStatus === "draft"} onChange={() => setBlogStatus("draft")} /> {tr("下書き")}
                   </label>
                   <label style={{ display: "flex", alignItems: "center", gap: 4, cursor: "pointer" }}>
-                    <input type="radio" value="published" checked={blogStatus === "published"} onChange={() => setBlogStatus("published")} /> 公開する
+                    <input type="radio" value="published" checked={blogStatus === "published"} onChange={() => setBlogStatus("published")} /> {tr("公開する")}
                   </label>
                 </div>
 
                 <button className={styles.noticePostBtn} onClick={handleSaveBlog} disabled={blogSaving}>
-                  {blogSaving ? "保存中..." : "保存する"}
+                  {blogSaving ? tr("保存中...") : tr("保存する")}
                 </button>
                 {blogMsg && <p className={styles.noticeMsg}>{blogMsg}</p>}
               </div>
@@ -2041,11 +2042,11 @@ export default function AdminPanel() {
       {tab === "lesson_info" && isAdmin && (
         <div className={styles.section}>
           <div className={styles.lessonInfoWrapper}>
-          <p className={styles.sectionTitle}>祝日・変更・不定期レッスン</p>
+          <p className={styles.sectionTitle}>{tr("祝日・変更・不定期レッスン")}</p>
           <div className={styles.noticeForm}>
             <textarea
               className={styles.lessonInfoTextarea}
-              placeholder="変更・臨時レッスンの内容を入力&#10;（空欄の場合「お知らせなし」と表示されます）"
+              placeholder={tr("変更・臨時レッスンの内容を入力\n（空欄の場合「お知らせなし」と表示されます）")}
               value={lessonInfoChange}
               onChange={(e) => setLessonInfoChange(e.target.value)}
               rows={8}
@@ -2056,23 +2057,23 @@ export default function AdminPanel() {
                 onClick={() => handleSaveLessonInfo("change")}
                 disabled={lessonInfoSaving === "change"}
               >
-                {lessonInfoSaving === "change" ? "保存中..." : "保存する"}
+                {lessonInfoSaving === "change" ? tr("保存中...") : tr("保存する")}
               </button>
               <button
                 className={styles.lessonInfoClearBtn}
                 onClick={() => setLessonInfoChange("")}
                 disabled={lessonInfoSaving === "change"}
               >
-                クリア
+                {tr("クリア")}
               </button>
             </div>
           </div>
 
-          <p className={styles.sectionTitle} style={{ marginTop: 32 }}>休講</p>
+          <p className={styles.sectionTitle} style={{ marginTop: 32 }}>{tr("休講")}</p>
           <div className={styles.noticeForm}>
             <textarea
               className={styles.lessonInfoTextarea}
-              placeholder="休講の内容を入力&#10;（空欄の場合「お知らせなし」と表示されます）"
+              placeholder={tr("休講の内容を入力\n（空欄の場合「お知らせなし」と表示されます）")}
               value={lessonInfoClosed}
               onChange={(e) => setLessonInfoClosed(e.target.value)}
               rows={8}
@@ -2083,14 +2084,14 @@ export default function AdminPanel() {
                 onClick={() => handleSaveLessonInfo("closed")}
                 disabled={lessonInfoSaving === "closed"}
               >
-                {lessonInfoSaving === "closed" ? "保存中..." : "保存する"}
+                {lessonInfoSaving === "closed" ? tr("保存中...") : tr("保存する")}
               </button>
               <button
                 className={styles.lessonInfoClearBtn}
                 onClick={() => setLessonInfoClosed("")}
                 disabled={lessonInfoSaving === "closed"}
               >
-                クリア
+                {tr("クリア")}
               </button>
             </div>
           </div>

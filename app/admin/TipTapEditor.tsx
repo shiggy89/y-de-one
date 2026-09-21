@@ -6,6 +6,7 @@ import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 import { useRef, useEffect } from "react";
 import styles from "./TipTapEditor.module.css";
+import { tr } from "@/lib/tr";
 
 type Props = {
   content: string;
@@ -47,7 +48,7 @@ export default function TipTapEditor({ content, onChange, adminFetch, mode = "se
   const triggerImageUpload = () => fileInputRef.current?.click();
 
   const setLink = () => {
-    const url = window.prompt("URLを入力してください");
+    const url = window.prompt(tr("URLを入力してください"));
     if (!url) return;
     editor.chain().focus().setLink({ href: url }).run();
   };
@@ -61,12 +62,12 @@ export default function TipTapEditor({ content, onChange, adminFetch, mode = "se
           <>
             <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 2 }).run(); }} className={editor.isActive("heading", { level: 2 }) ? styles.active : ""}>H2</button>
             <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleHeading({ level: 3 }).run(); }} className={editor.isActive("heading", { level: 3 }) ? styles.active : ""}>H3</button>
-            <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBulletList().run(); }} className={editor.isActive("bulletList") ? styles.active : ""}>• リスト</button>
-            <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleOrderedList().run(); }} className={editor.isActive("orderedList") ? styles.active : ""}>1. リスト</button>
-            <button type="button" onMouseDown={(e) => { e.preventDefault(); setLink(); }}>リンク</button>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBulletList().run(); }} className={editor.isActive("bulletList") ? styles.active : ""}>{tr("• リスト")}</button>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleOrderedList().run(); }} className={editor.isActive("orderedList") ? styles.active : ""}>{tr("1. リスト")}</button>
+            <button type="button" onMouseDown={(e) => { e.preventDefault(); setLink(); }}>{tr("リンク")}</button>
           </>
         )}
-        <button type="button" onClick={triggerImageUpload}>📷 画像</button>
+        <button type="button" onClick={triggerImageUpload}>{tr("📷 画像")}</button>
         <input
           ref={fileInputRef}
           type="file"
@@ -82,7 +83,7 @@ export default function TipTapEditor({ content, onChange, adminFetch, mode = "se
       <EditorContent editor={editor} className={styles.content} />
       {mode === "diary" && (
         <div className={styles.imageFloatBar}>
-          <button type="button" className={styles.imageFloatBtn} onClick={triggerImageUpload}>📷 画像を挿入</button>
+          <button type="button" className={styles.imageFloatBtn} onClick={triggerImageUpload}>{tr("📷 画像を挿入")}</button>
         </div>
       )}
     </div>
