@@ -47,6 +47,7 @@
 
 .phone {
   flex: none;
+  box-sizing: border-box;
   width: 410px;
   padding: 10px;
   border-radius: 44px;
