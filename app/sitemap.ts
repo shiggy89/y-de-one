@@ -1,9 +1,13 @@
 import type { MetadataRoute } from "next";
 import { supabaseAdmin } from "../lib/supabase";
+import { DEMO_MODE } from "../lib/demo";
 
 const BASE_URL = "https://y-de-one.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // デモ環境は本物の教室サイトと URL が重複するため、サイトマップを出さない
+  if (DEMO_MODE) return [];
+
   const staticPages: MetadataRoute.Sitemap = [
     { url: BASE_URL, priority: 1.0, changeFrequency: "weekly" },
     { url: `${BASE_URL}/class`, priority: 0.9, changeFrequency: "monthly" },

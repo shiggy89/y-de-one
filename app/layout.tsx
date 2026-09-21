@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { DEMO_MODE } from "@/lib/demo";
+import DemoBanner from "./_components/demo/DemoBanner";
 
 export const metadata: Metadata = {
   title: "大人バレエ・モダンバレエ教室 Y-de-ONE｜高田馬場・新宿",
@@ -7,6 +9,8 @@ export const metadata: Metadata = {
   verification: {
     google: "0JQECYL7i3H4EQnKZaVDUR3AlVnjta_2m9yjTGL1fCM",
   },
+  // デモ環境は検索結果に出さない（本物の教室サイトと重複させない）
+  ...(DEMO_MODE ? { robots: { index: false, follow: false } } : {}),
 };
 
 export default function RootLayout({
@@ -18,19 +22,26 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="format-detection" content="telephone=no, email=no" />
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-LFPKC48DGG"></script>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-LFPKC48DGG');
-            `,
-          }}
-        />
+        {!DEMO_MODE && (
+          <>
+            <script async src="https://www.googletagmanager.com/gtag/js?id=G-LFPKC48DGG"></script>
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){dataLayer.push(arguments);}
+                  gtag('js', new Date());
+                  gtag('config', 'G-LFPKC48DGG');
+                `,
+              }}
+            />
+          </>
+        )}
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        {DEMO_MODE && <DemoBanner />}
+      </body>
     </html>
   );
 }

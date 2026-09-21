@@ -1,0 +1,43 @@
+.banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 6px 12px;
+  background: #333;
+  color: #fff;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.badge {
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #e05080;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.text {
+  min-width: 0;
+}
+
+.link {
+  flex: none;
+  color: #fff;
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .banner {
+    font-size: 11px;
+    gap: 8px;
+    padding: 6px 10px;
+  }
+}
