@@ -115,15 +115,61 @@
 
 .lineLogo {
   flex: none;
-  display: inline-flex;
+  color: #06c755;
+  font-size: 44px;
+  line-height: 1;
+}
+
+.website {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: #06c755;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 0 0 24px;
+  padding: 20px 24px;
+  border-radius: 16px;
+  background: #f4efff;
+  border: 2px solid #7c5cd6;
+}
+
+.websiteTitle {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.websiteBody {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.websiteLinks {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 220px;
+}
+
+.websitePrimary,
+.websiteSecondary {
+  display: block;
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+}
+
+.websitePrimary {
+  background: #7c5cd6;
   color: #fff;
-  font-size: 28px;
+}
+
+.websiteSecondary {
+  background: #fff;
+  color: #7c5cd6;
+  border: 2px solid #7c5cd6;
 }
 
 .phoneNotice {
@@ -206,6 +252,15 @@
 }
 
 @media (max-width: 720px) {
+  .website {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .websiteLinks {
+    min-width: 0;
+  }
+
   .page {
     padding: 40px 16px 72px;
   }

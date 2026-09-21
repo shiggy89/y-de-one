@@ -72,11 +72,27 @@ export default function DemoPage() {
           ))}
         </ul>
 
+        <section className={styles.website}>
+          <div className={styles.websiteText}>
+            <h2 className={styles.websiteTitle}>The school website</h2>
+            <p className={styles.websiteBody}>
+              The public website of Y-de-ONE, with classes, prices, the studio and access. Read it in English or in the
+              original Japanese.
+            </p>
+          </div>
+          <div className={styles.websiteLinks}>
+            <Link className={styles.websitePrimary} href="/en">
+              Website in English
+            </Link>
+            <Link className={styles.websiteSecondary} href="/">
+              日本語のホームページ
+            </Link>
+          </div>
+        </section>
+
         <section id="about-line" className={styles.line}>
           <h2 className={styles.lineTitle}>
-            <span className={styles.lineLogo} aria-hidden="true">
-              <i className="fa-brands fa-line" />
-            </span>
+            <i className={`fa-brands fa-line ${styles.lineLogo}`} aria-hidden="true" />
             What is LINE?
           </h2>
           <p className={styles.lineLead}>
@@ -111,9 +127,6 @@ export default function DemoPage() {
             <li>Feel free to edit, add or delete. The data resets every day.</li>
             <li>Uploads are limited to images up to 2 MB.</li>
           </ul>
-          <p className={styles.siteLink}>
-            <Link href="/">Go to the school website</Link>
-          </p>
         </section>
       </div>
     </main>
