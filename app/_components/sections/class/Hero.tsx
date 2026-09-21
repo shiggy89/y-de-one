@@ -1,5 +1,6 @@
 import Image from "next/image";
 import styles from "./Hero.module.css";
+import { makeT, type Lang } from "@/lib/i18n";
 
 import type { ReactNode } from "react";
 
@@ -9,8 +10,10 @@ type Props = {
 	lead?: ReactNode
 	noTitleSpace?: boolean
 	alwaysBreak?: boolean
+	lang?: Lang
 }
-export default function Hero({ title, subtitle, lead, noTitleSpace, alwaysBreak }: Props) {
+export default function Hero({ title, subtitle, lead, noTitleSpace, alwaysBreak, lang = "ja" }: Props) {
+	const t = makeT(lang);
 	const titleParts = typeof title === 'string' ? title.split(" ") : null;
 	const [titleFirst = "", titleSecond = ""] = titleParts ?? [];
 
@@ -21,21 +24,21 @@ export default function Hero({ title, subtitle, lead, noTitleSpace, alwaysBreak 
 				<Image
 					className={styles.dogIcon}
 					src="/images/class/dog-icon.png"
-					alt="犬のアイコン"
+					alt={t("犬のアイコン", "Mascot dog") as string}
 					width={555}
 					height={427}
 				/>
 				<Image
 					className={styles.leftTeacherIcon}
 					src="/images/class/kazuki-dog-icon.png"
-					alt="先生のアイコン"
+					alt={t("先生のアイコン", "Teacher illustration") as string}
 					width={430}
 					height={486}
 				/>
 				<Image
 					className={styles.rightTeacherIcon}
 					src="/images/class/yoshiki-idea-red-icon.png"
-					alt="先生のアイコン"
+					alt={t("先生のアイコン", "Teacher illustration") as string}
 					width={500}
 					height={500}
 				/>

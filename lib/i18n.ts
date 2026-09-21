@@ -17,16 +17,6 @@ const EN_PAGES = new Set([
   "/",
   "/class",
   "/price",
-  "/instructor",
-  "/studio",
-  "/works",
-  "/access",
-  "/modern-ballet",
-  "/saitama",
-  "/down-syndrome",
-  "/voice",
-  "/lesson-info",
-  "/contact",
 ]);
 
 // 英語ページ内のリンクを /en 付きにする。外部リンクや英語版がないページはそのまま。

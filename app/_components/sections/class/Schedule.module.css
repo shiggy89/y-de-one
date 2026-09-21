@@ -257,3 +257,18 @@
     width: 35px;
   }
 }
+
+/* 英語版: 「Closed」は縦に並べず、日本語の「休講日」より小さく縦書きで見せる */
+:global([data-lang="en"]) .closedDay {
+  font-size: 28px;
+  font-weight: 700;
+  writing-mode: vertical-rl;
+  letter-spacing: 0.15em;
+  line-height: 1;
+}
+
+@media (max-width: 576px) {
+  :global([data-lang="en"]) .closedDay {
+    font-size: 22px;
+  }
+}
