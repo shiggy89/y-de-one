@@ -8,6 +8,7 @@ import popupStyles from "./register.module.css";
 import { lineAuthHeaders } from "@/lib/lineClient";
 import { DEMO_MODE } from "@/lib/demo";
 import { fetchDemoSession } from "@/lib/demoClient";
+import { EN, fmtLessons, fmtMonth, fmtYearMonth, tr, weekday } from "@/lib/tr";
 
 type Profile = {
   userId: string;
@@ -58,7 +59,7 @@ export default function RegisterForm() {
         setProfile({ userId: p.userId, displayName: p.displayName, pictureUrl: p.pictureUrl });
       } catch (e) {
         console.error(e);
-        setError("LINEログインに失敗しました。時間をおいて再度お試しください。");
+        setError(tr("LINEログインに失敗しました。時間をおいて再度お試しください。"));
       } finally {
         setLoading(false);
       }
@@ -77,7 +78,7 @@ export default function RegisterForm() {
     setError(null);
 
     if (!lastName.trim() || !firstName.trim()) {
-      setError("氏名を入力してください。");
+      setError(tr("氏名を入力してください。"));
       return;
     }
 
@@ -96,14 +97,14 @@ export default function RegisterForm() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error ?? "エラーが発生しました。");
+        setError(tr(data.error ?? "エラーが発生しました。"));
         return;
       }
 
       setShowPopup(true);
     } catch (e) {
       console.error(e);
-      setError("送信中にエラーが発生しました。時間をおいて再度お試しください。");
+      setError(tr("送信中にエラーが発生しました。時間をおいて再度お試しください。"));
     }
   };
 
@@ -122,7 +123,7 @@ export default function RegisterForm() {
     return (
       <main className={styles.trial}>
         <div className="inner">
-          <p>読み込み中です…</p>
+          <p>{tr("読み込み中です…")}</p>
         </div>
       </main>
     );
@@ -132,14 +133,14 @@ export default function RegisterForm() {
     <main className={styles.trial}>
       <div className="inner">
         <Heading2
-          title="会員登録フォーム"
+          title={tr("会員登録フォーム")}
         />
 
-        <p className={styles.trialLineName}>Y-de-ONE（ワイデワン）の会員登録ページです。</p>
+        <p className={styles.trialLineName}>{tr("Y-de-ONE（ワイデワン）の会員登録ページです。")}</p>
         {profile && (
           <p className={styles.trialLineName}>
             <strong>{profile.displayName}</strong>
-            さん、お名前を登録してください。
+            {tr("さん、お名前を登録してください。")}
           </p>
         )}
 
@@ -147,7 +148,7 @@ export default function RegisterForm() {
           <div style={{ display: "flex", gap: "12px" }}>
             <div className={styles.formField} style={{ flex: 1 }}>
               <label className={styles.formLabel}>
-                姓 <span className={styles.formRequired}>必須</span>
+                {tr("姓")} <span className={styles.formRequired}>{tr("必須")}</span>
               </label>
               <input
                 type="text"
@@ -155,12 +156,12 @@ export default function RegisterForm() {
                 required
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                placeholder="例）山田"
+                placeholder={tr("例）山田")}
               />
             </div>
             <div className={styles.formField} style={{ flex: 1 }}>
               <label className={styles.formLabel}>
-                名 <span className={styles.formRequired}>必須</span>
+                {tr("名")} <span className={styles.formRequired}>{tr("必須")}</span>
               </label>
               <input
                 type="text"
@@ -168,7 +169,7 @@ export default function RegisterForm() {
                 required
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                placeholder="例）花子"
+                placeholder={tr("例）花子")}
               />
             </div>
           </div>
@@ -176,7 +177,7 @@ export default function RegisterForm() {
           {error && <p className={styles.formError}>{error}</p>}
 
           <button type="submit" className={styles.formSubmit}>
-            登録する
+            {tr("登録する")}
           </button>
         </form>
       </div>
@@ -185,12 +186,12 @@ export default function RegisterForm() {
         <div className={popupStyles.overlay}>
           <div className={popupStyles.popup}>
             <p className={popupStyles.popupIcon}>✅</p>
-            <p className={popupStyles.popupTitle}>登録が完了しました！</p>
+            <p className={popupStyles.popupTitle}>{tr("登録が完了しました！")}</p>
             <p className={popupStyles.popupText}>
-              {profile?.displayName} さん、<br />Y-de-ONEへようこそ！
+              {profile?.displayName}{EN ? "," : " さん、"}<br />{tr("Y-de-ONEへようこそ！")}
             </p>
             <button className={popupStyles.popupBtn} onClick={handlePopupClose}>
-              閉じる
+              {tr("閉じる")}
             </button>
           </div>
         </div>

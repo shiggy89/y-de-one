@@ -8,6 +8,7 @@ import styles from "./TrialForm.module.css";
 import { lineAuthHeaders } from "@/lib/lineClient";
 import { DEMO_MODE } from "@/lib/demo";
 import { fetchDemoSession } from "@/lib/demoClient";
+import { EN, fmtLessons, fmtMonth, fmtYearMonth, tr, weekday } from "@/lib/tr";
 
 type Profile = {
   userId: string;
@@ -73,7 +74,14 @@ const VISIT_SLOTS: Record<number, string[]> = {
 const UPCOMING_DAYS = 21;
 // 最初に表示する候補日数（残りは「さらに日程を表示」で開く）
 const INITIAL_DATE_COUNT = 3;
-const YOUBI = ["日", "月", "火", "水", "木", "金", "土"];
+const YOUBI = [0, 1, 2, 3, 4, 5, 6].map(weekday);
+
+// 「13:00 - 14:30　バレエ入門（門馬和樹）」を英語で表示する（送信する値は日本語のまま）
+function trSlot(slot: string): string {
+  if (!EN) return slot;
+  const m = slot.match(/^(\d{2}:\d{2} - \d{2}:\d{2})　(.+?)（(.+?)）$/);
+  return m ? `${m[1]}  ${tr(m[2])} (${tr(m[3])})` : slot;
+}
 
 // タイムゾーンのズレを起こさない日付文字列変換（toISOString()はUTC変換されるため使わない）
 function localDateStr(d: Date): string {
@@ -187,7 +195,7 @@ export default function TrialPage() {
         }
       } catch (e) {
         console.error(e);
-        setError("LINEログインに失敗しました。時間をおいて再度お試しください。");
+        setError(tr("LINEログインに失敗しました。時間をおいて再度お試しください。"));
       } finally {
         setLoading(false);
       }
@@ -231,15 +239,15 @@ export default function TrialPage() {
     e.preventDefault();
     setError(null);
 
-    if (!name.trim()) { setError("氏名を入力してください。"); return; }
-    if (formType === "trial" && !genre) { setError("体験レッスンの種類を選択してください。"); return; }
+    if (!name.trim()) { setError(tr("氏名を入力してください。")); return; }
+    if (formType === "trial" && !genre) { setError(tr("体験レッスンの種類を選択してください。")); return; }
     if (noSlotMatch) {
-      if (!customRequest.trim()) { setError("ご希望の曜日・時間帯を入力してください。"); return; }
+      if (!customRequest.trim()) { setError(tr("ご希望の曜日・時間帯を入力してください。")); return; }
     } else if (!date || !timeSlot) {
-      setError("希望日時を選択してください。");
+      setError(tr("希望日時を選択してください。"));
       return;
     }
-    if (formType === "trial" && !experience) { setError("バレエ経験を選択してください。"); return; }
+    if (formType === "trial" && !experience) { setError(tr("バレエ経験を選択してください。")); return; }
 
     setSubmitting(true);
     try {
@@ -260,16 +268,16 @@ export default function TrialPage() {
       });
 
       const msg = noSlotMatch
-        ? "ご希望ありがとうございます。\nスタッフが改めて日程をご案内いたします。"
+        ? tr("ご希望ありがとうございます。\nスタッフが改めて日程をご案内いたします。")
         : formType === "visit"
-          ? "見学のお申込みありがとうございます。\n詳細はこの後LINEでご連絡いたします。"
-          : "体験レッスンのお申込みありがとうございます。\n詳細はこの後LINEでご連絡いたします。";
+          ? tr("見学のお申込みありがとうございます。\n詳細はこの後LINEでご連絡いたします。")
+          : tr("体験レッスンのお申込みありがとうございます。\n詳細はこの後LINEでご連絡いたします。");
       alert(msg);
       router.push("/");
       try { if (liff.isInClient()) liff.closeWindow(); } catch { /* ignore */ }
     } catch (e) {
       console.error(e);
-      setError("送信中にエラーが発生しました。時間をおいて再度お試しください。");
+      setError(tr("送信中にエラーが発生しました。時間をおいて再度お試しください。"));
       setSubmitting(false);
     }
   };
@@ -277,7 +285,7 @@ export default function TrialPage() {
   if (loading) {
     return (
       <main className={styles.trial}>
-        <div className="inner"><p>読み込み中です…</p></div>
+        <div className="inner"><p>{tr("読み込み中です…")}</p></div>
       </main>
     );
   }
@@ -287,11 +295,10 @@ export default function TrialPage() {
       <div className="inner">
         <section aria-labelledby="trial-form-heading">
           <Heading2
-            title={<>見学・体験レッスン<br className={styles.titleBr} />申込みフォーム</>}
+            title={<>{tr("見学・体験レッスン")}<br className={styles.titleBr} />{tr("申込みフォーム")}</>}
             lead={
               <>
-                高田馬場・東中野・落合・新宿エリアにある「質問できる大人バレエ教室」
-                Y-de-ONE（ワイデワン）の体験レッスン・レッスン見学お申込みページです。
+                {tr("高田馬場・東中野・落合・新宿エリアにある「質問できる大人バレエ教室」 Y-de-ONE（ワイデワン）の体験レッスン・レッスン見学お申込みページです。")}
               </>
             }
           />
@@ -299,7 +306,7 @@ export default function TrialPage() {
           {profile && (
             <p className={styles.trialLineName}>
               <strong>{profile.displayName}</strong>
-              さん、Y-de-ONEに興味をもっていただきありがとうございます。
+              {tr("さん、Y-de-ONEに興味をもっていただきありがとうございます。")}
             </p>
           )}
 
@@ -308,7 +315,7 @@ export default function TrialPage() {
             {/* 申込み種別（必須） */}
             <div className={styles.formField}>
               <label className={styles.formLabel}>
-                申込み種別 <span className={styles.formRequired}>必須</span>
+                {tr("申込み種別")} <span className={styles.formRequired}>{tr("必須")}</span>
               </label>
               <div className={styles.radioGroup}>
                 <label className={styles.radioItem}>
@@ -319,7 +326,7 @@ export default function TrialPage() {
                     checked={formType === "trial"}
                     onChange={() => handleFormTypeChange("trial")}
                   />
-                  <span>体験レッスン（¥{trialPrice}）</span>
+                  <span>{EN ? `Trial lesson (¥${trialPrice})` : `体験レッスン（¥${trialPrice}）`}</span>
                 </label>
                 <label className={styles.radioItem}>
                   <input
@@ -329,7 +336,7 @@ export default function TrialPage() {
                     checked={formType === "visit"}
                     onChange={() => handleFormTypeChange("visit")}
                   />
-                  <span>レッスン見学（無料）</span>
+                  <span>{tr("レッスン見学（無料）")}</span>
                 </label>
               </div>
             </div>
@@ -337,7 +344,7 @@ export default function TrialPage() {
             {/* 氏名（必須） */}
             <div className={styles.formField}>
               <label className={styles.formLabel}>
-                氏名 <span className={styles.formRequired}>必須</span>
+                {tr("氏名")} <span className={styles.formRequired}>{tr("必須")}</span>
               </label>
               <input
                 type="text"
@@ -345,7 +352,7 @@ export default function TrialPage() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="例）山田花子"
+                placeholder={tr("例）山田花子")}
               />
             </div>
 
@@ -353,7 +360,7 @@ export default function TrialPage() {
             {formType === "trial" && (
               <div className={styles.formField}>
                 <label className={styles.formLabel}>
-                  体験レッスンの種類 <span className={styles.formRequired}>必須</span>
+                  {tr("体験レッスンの種類")} <span className={styles.formRequired}>{tr("必須")}</span>
                 </label>
                 <div className={styles.radioGroup}>
                   {["バレエ", "モダンバレエ"].map((g) => (
@@ -372,7 +379,7 @@ export default function TrialPage() {
                         setShowAllDates(false);
                       }}
                       />
-                      <span>{g}</span>
+                      <span>{tr(g)}</span>
                     </label>
                   ))}
                 </div>
@@ -382,17 +389,17 @@ export default function TrialPage() {
             {/* 希望日時（必須）：空いている日時だけを選択肢として表示する */}
             <div className={styles.formField}>
               <label className={styles.formLabel}>
-                {formType === "visit" ? "見学希望日時" : "体験レッスン希望日時"}{" "}
-                <span className={styles.formRequired}>必須</span>
+                {tr(formType === "visit" ? "見学希望日時" : "体験レッスン希望日時")}{" "}
+                <span className={styles.formRequired}>{tr("必須")}</span>
               </label>
 
               {formType === "trial" && !genre && (
-                <p className={styles.formNote}>先に「体験レッスンの種類」を選択してください。</p>
+                <p className={styles.formNote}>{tr("先に「体験レッスンの種類」を選択してください。")}</p>
               )}
 
               {(formType === "visit" || genre) && dateGroups.length === 0 && (
                 <p className={styles.formNote}>
-                  現在お選びいただける日時がありません。お手数ですがお問い合わせください。
+                  {tr("現在お選びいただける日時がありません。お手数ですがお問い合わせください。")}
                 </p>
               )}
 
@@ -410,7 +417,7 @@ export default function TrialPage() {
                               checked={date === group.date && timeSlot === item}
                               onChange={() => selectSlot(group.date, item)}
                             />
-                            <span>{item}</span>
+                            <span>{trSlot(item)}</span>
                           </label>
                         ))}
                       </div>
@@ -422,7 +429,7 @@ export default function TrialPage() {
                       className={styles.showMoreButton}
                       onClick={() => setShowAllDates(true)}
                     >
-                      さらに日程を表示（残り{hiddenCount}日）
+                      {EN ? "Show more dates" : `さらに日程を表示（残り${hiddenCount}日）`}
                     </button>
                   )}
                 </div>
@@ -441,12 +448,12 @@ export default function TrialPage() {
                     />
                     <span className={styles.noMatchText}>
                       <span className={styles.noMatchTitle}>
-                        希望の日時がない場合
+                        {tr("希望の日時がない場合")}
                         <br />
-                        （曜日・時間帯を伝える）
+                        {tr("（曜日・時間帯を伝える）")}
                       </span>
                       <span className={styles.noMatchSub}>
-                        ご希望をお聞きして、スタッフから改めて日程をご案内します
+                        {tr("ご希望をお聞きして、スタッフから改めて日程をご案内します")}
                       </span>
                     </span>
                   </label>
@@ -454,14 +461,14 @@ export default function TrialPage() {
                   {noSlotMatch && (
                     <div className={styles.noMatchField}>
                       <label className={styles.formLabel}>
-                        ご希望の曜日・時間帯 <span className={styles.formRequired}>必須</span>
+                        {tr("ご希望の曜日・時間帯")} <span className={styles.formRequired}>{tr("必須")}</span>
                       </label>
                       <textarea
                         className={styles.formTextarea}
                         rows={3}
                         value={customRequest}
                         onChange={(e) => setCustomRequest(e.target.value)}
-                        placeholder="例）水曜19時以降 / 土日の午前中を希望 など"
+                        placeholder={tr("例）水曜19時以降 / 土日の午前中を希望 など")}
                       />
                     </div>
                   )}
@@ -473,7 +480,7 @@ export default function TrialPage() {
             {formType === "trial" && (
               <div className={styles.formField}>
                 <label className={styles.formLabel}>
-                  バレエ経験 <span className={styles.formRequired}>必須</span>
+                  {tr("バレエ経験")} <span className={styles.formRequired}>{tr("必須")}</span>
                 </label>
                 <div className={styles.radioGroup}>
                   {["はじめて", "少しだけ経験あり", "昔やっていた", "今も現役"].map((label) => (
@@ -485,7 +492,7 @@ export default function TrialPage() {
                         checked={experience === label}
                         onChange={(e) => setExperience(e.target.value)}
                       />
-                      <span>{label}</span>
+                      <span>{tr(label)}</span>
                     </label>
                   ))}
                 </div>
@@ -494,16 +501,16 @@ export default function TrialPage() {
 
             {/* ご質問（任意） */}
             <div className={styles.formField}>
-              <label className={styles.formLabel}>ご質問・不安なことなど（任意）</label>
+              <label className={styles.formLabel}>{tr("ご質問・不安なことなど（任意）")}</label>
               <textarea
                 className={styles.formTextarea}
                 rows={4}
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder={
-                  formType === "visit"
+                  tr(formType === "visit"
                     ? "例）服装について知りたい／子連れでも大丈夫か など"
-                    : "例）服装・持ち物が知りたい／からだが硬いのが心配 など"
+                    : "例）服装・持ち物が知りたい／からだが硬いのが心配 など")
                 }
               />
             </div>
@@ -511,13 +518,13 @@ export default function TrialPage() {
             {error && <p className={styles.formError}>{error}</p>}
 
             <button type="submit" className={styles.formSubmit} disabled={submitting}>
-              {submitting
+              {tr(submitting
                 ? "送信中..."
                 : noSlotMatch
                   ? "この内容で日程を相談する"
                   : formType === "visit"
                     ? "この内容で見学を申込む"
-                    : "この内容で体験レッスンを申込む"}
+                    : "この内容で体験レッスンを申込む")}
             </button>
           </form>
         </section>
