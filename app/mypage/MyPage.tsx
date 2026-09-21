@@ -6,6 +6,7 @@ import styles from "./mypage.module.css";
 import { lineAuthHeaders } from "@/lib/lineClient";
 import { DEMO_MODE } from "@/lib/demo";
 import { fetchDemoSession } from "@/lib/demoClient";
+import { EN, fmtLessons, fmtMonth, fmtYearMonth, tr, weekday } from "@/lib/tr";
 
 const REACTION_EMOJIS = ["❤️", "👍", "😊", "😮", "😢"];
 
@@ -97,7 +98,7 @@ function NoticeItem({ n, lineUserId, onReactionUpdate, myDisplayName, myPictureU
       </div>
       {n.title && <p className={styles.noticeTitle}>{n.title}</p>}
       {expanded && <p className={styles.noticeBody}>{n.body}</p>}
-      <span className={styles.noticeToggle}>{expanded ? "閉じる ▲" : "本文を表示 ▼"}</span>
+      <span className={styles.noticeToggle}>{expanded ? tr("閉じる ▲") : tr("本文を表示 ▼")}</span>
 
       {/* ━━ リアクション ━━ */}
       <div className={styles.reactionRow} onClick={(e) => e.stopPropagation()}>
@@ -142,7 +143,7 @@ function NoticeItem({ n, lineUserId, onReactionUpdate, myDisplayName, myPictureU
       {showReactionPopup && totalReactionCount > 0 && (
         <div className={styles.reactionPopup} onClick={(e) => e.stopPropagation()}>
           <div className={styles.reactionPopupHeader}>
-            <span className={styles.reactionPopupTitle}>リアクション ({totalReactionCount})</span>
+            <span className={styles.reactionPopupTitle}>{tr("リアクション")} ({totalReactionCount})</span>
             <button className={styles.reactionPopupClose} onClick={() => setShowReactionPopup(false)}>✕</button>
           </div>
           {allReactionUsers.map((u, i) => (
@@ -195,8 +196,8 @@ type Attendance = {
 type BadgeRecord = { year_month: string; badge: string };
 
 const BADGE_LABEL: Record<string, string> = {
-  normal: "ノーマル", bronze: "ブロンズ", silver: "シルバー",
-  gold: "ゴールド", platinum: "プラチナ", diamond: "ダイヤモンド",
+  normal: tr("ノーマル"), bronze: tr("ブロンズ"), silver: tr("シルバー"),
+  gold: tr("ゴールド"), platinum: tr("プラチナ"), diamond: tr("ダイヤモンド"),
 };
 
 const CACHE_KEY = "mypage_cache_v3";
@@ -417,7 +418,7 @@ export default function MyPage() {
   };
 
   const fmtCount = (n: number): string => {
-    return Number.isInteger(n) ? `${n}回` : `${n}回`;
+    return fmtLessons(n);
   };
 
   const getHistoryMinYear = () => {
@@ -440,14 +441,14 @@ export default function MyPage() {
 
   const fmtDate = (s: string) => {
     const [y, m, d] = s.split("-").map(Number);
-    const dow = ["日", "月", "火", "水", "木", "金", "土"][new Date(y, m - 1, d).getDay()];
+    const dow = weekday(new Date(y, m - 1, d).getDay());
     return `${m}/${d} (${dow})`;
   };
 
-  if (loading) return <main className={styles.mypage}><p className={styles.loading}>読み込み中...</p></main>;
+  if (loading) return <main className={styles.mypage}><p className={styles.loading}>{tr("読み込み中...")}</p></main>;
   if (error) return <main className={styles.mypage}><p className={styles.errorMsg}>{error}</p></main>;
 
-  const displayedName = user?.mypage_name ?? user?.line_display_name ?? displayName ?? "ゲスト";
+  const displayedName = user?.mypage_name ?? user?.line_display_name ?? displayName ?? tr("ゲスト");
   const now = new Date();
   const yearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
@@ -468,7 +469,7 @@ export default function MyPage() {
           <div className={styles.headerInfo}>
             <p className={styles.headerName}>
               <button className={styles.nameEditBtn} onClick={() => { setEditName(displayedName); setShowNameEdit(true); }}>
-                <span className={styles.headerNameText}>{displayedName}</span>さん ✎
+                <span className={styles.headerNameText}>{displayedName}</span>{EN ? "" : "さん"} ✎
               </button>
             </p>
           </div>
@@ -490,11 +491,19 @@ export default function MyPage() {
         <div className={styles.nextBadge}>
           <img src={`/images/badges/badge-${nextBadge.badge}.png`} alt="" className={styles.nextBadgeImg} />
           <p className={styles.nextBadgeText}>
-            あと<span className={styles.nextBadgeNum}>{nextBadge.remaining}</span>回で
-            {nextBadge.isContinuation
-              ? <><span className={styles.nextBadgeName}>{nextBadge.label}バッジ</span>継続！</>
-              : <><span className={styles.nextBadgeName}>{nextBadge.label}バッジ</span>獲得！</>
-            }
+            {EN ? (
+              <>
+                <span className={styles.nextBadgeNum}>{nextBadge.remaining}</span> more {nextBadge.remaining === 1 ? "lesson" : "lessons"} to {nextBadge.isContinuation ? "keep" : "earn"} the <span className={styles.nextBadgeName}>{tr(nextBadge.label)} badge</span>!
+              </>
+            ) : (
+              <>
+                あと<span className={styles.nextBadgeNum}>{nextBadge.remaining}</span>回で
+                {nextBadge.isContinuation
+                  ? <><span className={styles.nextBadgeName}>{nextBadge.label}バッジ</span>継続！</>
+                  : <><span className={styles.nextBadgeName}>{nextBadge.label}バッジ</span>獲得！</>
+                }
+              </>
+            )}
           </p>
         </div>
       )}
@@ -502,7 +511,7 @@ export default function MyPage() {
         <div className={styles.nextBadge}>
           <img src="/images/badges/badge-diamond.png" alt="" className={styles.nextBadgeImg} />
           <p className={styles.nextBadgeText}>
-            すごい🤩<span className={styles.nextBadgeName}>ダイヤモンド達成！</span>最高ランクです✨
+            {EN ? <>Wow 🤩 <span className={styles.nextBadgeName}>Diamond achieved!</span> The highest rank ✨</> : <>すごい🤩<span className={styles.nextBadgeName}>ダイヤモンド達成！</span>最高ランクです✨</>}
           </p>
         </div>
       )}
@@ -511,16 +520,16 @@ export default function MyPage() {
       {showNameEdit && (
         <div className={styles.badgeInfoOverlay} onClick={() => setShowNameEdit(false)}>
           <div className={styles.badgeInfoModal} onClick={(e) => e.stopPropagation()}>
-            <p className={styles.badgeInfoTitle}>名前を変更</p>
+            <p className={styles.badgeInfoTitle}>{tr("名前を変更")}</p>
             <input
               type="text"
               className={styles.nameEditInput}
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              placeholder="表示名を入力"
+              placeholder={tr("表示名を入力")}
             />
             <button className={styles.badgeInfoClose} onClick={handleNameSave} disabled={nameSaving || !editName.trim()}>
-              {nameSaving ? "保存中..." : "保存する"}
+              {nameSaving ? tr("保存中...") : tr("保存する")}
             </button>
           </div>
         </div>
@@ -535,17 +544,17 @@ export default function MyPage() {
           {badgeInfoPage === "badges" ? (
             <>
               <div className={styles.badgeInfoHeader}>
-                <p className={styles.badgeInfoTitle}>バッジの仕組み</p>
-                <button className={styles.badgeInfoNext} onClick={() => setBadgeInfoPage("counts")}>回数の数え方 ›</button>
+                <p className={styles.badgeInfoTitle}>{tr("バッジの仕組み")}</p>
+                <button className={styles.badgeInfoNext} onClick={() => setBadgeInfoPage("counts")}>{tr("回数の数え方 ›")}</button>
               </div>
               <div className={styles.badgeInfoList}>
                 {[
-                  { badge: "normal",   label: "ノーマル",   count: "月1回以上" },
-                  { badge: "bronze",   label: "ブロンズ",   count: "月4回以上" },
-                  { badge: "silver",   label: "シルバー",   count: "月8回以上" },
-                  { badge: "gold",     label: "ゴールド",   count: "月12回以上" },
-                  { badge: "platinum", label: "プラチナ",   count: "月20回以上" },
-                  { badge: "diamond",  label: "ダイヤモンド", count: "月40回以上" },
+                  { badge: "normal",   label: tr("ノーマル"),   count: tr("月1回以上") },
+                  { badge: "bronze",   label: tr("ブロンズ"),   count: tr("月4回以上") },
+                  { badge: "silver",   label: tr("シルバー"),   count: tr("月8回以上") },
+                  { badge: "gold",     label: tr("ゴールド"),   count: tr("月12回以上") },
+                  { badge: "platinum", label: tr("プラチナ"),   count: tr("月20回以上") },
+                  { badge: "diamond",  label: tr("ダイヤモンド"), count: tr("月40回以上") },
                 ].map((b) => (
                   <div key={b.badge} className={styles.badgeInfoRow}>
                     <img src={`/images/badges/badge-${b.badge}.png`} alt={b.label} className={styles.badgeInfoImg} />
@@ -558,16 +567,16 @@ export default function MyPage() {
           ) : (
             <>
               <div className={styles.badgeInfoHeader}>
-                <button className={styles.badgeInfoBack} onClick={() => setBadgeInfoPage("badges")}>‹ 戻る</button>
-                <p className={styles.badgeInfoTitle}>回数の数え方</p>
+                <button className={styles.badgeInfoBack} onClick={() => setBadgeInfoPage("badges")}>{tr("‹ 戻る")}</button>
+                <p className={styles.badgeInfoTitle}>{tr("回数の数え方")}</p>
               </div>
               <div className={styles.badgeInfoList}>
                 {[
-                  { label: "通常レッスン",       count: "1回" },
-                  { label: "特別レッスン",       count: "1回" },
-                  { label: "ポワント",           count: "0.5回" },
-                  { label: "プレモダン",         count: "0.5回" },
-                  { label: "個人レッスン 15分", count: "1回" },
+                  { label: tr("通常レッスン"),       count: tr("1回") },
+                  { label: tr("特別レッスン"),       count: tr("1回") },
+                  { label: tr("ポワント"),           count: tr("0.5回") },
+                  { label: tr("プレモダン"),         count: tr("0.5回") },
+                  { label: tr("個人レッスン 15分"), count: tr("1回") },
                 ].map((r) => (
                   <div key={r.label} className={styles.badgeInfoRow}>
                     <span className={styles.badgeCountLabel}>{r.label}</span>
@@ -577,7 +586,7 @@ export default function MyPage() {
               </div>
             </>
           )}
-          <button className={styles.badgeInfoClose} onClick={() => setShowBadgeInfo(false)}>閉じる</button>
+          <button className={styles.badgeInfoClose} onClick={() => setShowBadgeInfo(false)}>{tr("閉じる")}</button>
         </div>
       </div>
 
@@ -595,20 +604,22 @@ export default function MyPage() {
                 transform: `rotate(${Math.random() * 360}deg)`,
               }} />
             ))}
-            <p className={styles.badgePopupTitle}>🎉 バッジを獲得しました！</p>
+            <p className={styles.badgePopupTitle}>{tr("🎉 バッジを獲得しました！")}</p>
             <img
               src={`/images/badges/badge-${popupBadge}.png`}
               alt={popupBadge}
               className={styles.badgePopupImg}
             />
-            <p className={styles.badgePopupName}>{BADGE_LABEL[popupBadge]}バッジ</p>
+            <p className={styles.badgePopupName}>{BADGE_LABEL[popupBadge]}{EN ? " badge" : "バッジ"}</p>
             {nextBadge && nextBadge.isContinuation && (
               <p className={styles.badgePopupHint}>
-                あと<strong>{nextBadge.remaining}</strong>回で{nextBadge.label}バッジ継続！
+                {EN
+                  ? <><strong>{nextBadge.remaining}</strong> more {nextBadge.remaining === 1 ? "lesson" : "lessons"} to keep the {tr(nextBadge.label)} badge!</>
+                  : <>あと<strong>{nextBadge.remaining}</strong>回で{nextBadge.label}バッジ継続！</>}
               </p>
             )}
             <button className={styles.badgePopupClose} onClick={() => setShowBadgePopup(false)}>
-              やったー！
+              {tr("やったー！")}
             </button>
           </div>
         </div>
@@ -616,9 +627,9 @@ export default function MyPage() {
 
       {/* ━━━ タブ ━━━ */}
       <div className={styles.tabs}>
-        <button className={`${styles.tab} ${tab === "notices" ? styles.active : ""}`} onClick={() => setTab("notices")}>お知らせ</button>
-        <button className={`${styles.tab} ${tab === "history" ? styles.active : ""}`} onClick={() => setTab("history")}>レッスン履歴</button>
-        <button className={`${styles.tab} ${tab === "badges" ? styles.active : ""}`} onClick={() => setTab("badges")}>マイバッジ</button>
+        <button className={`${styles.tab} ${tab === "notices" ? styles.active : ""}`} onClick={() => setTab("notices")}>{tr("お知らせ")}</button>
+        <button className={`${styles.tab} ${tab === "history" ? styles.active : ""}`} onClick={() => setTab("history")}>{tr("レッスン履歴")}</button>
+        <button className={`${styles.tab} ${tab === "badges" ? styles.active : ""}`} onClick={() => setTab("badges")}>{tr("マイバッジ")}</button>
       </div>
       </div>
 
@@ -627,7 +638,7 @@ export default function MyPage() {
       {tab === "notices" && (
         <div className={styles.section}>
           {notices.length === 0 ? (
-            <p className={styles.empty}>お知らせはありません</p>
+            <p className={styles.empty}>{tr("お知らせはありません")}</p>
           ) : notices.map((n) => (
             <NoticeItem
               key={n.id}
@@ -646,22 +657,22 @@ export default function MyPage() {
         <div className={styles.section}>
           {/* モード切替 */}
           <div className={styles.historyModeToggle}>
-            <button className={`${styles.historyModeBtn} ${historyMode === "month" ? styles.active : ""}`} onClick={() => setHistoryMode("month")}>月</button>
-            <button className={`${styles.historyModeBtn} ${historyMode === "year" ? styles.active : ""}`} onClick={() => setHistoryMode("year")}>年</button>
+            <button className={`${styles.historyModeBtn} ${historyMode === "month" ? styles.active : ""}`} onClick={() => setHistoryMode("month")}>{tr("月")}</button>
+            <button className={`${styles.historyModeBtn} ${historyMode === "year" ? styles.active : ""}`} onClick={() => setHistoryMode("year")}>{tr("年")}</button>
           </div>
 
           {historyMode === "month" ? (
             <>
               <div className={styles.monthNav}>
                 <button className={styles.monthNavBtn} onClick={() => changeHistoryMonth(-1)}>‹</button>
-                <span className={styles.monthNavLabel}>{historyMonth.split("-").map(Number).join("年")}月</span>
+                <span className={styles.monthNavLabel}>{fmtYearMonth(historyMonth)}</span>
                 <button className={styles.monthNavBtn} onClick={() => changeHistoryMonth(1)} disabled={historyMonth >= yearMonth}>›</button>
               </div>
               <div className={styles.historyMeta}>
-                <span className={styles.historyCount}>{parseInt(historyMonth.split("-")[1])}月レッスン {fmtCount(calcCount(historyMonthData))}</span>
+                <span className={styles.historyCount}>{EN ? `${fmtMonth(parseInt(historyMonth.split("-")[1]), true)} lessons: ` : `${parseInt(historyMonth.split("-")[1])}月レッスン `}{fmtCount(calcCount(historyMonthData))}</span>
               </div>
               {historyMonthData.length === 0 ? (
-                <p className={styles.empty}>この月の履歴がありません</p>
+                <p className={styles.empty}>{tr("この月の履歴がありません")}</p>
               ) : (() => {
                 const dateGroups: { date: string; items: Attendance[] }[] = [];
                 historyMonthData.forEach((a) => {
@@ -679,9 +690,9 @@ export default function MyPage() {
                             <div className={styles.historyRow}>
                               <span className={styles.historyType}>
                                 {a.lesson_time && <span className={styles.historyLessonTime}>{a.lesson_time}　</span>}
-                                {a.lesson_title ?? { 通常: "通常レッスン", 祝日: "祝日レッスン", 個人: "個人レッスン", 特別: "特別レッスン" }[a.lesson_type] ?? a.lesson_type}
+                                {tr(a.lesson_title ?? { 通常: "通常レッスン", 祝日: "祝日レッスン", 個人: "個人レッスン", 特別: "特別レッスン" }[a.lesson_type] ?? a.lesson_type)}
                               </span>
-                              {a.lesson_teacher && <span className={styles.historyTeacher}>{a.lesson_teacher}</span>}
+                              {a.lesson_teacher && <span className={styles.historyTeacher}>{tr(a.lesson_teacher)}</span>}
                             </div>
                           </div>
                         ))}
@@ -695,7 +706,7 @@ export default function MyPage() {
             <>
               <div className={styles.monthNav}>
                 <button className={styles.monthNavBtn} onClick={() => setHistoryYear((y) => y - 1)} disabled={historyYear <= getHistoryMinYear()}>‹</button>
-                <span className={styles.monthNavLabel}>{historyYear}年</span>
+                <span className={styles.monthNavLabel}>{historyYear}{EN ? "" : "年"}</span>
                 <button className={styles.monthNavBtn} onClick={() => setHistoryYear((y) => y + 1)} disabled={historyYear >= new Date().getFullYear()}>›</button>
               </div>
               <div className={styles.historyList}>
@@ -712,7 +723,7 @@ export default function MyPage() {
                   return (
                     <div key={ym} className={styles.historyYearMonth}>
                       <button className={styles.historyYearMonthBtn} onClick={() => toggleMonth(ym)} disabled={monthItems.length === 0}>
-                        <span className={styles.historyYearMonthLabel}>{m}月</span>
+                        <span className={styles.historyYearMonthLabel}>{fmtMonth(m)}</span>
                         <span className={styles.historyYearMonthCount}>{fmtCount(calcCount(monthItems))}</span>
                         {monthItems.length > 0 && <span className={styles.historyYearMonthArrow}>{isOpen ? "▲" : "▼"}</span>}
                       </button>
@@ -726,9 +737,9 @@ export default function MyPage() {
                                   <div className={styles.historyRow}>
                                     <span className={styles.historyType}>
                                       {a.lesson_time && <span className={styles.historyLessonTime}>{a.lesson_time}　</span>}
-                                      {a.lesson_title ?? { 通常: "通常レッスン", 祝日: "祝日レッスン", 個人: "個人レッスン", 特別: "特別レッスン" }[a.lesson_type] ?? a.lesson_type}
+                                      {tr(a.lesson_title ?? { 通常: "通常レッスン", 祝日: "祝日レッスン", 個人: "個人レッスン", 特別: "特別レッスン" }[a.lesson_type] ?? a.lesson_type)}
                                     </span>
-                                    {a.lesson_teacher && <span className={styles.historyTeacher}>{a.lesson_teacher}</span>}
+                                    {a.lesson_teacher && <span className={styles.historyTeacher}>{tr(a.lesson_teacher)}</span>}
                                   </div>
                                 </div>
                               ))}
@@ -755,7 +766,7 @@ export default function MyPage() {
                   onClick={() => setBadgeYear((y) => y - 1)}
                   disabled={badgeYear <= getBadgeMinYear()}
                 >‹</button>
-                <span className={styles.monthNavLabel}>{badgeYear}年</span>
+                <span className={styles.monthNavLabel}>{badgeYear}{EN ? "" : "年"}</span>
                 <button
                   className={styles.monthNavBtn}
                   onClick={() => setBadgeYear((y) => y + 1)}
@@ -774,7 +785,7 @@ export default function MyPage() {
                       {b ? (
                         <img src={`/images/badges/badge-${b.badge}.png`} alt={b.badge} className={styles.badgeImg} />
                       ) : (
-                        <span className={styles.badgeEmpty}>{m}月</span>
+                        <span className={styles.badgeEmpty}>{fmtMonth(m)}</span>
                       )}
                     </div>
                   );
