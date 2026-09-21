@@ -135,7 +135,7 @@ export default function About({ lang = "ja" }: { lang?: Lang }) {
           </p>
           {lang === "en" && (
             <div className={styles.enPhotos}>
-              <Image className={styles.enDuo} src="/images/home/yoshiki-kazuki-profile.jpg" alt="Yoshiki Aoyama and Kazuki Momma" width={720} height={480} />
+              <Image className={styles.enDuo} src="/images/home/yoshiki-kazuki-profile.jpg" alt="Yoshiki Aoyama and Kazuki Monma" width={720} height={480} />
             </div>
           )}
           {lang === "ja" && (
