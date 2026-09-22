@@ -1,3 +1,8 @@
+---
+name: push
+description: 未コミットの変更をコミットして、必ず origin の main に push する（ブランチには push しない）。
+---
+
 # main に push
 
 未コミットの変更をコミットして、**必ず origin の main に**push する。ブランチは作らない・push しない。

@@ -429,7 +429,7 @@ export default function TrialPage() {
                       className={styles.showMoreButton}
                       onClick={() => setShowAllDates(true)}
                     >
-                      {EN ? "Show more dates" : `さらに日程を表示（残り${hiddenCount}日）`}
+                      {tr("さらに日程を表示")}
                     </button>
                   )}
                 </div>
