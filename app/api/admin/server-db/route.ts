@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { requireAdmin } from "@/lib/adminAuth";
+import { DEMO_MODE } from "@/lib/demo";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
+  if (DEMO_MODE) return new NextResponse(null, { status: 404 }); // デモには出さない
   if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { data, error } = await supabaseAdmin
     .from("server_db_costs")
@@ -15,6 +17,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  if (DEMO_MODE) return new NextResponse(null, { status: 404 }); // デモには出さない
   if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { year_month, amount, received_at, note } = await req.json();
   if (!year_month || !amount) return NextResponse.json({ error: "year_month と amount は必須です" }, { status: 400 });
@@ -26,6 +29,7 @@ export async function POST(req: Request) {
 }
 
 export async function PATCH(req: Request) {
+  if (DEMO_MODE) return new NextResponse(null, { status: 404 }); // デモには出さない
   if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id, received_at, amount, note } = await req.json();
   if (!id) return NextResponse.json({ error: "id は必須です" }, { status: 400 });
@@ -39,6 +43,7 @@ export async function PATCH(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  if (DEMO_MODE) return new NextResponse(null, { status: 404 }); // デモには出さない
   if (!await requireAdmin(req)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await req.json();
   if (!id) return NextResponse.json({ error: "id は必須です" }, { status: 400 });

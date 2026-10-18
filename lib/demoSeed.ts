@@ -16,7 +16,6 @@ import {
   DEMO_NOTICES_TEXT,
   DEMO_PEOPLE_TEXT,
   DEMO_POSTS_TEXT,
-  DEMO_SERVER_COST_NOTE,
 } from "./demoSeedText";
 
 // ── 料金・バッジ計算 ────────────────────────────────
@@ -284,9 +283,7 @@ export function buildDemoData(today: string) {
     { section: "closed", content: DEMO_LESSON_INFO_TEXT.closed.ja },
   ];
 
-  const serverDbCosts = months.slice(0, -1).map((ym, i) => ({ year_month: ym, amount: 2500 + i * 100, received_at: `${ym}-25`, note: DEMO_SERVER_COST_NOTE.ja }));
-
-  return { people: PEOPLE, users, attendances, badges, notices, reactions, categories, posts, hpNews, lessonInfo, serverDbCosts };
+  return { people: PEOPLE, users, attendances, badges, notices, reactions, categories, posts, hpNews, lessonInfo };
 }
 
 // ── データベースへの書き込み ────────────────────────
@@ -336,7 +333,6 @@ export async function resetDemoData(client: SupabaseClient, today = todayInTokyo
 
   await insertAll(client, "hp_news", data.hpNews);
   await insertAll(client, "lesson_info", data.lessonInfo);
-  await insertAll(client, "server_db_costs", data.serverDbCosts);
 
   return {
     today,

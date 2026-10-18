@@ -141,14 +141,16 @@ export default function AdminPanel() {
     if (typeof window !== "undefined") {
       const hash = window.location.hash.replace("#", "") as Tab;
       const valid: Tab[] = ["attendance", "ledger", "users", "message", "direct", "server_db", "report", "hp_news", "blog", "lesson_info"];
-      if (valid.includes(hash)) return hash;
+      if (valid.includes(hash) && !(DEMO_MODE && hash === "server_db")) return hash;
     }
     return "attendance";
   });
 
   const changeTab = (t: Tab) => {
     setTab(t);
-    window.location.hash = t;
+    // デモではタブの切り替えを履歴に残さない（ブラウザの「戻る」1回でデモのトップへ戻れるように）
+    if (DEMO_MODE) history.replaceState(null, "", `#${t}`);
+    else window.location.hash = t;
   };
 
   // ユーザー一覧
@@ -973,7 +975,10 @@ export default function AdminPanel() {
           <button className={`${styles.tab} ${tab === "blog" ? styles.active : ""}`} onClick={() => changeTab("blog")}>{tr("ブログ")}</button>
           {/* <button className={`${styles.tab} ${tab === "message" ? styles.active : ""}`} onClick={() => changeTab("message")}>メッセージ</button> */}
           <button className={`${styles.tab} ${tab === "direct" ? styles.active : ""}`} onClick={() => changeTab("direct")}>{tr("個別メッセージ")}</button>
-          <button className={`${styles.tab} ${tab === "server_db" ? styles.active : ""}`} onClick={() => changeTab("server_db")}>{tr("サーバーDB")}</button>
+          {/* サーバー・DB費用は教室の内部管理なので、デモには出さない */}
+          {!DEMO_MODE && (
+            <button className={`${styles.tab} ${tab === "server_db" ? styles.active : ""}`} onClick={() => changeTab("server_db")}>{tr("サーバーDB")}</button>
+          )}
         </div>
       </div>
 
@@ -1835,7 +1840,7 @@ export default function AdminPanel() {
       )}
 
       {/* ━━━ サーバーDB ━━━ */}
-      {tab === "server_db" && (
+      {tab === "server_db" && !DEMO_MODE && (
         <div className={styles.section}>
           <p className={styles.sectionTitle}>{tr("サーバーDB費用")}</p>
           {serverDbRecords.length === 0 ? (

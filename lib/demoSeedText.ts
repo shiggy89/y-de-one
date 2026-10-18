@@ -116,8 +116,6 @@ export const DEMO_LESSON_INFO_TEXT = {
   closed: b("（サンプル）今月の祝日はレッスンがありません。", "Sample notice: no lessons on the public holiday this month."),
 };
 
-export const DEMO_SERVER_COST_NOTE = b("サンプルのサーバー・データベース費用", "Sample server and database cost");
-
 // 英語デモでの表示用：日本語 → 英語
 export const DEMO_DATA_EN: Record<string, string> = Object.fromEntries(
   [
@@ -129,6 +127,5 @@ export const DEMO_DATA_EN: Record<string, string> = Object.fromEntries(
     ...DEMO_HP_NEWS_TEXT.flatMap((n) => [n.title, n.content]),
     DEMO_LESSON_INFO_TEXT.change,
     DEMO_LESSON_INFO_TEXT.closed,
-    DEMO_SERVER_COST_NOTE,
   ].map(({ ja, en }) => [ja, en])
 );
