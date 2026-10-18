@@ -8,6 +8,7 @@
 
 import { DEMO_LANG_COOKIE, DEMO_MODE } from "./demo";
 import { SANDBOX_EN } from "./sandboxEn";
+import { DEMO_DATA_EN } from "./demoSeedText";
 
 function readEnglish(): boolean {
   if (!DEMO_MODE || typeof document === "undefined") return false;
@@ -15,6 +16,24 @@ function readEnglish(): boolean {
 }
 
 export const EN = readEnglish();
+
+// サンプルデータ（生徒の名前・お知らせなど）はデータベースに日本語で入っている。
+// 英語デモでは、API の JSON を受け取った時点で、対訳のある文言だけ英語に置き換える。
+function translateData(value: unknown): unknown {
+  if (typeof value === "string") return DEMO_DATA_EN[value] ?? value;
+  if (Array.isArray(value)) return value.map(translateData);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, translateData(v)]));
+  }
+  return value;
+}
+
+if (EN) {
+  const json = Response.prototype.json;
+  Response.prototype.json = async function () {
+    return translateData(await json.call(this));
+  };
+}
 
 export const tr = (ja: string): string => (EN ? (SANDBOX_EN[ja] ?? ja) : ja);
 

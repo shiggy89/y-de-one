@@ -55,14 +55,58 @@
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
 }
 
-.screen {
-  display: block;
+.screenWrap {
+  display: flex;
+  flex-direction: column;
   width: 390px;
   height: min(780px, calc(100vh - 140px));
   min-height: 560px;
-  border: 0;
+  overflow: hidden;
   border-radius: 34px;
   background: #fff;
+}
+
+.statusBar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 40px;
+  padding: 6px 30px 0;
+  box-sizing: border-box;
+  color: #111;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.statusIcons {
+  display: flex;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.screen {
+  display: block;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  background: #fff;
+}
+
+.homeBar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+}
+
+.homeBar span {
+  width: 120px;
+  height: 5px;
+  border-radius: 999px;
+  background: #111;
 }
 
 @media (max-width: 900px) {

@@ -4,10 +4,20 @@
 // 毎日リセットしても、いつ見ても最新の月に出席がある状態になる。
 //
 // lesson_type / lesson_title は本番と同じ日本語の値を使う（料金・バッジの判定がこの値に依存するため）。
+// 名前やお知らせの文言は lib/demoSeedText.ts にまとめてある（日本語で入れ、英語デモでは表示時に置き換える）。
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { DEMO_LINE_USER_IDS } from "./demo";
 import { getLessonsForDate } from "./lessons";
+import {
+  DEMO_CATEGORIES_TEXT,
+  DEMO_HP_NEWS_TEXT,
+  DEMO_LESSON_INFO_TEXT,
+  DEMO_NOTICES_TEXT,
+  DEMO_PEOPLE_TEXT,
+  DEMO_POSTS_TEXT,
+  DEMO_SERVER_COST_NOTE,
+} from "./demoSeedText";
 
 // ── 料金・バッジ計算 ────────────────────────────────
 // app/api/admin/attendance/route.ts の calcPrice / calcBadge と同じ規則（2026年9月から新料金）。
@@ -88,8 +98,6 @@ function pick<T>(items: T[], count: number, random: () => number): T[] {
 
 // ── 生徒 ───────────────────────────────────────────
 type Person = {
-  name: string;
-  display: string;
   status: "member" | "trial" | "teacher";
   isAdmin?: boolean;
   lineUserId?: string;
@@ -99,30 +107,31 @@ type Person = {
   privateMinutes?: number[]; // 個人レッスン（分）を月ごとに1回ずつ
 };
 
-// 並びがそのまま users.id になる（14 番目が管理者：SUPER_ADMIN_IDS = [14, 15] に合わせる）
+// 並びがそのまま users.id になる（14 番目が管理者：SUPER_ADMIN_IDS = [14, 15] に合わせる）。
+// 名前は同じ並びの DEMO_PEOPLE_TEXT から取る。
 const PEOPLE: Person[] = [
-  { name: "Emily Carter", display: "Emily C.", status: "member", standard: [6, 8, 9, 5], fixed: 1 },
-  { name: "Daniel Kim", display: "Daniel", status: "member", standard: [3, 4, 4, 3] },
-  { name: "Sofia Rossi", display: "Sofia R.", status: "member", standard: [12, 13, 12, 9], fixed: 2 },
-  { name: "Liam Foster", display: "Liam", status: "member", standard: [1, 2, 2, 1] },
-  { name: "Hannah Weber", display: "Hannah W.", status: "member", standard: [8, 8, 9, 6], privateMinutes: [15, 30] },
-  { name: "Noah Bennett", display: "Noah", status: "member", standard: [0, 0, 3, 2] },
-  { name: "Olivia Martin", display: "Olivia M.", status: "member", standard: [10, 11, 12, 8], fixed: 1 },
-  { name: "Ethan Brooks", display: "Ethan", status: "member", standard: [5, 6, 4, 4] },
-  { name: "Grace Nakamura", display: "Grace N.", status: "member", standard: [14, 16, 15, 11], fixed: 2 },
-  { name: "Lucas Meyer", display: "Lucas", status: "member", standard: [2, 3, 3, 2] },
-  { name: "Mia Sanchez", display: "Mia S.", status: "member", standard: [7, 9, 8, 6], fixed: 1 },
-  { name: "Jack Turner", display: "Jack", status: "member", standard: [0, 1, 2, 1] },
-  { name: "Chloe Dubois", display: "Chloe D.", status: "member", standard: [4, 4, 5, 3] },
-  { name: "Demo Admin", display: "Demo Admin", status: "teacher", isAdmin: true, lineUserId: DEMO_LINE_USER_IDS.admin },
+  { status: "member", standard: [6, 8, 9, 5], fixed: 1 },
+  { status: "member", standard: [3, 4, 4, 3] },
+  { status: "member", standard: [12, 13, 12, 9], fixed: 2 },
+  { status: "member", standard: [1, 2, 2, 1] },
+  { status: "member", standard: [8, 8, 9, 6], privateMinutes: [15, 30] },
+  { status: "member", standard: [0, 0, 3, 2] },
+  { status: "member", standard: [10, 11, 12, 8], fixed: 1 },
+  { status: "member", standard: [5, 6, 4, 4] },
+  { status: "member", standard: [14, 16, 15, 11], fixed: 2 },
+  { status: "member", standard: [2, 3, 3, 2] },
+  { status: "member", standard: [7, 9, 8, 6], fixed: 1 },
+  { status: "member", standard: [0, 1, 2, 1] },
+  { status: "member", standard: [4, 4, 5, 3] },
+  { status: "teacher", isAdmin: true, lineUserId: DEMO_LINE_USER_IDS.admin },
   // 生徒のデモ用アカウント：先月シルバー、今月ブロンズ → 「あと◯回でシルバー継続」が表示される
-  { name: "Demo Member", display: "Demo Member", status: "member", lineUserId: DEMO_LINE_USER_IDS.member, standard: [4, 6, 9, 5], fixed: 1, privateMinutes: [15] },
-  { name: "Ava Thompson", display: "Ava T.", status: "member", standard: [21, 41, 24, 17], fixed: 2 },
-  { name: "Ryan Cooper", display: "Ryan", status: "member", standard: [9, 10, 10, 7] },
-  { name: "Zoe Adams", display: "Zoe", status: "member", standard: [3, 5, 6, 4], fixed: 1 },
-  { name: "Oliver Hayes", display: "Oliver", status: "trial" },
-  { name: "Priya Shah", display: "Priya", status: "trial" },
-  { name: "Marco Bianchi", display: "Marco", status: "trial" },
+  { status: "member", lineUserId: DEMO_LINE_USER_IDS.member, standard: [4, 6, 9, 5], fixed: 1, privateMinutes: [15] },
+  { status: "member", standard: [21, 41, 24, 17], fixed: 2 },
+  { status: "member", standard: [9, 10, 10, 7] },
+  { status: "member", standard: [3, 5, 6, 4], fixed: 1 },
+  { status: "trial" },
+  { status: "trial" },
+  { status: "trial" },
 ];
 
 export const DEMO_MEMBER_INDEX = PEOPLE.findIndex((p) => p.lineUserId === DEMO_LINE_USER_IDS.member);
@@ -221,10 +230,10 @@ export function buildDemoData(today: string) {
     const current = calcBadge(monthlyCount(i, currentMonth));
     return {
       line_user_id: p.lineUserId ?? lineIdFor(i),
-      name: p.name,
+      name: DEMO_PEOPLE_TEXT[i].name.ja,
       status: p.status,
       is_admin: p.isAdmin ?? false,
-      line_display_name: p.display,
+      line_display_name: DEMO_PEOPLE_TEXT[i].display.ja,
       current_badge: current,
       // 生徒のデモ用アカウントは、初回のマイページで獲得ポップアップが出るよう「未通知」にしておく
       badge_notified: i === DEMO_MEMBER_INDEX ? false : true,
@@ -241,12 +250,8 @@ export function buildDemoData(today: string) {
 
   const daysAgo = (n: number, hour = 10) => `${shiftDays(today, -n)}T${String(hour).padStart(2, "0")}:00:00+09:00`;
 
-  const notices = [
-    { title: "Welcome to the Y-de-ONE demo", body: "This is a sandbox with fictional students and sample data. Feel free to look around, edit or delete anything. Everything resets every day.", author: "Y-de-ONE", created_at: daysAgo(1) },
-    { title: "Autumn workshop: sign-ups are open", body: "A one-day workshop for all levels will be held this autumn. Ask a teacher after class if you would like to join.", author: "Y-de-ONE", created_at: daysAgo(6) },
-    { title: "Reminder: monthly studio fee", body: "The monthly studio fee of 500 yen is paid in cash at your first lesson of the month. Lesson fees get cheaper the more you attend in a month.", author: "Y-de-ONE", created_at: daysAgo(15) },
-    { title: "The studio is closed on Mondays", body: "Regular lessons are held from Tuesday to Sunday. Changes to the schedule are posted here and on the website.", author: "Y-de-ONE", created_at: daysAgo(30) },
-  ];
+  const noticeDaysAgo = [1, 6, 15, 30];
+  const notices = DEMO_NOTICES_TEXT.map((n, i) => ({ title: n.title.ja, body: n.body.ja, author: "Y-de-ONE", created_at: daysAgo(noticeDaysAgo[i]) }));
 
   // お知らせへのリアクション（notice の添字, 生徒の添字, 絵文字）
   const reactions: { notice_index: number; user_index: number; emoji: string }[] = [
@@ -257,28 +262,29 @@ export function buildDemoData(today: string) {
   ].map(([notice_index, user_index, emoji]) => ({ notice_index: notice_index as number, user_index: user_index as number, emoji: emoji as string }));
 
   const categories = [
-    { name: "Studio diary", slug: "diary" },
-    { name: "Ballet tips", slug: "tips" },
+    { name: DEMO_CATEGORIES_TEXT[0].ja, slug: "diary" },
+    { name: DEMO_CATEGORIES_TEXT[1].ja, slug: "tips" },
   ];
 
   const posts = [
-    { title: "A quiet Tuesday afternoon at the studio", type: "diary", slug: "tuesday-afternoon", category_index: 0, published_at: daysAgo(3), content: "<p>Sunlight, a warm barre and a small class. Days like this are why we teach.</p>" },
-    { title: "Five tips for your first ballet class", type: "seo", slug: "first-ballet-class-tips", category_index: 1, published_at: daysAgo(12), content: "<h2>Wear what you can move in</h2><p>Comfortable clothes and socks are all you need for a trial lesson.</p><h2>Arrive ten minutes early</h2><p>Take your time to get changed and say hello to your teacher.</p>" },
-    { title: "Draft: ideas for the winter showcase", type: "diary", slug: null, category_index: 0, published_at: null, status: "draft", content: "<p>Notes for later.</p>" },
+    { title: DEMO_POSTS_TEXT[0].title.ja, type: "diary", slug: "tuesday-afternoon", category_index: 0, published_at: daysAgo(3), content: DEMO_POSTS_TEXT[0].content.ja },
+    { title: DEMO_POSTS_TEXT[1].title.ja, type: "seo", slug: "first-ballet-class-tips", category_index: 1, published_at: daysAgo(12), content: DEMO_POSTS_TEXT[1].content.ja },
+    { title: DEMO_POSTS_TEXT[2].title.ja, type: "diary", slug: null, category_index: 0, published_at: null, status: "draft", content: DEMO_POSTS_TEXT[2].content.ja },
   ].map((p) => ({ status: "published", ...p }));
 
-  const hpNews = [
-    { title: "New autumn schedule", content: "The autumn schedule starts this month.\nPlease check the class page for details.", category: "Schedule", published_at: daysAgo(5) },
-    { title: "Trial lessons are open", content: "Trial lessons for adults are open all year.\nBook from the trial lesson form.", category: "Info", published_at: daysAgo(20) },
-    { title: "Studio closed for a public holiday", content: "The studio will be closed on the public holiday.\nThank you for your understanding.", category: "Closure", published_at: daysAgo(40) },
+  const hpNewsMeta = [
+    { category: "お知らせ", days: 5 },
+    { category: "お知らせ", days: 20 },
+    { category: "休講・振替", days: 40 },
   ];
+  const hpNews = DEMO_HP_NEWS_TEXT.map((n, i) => ({ title: n.title.ja, content: n.content.ja, category: hpNewsMeta[i].category, published_at: daysAgo(hpNewsMeta[i].days) }));
 
   const lessonInfo = [
-    { section: "change", content: "Sample notice: the Saturday lesson starts 30 minutes later this week." },
-    { section: "closed", content: "Sample notice: no lessons on the public holiday this month." },
+    { section: "change", content: DEMO_LESSON_INFO_TEXT.change.ja },
+    { section: "closed", content: DEMO_LESSON_INFO_TEXT.closed.ja },
   ];
 
-  const serverDbCosts = months.slice(0, -1).map((ym, i) => ({ year_month: ym, amount: 2500 + i * 100, received_at: `${ym}-25`, note: "Sample server and database cost" }));
+  const serverDbCosts = months.slice(0, -1).map((ym, i) => ({ year_month: ym, amount: 2500 + i * 100, received_at: `${ym}-25`, note: DEMO_SERVER_COST_NOTE.ja }));
 
   return { people: PEOPLE, users, attendances, badges, notices, reactions, categories, posts, hpNews, lessonInfo, serverDbCosts };
 }

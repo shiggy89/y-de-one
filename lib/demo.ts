@@ -21,9 +21,9 @@ export const DEMO_LINE_USER_IDS = {
 } as const;
 
 export const DEMO_DISPLAY_NAMES: Record<DemoRole, string> = {
-  admin: "Demo Admin",
-  member: "Demo Member",
-  guest: "Demo Guest",
+  admin: "デモ管理者",
+  member: "デモ生徒",
+  guest: "デモゲスト",
 };
 
 // 体験レッスンの申込み先。本番は公式LINE、デモは LINE なしで動く申込みフォーム。

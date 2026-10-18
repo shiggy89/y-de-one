@@ -50,7 +50,21 @@ export default async function PhonePage({ searchParams }: { searchParams: Promis
         </Link>
       </div>
       <div className={styles.phone}>
-        <iframe className={styles.screen} src={path} title={c.frameTitle} />
+        {/* 実機と同じく、上にステータスバー・下にホームバーの帯を置き、角の丸みに中身がかからないようにする */}
+        <div className={styles.screenWrap}>
+          <div className={styles.statusBar} aria-hidden="true">
+            <span>9:41</span>
+            <span className={styles.statusIcons}>
+              <i className="fa-solid fa-signal" />
+              <i className="fa-solid fa-wifi" />
+              <i className="fa-solid fa-battery-full" />
+            </span>
+          </div>
+          <iframe className={styles.screen} src={path} title={c.frameTitle} />
+          <div className={styles.homeBar} aria-hidden="true">
+            <span />
+          </div>
+        </div>
       </div>
     </main>
   );

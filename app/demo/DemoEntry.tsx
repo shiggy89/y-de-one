@@ -44,9 +44,9 @@ const COPY = {
       },
     ],
     websiteTitle: "教室のホームページ",
-    websiteBody: "クラス・料金・スタジオ・アクセスなどを載せた、Y-de-ONE の公式ホームページです。日本語版と英語版があります。",
+    websiteBody: "クラス・料金・スタジオ・アクセスなどを載せた、Y-de-ONE の公式ホームページです。",
     websitePrimary: { label: "日本語のホームページ", href: homePath("ja") },
-    websiteSecondary: { label: "英語のホームページ（English）", href: homePath("en") },
+    websiteSecondary: null,
     lineTitle: "LINE ミニアプリの仕組み",
     lineLead: "生徒さんとのやりとりは、すべて教室の LINE 公式アカウントの中で完結します。",
     lineSteps: [
@@ -185,9 +185,11 @@ export default function DemoEntry({ lang }: { lang: DemoLang }) {
             <Link className={styles.websitePrimary} href={c.websitePrimary.href}>
               {c.websitePrimary.label}
             </Link>
-            <Link className={styles.websiteSecondary} href={c.websiteSecondary.href}>
-              {c.websiteSecondary.label}
-            </Link>
+            {c.websiteSecondary && (
+              <Link className={styles.websiteSecondary} href={c.websiteSecondary.href}>
+                {c.websiteSecondary.label}
+              </Link>
+            )}
           </div>
         </section>
 
