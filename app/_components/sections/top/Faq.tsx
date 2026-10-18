@@ -5,7 +5,7 @@ import Image from "next/image";
 import Heading2 from "../common/Heading2";
 import styles from "./Faq.module.css";
 import ctaStyles from "../common/CtaButton.module.css";
-import { TRIAL_ENTRY_URL } from "@/lib/demo";
+import { trialEntryUrl } from "@/lib/demo";
 import { localePath, makeT, type Lang } from "@/lib/i18n";
 
 type FaqItemProps = {
@@ -147,7 +147,7 @@ export default function Faq({ lang = "ja" }: { lang?: Lang }) {
           />
         </div>
         <div className={ctaStyles.centerBtn}>
-          <a href={TRIAL_ENTRY_URL} className={styles.lastBtn}>{t("体験レッスンはこちら", "Book a trial lesson")} <i className="fa-solid fa-arrow-up-right-from-square"></i></a>
+          <a href={trialEntryUrl(lang)} className={styles.lastBtn}>{t("体験レッスンはこちら", "Book a trial lesson")} <i className="fa-solid fa-arrow-up-right-from-square"></i></a>
           <span className={ctaStyles.lineAddText}>
             <i className="fa-brands fa-line"></i>
             {t("LINEから簡単に予約できます", "Book in a minute through LINE, Japan's main messaging app")}

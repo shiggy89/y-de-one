@@ -1,6 +1,6 @@
 import Link from "next/link";
 import styles from "./CtaButton.module.css";
-import { TRIAL_ENTRY_URL } from "@/lib/demo";
+import { trialEntryUrl } from "@/lib/demo";
 import { localePath, makeT, type Lang } from "@/lib/i18n";
 
 type Props = {
@@ -12,13 +12,14 @@ type Props = {
 };
 
 export default function SectionCtaButton({
-  href = TRIAL_ENTRY_URL,
+  href,
   label,
   note,
   className,
   lang = "ja",
 }: Props) {
   const t = makeT(lang);
+  href ??= trialEntryUrl(lang);
   label ??= t("体験レッスンはこちら", "Book a trial lesson") as string;
   note ??= t("LINEから簡単に予約できます", "Book in a minute through LINE, Japan's main messaging app") as string;
   return (

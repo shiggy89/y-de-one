@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./Footer.module.css";
-import { DEMO_MODE, TRIAL_ENTRY_URL } from "@/lib/demo";
+import { DEMO_MODE, trialEntryUrl } from "@/lib/demo";
 import { homePath, localePath, makeT, type Lang } from "@/lib/i18n";
 
 export default function Footer({ lang = "ja" }: { lang?: Lang }) {
@@ -105,7 +105,7 @@ export default function Footer({ lang = "ja" }: { lang?: Lang }) {
             <li><Link href={localePath(lang, "/access")}>{t("アクセス", "Access")}</Link></li>
             {!en && <li><Link href="/news">お知らせ</Link></li>}
             <li><Link href={localePath(lang, "/contact")}>{t("お問い合わせ", "Contact")}</Link></li>
-            <li><a href={TRIAL_ENTRY_URL} {...(DEMO_MODE ? {} : { target: "_blank", rel: "noopener noreferrer" })}>{t("体験レッスン", "Trial lesson")}</a></li>
+            <li><a href={trialEntryUrl(lang)} {...(DEMO_MODE ? {} : { target: "_blank", rel: "noopener noreferrer" })}>{t("体験レッスン", "Trial lesson")}</a></li>
           </ul>
         </div>
       </div>

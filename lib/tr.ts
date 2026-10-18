@@ -1,13 +1,20 @@
 // デモ環境のアプリ画面（管理画面・マイページ・フォーム）を英語で見せるための翻訳。
-// tr("日本語") は、デモ環境では辞書の英語を返し、それ以外（本番）は日本語のまま返す。
+// tr("日本語") は、英語の入口（/en）から入ったデモでは辞書の英語を返し、
+// 日本語の入口（/）から入ったデモと本番では日本語のまま返す。
+// 言語は Cookie（demo_lang）で決まるので、デモのアプリ画面はブラウザだけで描画する（DemoClientOnly）。
 // 辞書にない文言は日本語のまま表示されるので、訳し漏れがあっても画面は壊れない。
 //
 // 料金・バッジの判定に使う値（lesson_type の "通常" など）は翻訳しない。表示するときだけ tr() を通す。
 
-import { DEMO_MODE } from "./demo";
+import { DEMO_LANG_COOKIE, DEMO_MODE } from "./demo";
 import { SANDBOX_EN } from "./sandboxEn";
 
-export const EN = DEMO_MODE;
+function readEnglish(): boolean {
+  if (!DEMO_MODE || typeof document === "undefined") return false;
+  return new RegExp(`(?:^|;\\s*)${DEMO_LANG_COOKIE}=en(?:;|$)`).test(document.cookie);
+}
+
+export const EN = readEnglish();
 
 export const tr = (ja: string): string => (EN ? (SANDBOX_EN[ja] ?? ja) : ja);
 

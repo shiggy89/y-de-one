@@ -6,7 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import styles from "./Header.module.css";
 import { useNewsBadge } from "../../hooks/useNewsBadge";
-import { DEMO_MODE, TRIAL_ENTRY_URL } from "@/lib/demo";
+import { DEMO_MODE, trialEntryUrl } from "@/lib/demo";
 import { alternatePath, homePath, localePath, makeT, type Lang } from "@/lib/i18n";
 
 type NavGrandchild = { label: string; href: string };
@@ -44,7 +44,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "アクセス", href: "/access" },
   { label: "お知らせ", href: "/news" },
   { label: "お問い合わせ", href: "/contact" },
-  { label: "体験レッスン", href: TRIAL_ENTRY_URL },
+  { label: "体験レッスン", href: trialEntryUrl("ja") },
 ];
 
 const NAV_ITEMS_EN: NavItem[] = [
@@ -72,7 +72,7 @@ const NAV_ITEMS_EN: NavItem[] = [
   },
   { label: "Access", href: "/access" },
   { label: "Contact", href: "/contact" },
-  { label: "Trial lesson", href: TRIAL_ENTRY_URL },
+  { label: "Trial lesson", href: trialEntryUrl("en") },
 ];
 
 export default function Header({ lang = "ja" }: { lang?: Lang }) {
@@ -175,7 +175,7 @@ export default function Header({ lang = "ja" }: { lang?: Lang }) {
         <nav className="header-right">
           <ul className={`${styles.globalNav} ${isOpen ? styles.isOpen : ""}`}>
             {navItems.map((item) => {
-              const isCta = item.href === TRIAL_ENTRY_URL;
+              const isCta = item.href === trialEntryUrl(lang);
 
               if (item.children) {
                 const isDropdownOpen = openDropdowns.has(item.label);

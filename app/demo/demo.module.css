@@ -273,3 +273,19 @@
     grid-template-columns: 1fr;
   }
 }
+
+.langBar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.langSwitch {
+  padding: 6px 14px;
+  border: 1px solid #0090e8;
+  border-radius: 999px;
+  color: #0090e8;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}

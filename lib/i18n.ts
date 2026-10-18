@@ -28,20 +28,23 @@ export function localePath(lang: Lang, path: string): string {
   if (lang !== "en" || !path.startsWith("/")) return path;
   const base = path.split(/[?#]/)[0];
   if (!EN_PAGES.has(base)) return path;
-  return base === "/" ? `/en${path.slice(1)}` : `/en${path}`;
+  return base === "/" ? `${homePath("en")}${path.slice(1)}` : `/en${path}`;
 }
 
-// 各言語のホームページの URL。デモ環境では「/」が入口ページなので、日本語のホームは /ja。
+// 各言語のホームページの URL。デモ環境では「/」と「/en」が入口ページなので、
+// 日本語のホームは /ja、英語のホームは /en/home。
 export function homePath(lang: Lang): string {
-  return lang === "en" ? "/en" : DEMO_MODE ? "/ja" : "/";
+  if (lang === "en") return DEMO_MODE ? "/en/home" : "/en";
+  return DEMO_MODE ? "/ja" : "/";
 }
 
 // 現在のパスの、もう一方の言語での URL（言語切り替えリンク用）
 export function alternatePath(lang: Lang, pathname: string): string {
   if (lang === "en") {
+    if (pathname === homePath("en")) return homePath("ja");
     const stripped = pathname.replace(/^\/en(?=\/|$)/, "");
     return stripped === "" ? homePath("ja") : stripped;
   }
   const page = pathname === "/ja" ? "/" : pathname;
-  return EN_PAGES.has(page) ? (page === "/" ? "/en" : `/en${page}`) : "/en";
+  return EN_PAGES.has(page) ? (page === "/" ? homePath("en") : `/en${page}`) : homePath("en");
 }

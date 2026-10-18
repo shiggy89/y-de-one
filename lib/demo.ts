@@ -6,6 +6,11 @@ export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 export const DEMO_ROLE_COOKIE = "demo_role";
 export const DEMO_GUEST_COOKIE = "demo_uid";
+// アプリ画面（管理画面・マイページ・フォーム）の表示言語。入口ページで選んだ言語が入る。
+// ブラウザ側で読むので httpOnly にしない。
+export const DEMO_LANG_COOKIE = "demo_lang";
+
+export type DemoLang = "ja" | "en";
 
 export type DemoRole = "admin" | "member" | "guest";
 
@@ -23,6 +28,12 @@ export const DEMO_DISPLAY_NAMES: Record<DemoRole, string> = {
 
 // 体験レッスンの申込み先。本番は公式LINE、デモは LINE なしで動く申込みフォーム。
 export const TRIAL_ENTRY_URL = DEMO_MODE ? "/trial" : "https://lin.ee/iz33eCM";
+
+// デモでは、英語サイトから開いたフォームは英語、日本語サイトから開いたフォームは日本語にする
+// （?lang= を見て、ミドルウェアが表示言語の Cookie を書き換える）。
+export function trialEntryUrl(lang: DemoLang = "ja"): string {
+  return DEMO_MODE ? `/trial?lang=${lang}` : TRIAL_ENTRY_URL;
+}
 
 // 公開サンドボックスなので、アップロードは小さな画像だけ受け付ける。
 export const DEMO_MAX_UPLOAD_BYTES = 2 * 1024 * 1024;

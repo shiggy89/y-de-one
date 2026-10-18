@@ -5,7 +5,7 @@ import Heading2 from "../common/Heading2";
 import { FaqItem } from "../top/Faq";
 import styles from "../top/Faq.module.css";
 import sectionStyles from "./Faq.module.css";
-import { TRIAL_ENTRY_URL } from "@/lib/demo";
+import { trialEntryUrl } from "@/lib/demo";
 import { localePath, makeT, type Lang } from "@/lib/i18n";
 
 export default function ModernBalletFaq({ lang = "ja" }: { lang?: Lang }) {
@@ -51,8 +51,8 @@ export default function ModernBalletFaq({ lang = "ja" }: { lang?: Lang }) {
           />
           <FaqItem
             question={t("体験レッスンはモダンバレエクラスで受けられますか？", "Can I take a trial lesson in a modern ballet class?") as string}
-            answer={t(<>はい、モダンバレエクラスでの体験レッスン（¥3,500）と無料見学を随時受け付けています。LINEからお気軽にご予約ください。<a href={TRIAL_ENTRY_URL} style={{ color: "#de4e8c", fontWeight: 700, textDecoration: "underline" }}>体験レッスンはこちら →</a></>,
-              <>Yes. Trial lessons in the modern ballet classes (¥3,500) and free studio visits are open all year. <a href={TRIAL_ENTRY_URL} style={{ color: "#de4e8c", fontWeight: 700, textDecoration: "underline" }}>Book a trial lesson →</a></>)}
+            answer={t(<>はい、モダンバレエクラスでの体験レッスン（¥3,500）と無料見学を随時受け付けています。LINEからお気軽にご予約ください。<a href={trialEntryUrl("ja")} style={{ color: "#de4e8c", fontWeight: 700, textDecoration: "underline" }}>体験レッスンはこちら →</a></>,
+              <>Yes. Trial lessons in the modern ballet classes (¥3,500) and free studio visits are open all year. <a href={trialEntryUrl("en")} style={{ color: "#de4e8c", fontWeight: 700, textDecoration: "underline" }}>Book a trial lesson →</a></>)}
           />
           <FaqItem
             question={t("男性でも参加できますか？", "Can men join?") as string}

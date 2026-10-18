@@ -1,6 +1,6 @@
 import Link from "next/link";
 import styles from "./CtaButton.module.css";
-import { TRIAL_ENTRY_URL } from "@/lib/demo";
+import { trialEntryUrl } from "@/lib/demo";
 import { localePath, makeT, type Lang } from "@/lib/i18n";
 
 type Props = {
@@ -11,12 +11,13 @@ type Props = {
 };
 
 export default function HeroCtaButton({
-  href = TRIAL_ENTRY_URL,
+  href,
   showLineText = true,
   className,
   lang = "ja",
 }: Props) {
   const t = makeT(lang);
+  href ??= trialEntryUrl(lang);
   return (
     <div className={[styles.centerBtn, className].filter(Boolean).join(" ")}>
       <Link href={href} className={styles.ctaBtn}>
