@@ -104,6 +104,10 @@ const MAKOTO_PHOTOS = [1, 2, 3].map(
   (n) => `/images/instructor/makoto-profile-${n}.jpg`
 );
 
+const TETSURO_PHOTOS = [1, 2, 3, 4].map(
+  (n) => `/images/instructor/tetsuro-profile-${n}.jpg`
+);
+
 const KARIN_PHOTOS: PhotoItem[] = [
   "/images/instructor/karin-profile-1.jpg",
   { src: "/images/instructor/karin-profile-2.jpg", style: { width: "auto", maxHeight: "340px", margin: "0 auto" } },
@@ -398,6 +402,53 @@ export default function Instructor() {
                 <p>幼少期よりクラシックピアノを学び、高校時代にはジャズやスタンダードミュージックに興味を持つ。大学時代は早稲田大学モダンジャズ研究会に所属し、ピアノおよびボーカルを担当。その傍ら、都内のバーやレストラン、クラブ、ホテルラウンジなどでピアノ演奏や弾き語りを行うなど、音楽活動にも積極的に取り組んできた。</p>
               </div>
             </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ━━━ 本橋徹郎 ━━━ */}
+      <section id="tetsuro" className={styles.instructorSection}>
+        <div className="inner">
+
+          <div className={styles.instructorHeader}>
+            <span className={styles.instructorRole}>ダンサー・振付家</span>
+            <h3 className={styles.instructorName}>本橋 徹郎</h3>
+            <p className={styles.instructorNameKana}>もとはし てつろう</p>
+          </div>
+
+          <div className={styles.profileRow}>
+            <div className={styles.profilePhotoWrap}>
+              <PhotoCarousel photos={TETSURO_PHOTOS} />
+            </div>
+            <div className={styles.profileContent}>
+              <SectionHeading icon="career-icon.png" alt="経歴アイコン" label="経歴" />
+              <div className={styles.bioBlock}>
+                <p>早稲田大学教育学部在学中にダンスと出会う。名倉ジャズダンススタジオカンパニーメンバーを経て、モダン、コンテンポラリー、ミュージカルなど様々な舞台に出演。</p>
+                <p>振付家としての活動も、ダンス公演、ストレートプレイ、ミュージカルと多岐に渡る。</p>
+                <p>2003/05年 東京ヌードルの一員として韓国済州島、釜山での公演に参加。07年 One on Oneミュージカル「Entertainer:鏡に映る素顔」、11年同「ROOM:閉ざされた扉」に出演。</p>
+                <p>クラーク記念国際高等学校パフォーマンスコースで講師を務め、07年、16年には国立劇場にて100人の生徒によるパフォーマンスを振付、24年、25年には韓国公演のダンス振付を担当。</p>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.appearanceBlock}>
+            <SectionHeading icon="stage-icon.png" alt="出演アイコン" label="出演" />
+            <table className={styles.appearanceTable}>
+              <tbody>
+                {[
+                  ["名倉ジャズダンススタジオ", "「Can't Stop Dancin'」"],
+                  ["音楽座ミュージカル", "「星の王子様」"],
+                  ["DEBEDEBE★company", "「りんごジャム」"],
+                  ["cm3", "「spirala af himininn」"],
+                  ["Dance S Style", "「Duality」"],
+                ].map(([company, title]) => (
+                  <tr key={company}>
+                    <td><span className={styles.yearCell}>{company}</span><br />{title}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
         </div>
